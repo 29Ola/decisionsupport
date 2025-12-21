@@ -1306,14 +1306,20 @@
                     const tableName = table[0];
                     const tableItem = document.createElement('div');
                     tableItem.className = 'table-item';
-                    tableItem.innerHTML = `
-                        <strong>${tableName}</strong><br>
-                        <small>Click to preview</small>
-                    `;
-                    tableItem.addEventListener('click', () => {
-                        previewTableData(tableName);
+                    // In loadTableList() function:
+                tableItem.addEventListener('click', function(e) {
+                    console.log('DEBUG: Table clicked:', tableName);
+                    
+                    // Remove selection from all tables
+                    document.querySelectorAll('.table-item').forEach(item => {
+                        item.classList.remove('selected');
                     });
-                    tableList.appendChild(tableItem);
+                    
+                    // Add selection to clicked table
+                    this.classList.add('selected');
+                    
+                    // Call preview function
+                    previewTableData(tableName);
                 });
                 
             } catch (error) {
@@ -1323,8 +1329,9 @@
 
         // Preview table data
         // Preview table data - FIXED VERSION
+        // Improved preview function
         function previewTableData(tableName) {
-            console.log('Preview clicked for table:', tableName); // Debug log
+            console.log('DEBUG: previewTableData called with:', tableName);
             
             try {
                 if (!db) {
@@ -1334,45 +1341,122 @@
                 
                 const resultsDiv = document.getElementById('query-results');
                 if (!resultsDiv) {
-                    console.error('Results div not found');
+                    console.error('ERROR: No element with id="query-results"');
+                    alert('Cannot find results display area.');
                     return;
                 }
                 
-                // Show loading
-                resultsDiv.innerHTML = `<div style="color: blue; padding: 10px;">Loading ${tableName}...</div>`;
+                // Show loading message
+                resultsDiv.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: blue;">
+                        Loading data from table: <strong>${tableName}</strong>...
+                    </div>
+                `;
                 
-                // Execute query
-                const result = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
+                // Execute query with error handling
+                let result;
+                try {
+                    result = db.exec(`SELECT * FROM "${tableName}" LIMIT 20`);
+                } catch (queryError) {
+                    console.error('Query error:', queryError);
+                    
+                    // Try without quotes (some tables don't need them)
+                    try {
+                        result = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
+                    } catch (secondError) {
+                        throw new Error(`Cannot query table "${tableName}": ${secondError.message}`);
+                    }
+                }
                 
-                if (!result.length) {
-                    displayQueryResults({ columns: [], values: [] }, `Table: ${tableName} (empty)`);
+                console.log('DEBUG: Query result:', result);
+                
+                if (!result || result.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div style="padding: 20px; color: #666;">
+                            Table: <strong>${tableName}</strong> - No data returned
+                        </div>
+                    `;
                     return;
                 }
                 
                 const columns = result[0].columns;
                 const values = result[0].values;
                 
-                console.log(`Loaded ${values.length} rows from ${tableName}`); // Debug
+                console.log(`DEBUG: Loaded ${values.length} rows, ${columns.length} columns`);
                 
-                displayQueryResults({ columns, values }, `Table: ${tableName} (first 20 rows)`);
+                // Display results
+                displayTableData(tableName, columns, values);
                 
             } catch (error) {
-                console.error(`Error loading table ${tableName}:`, error);
+                console.error('ERROR in previewTableData:', error);
                 
-                // Show error in results div
                 const resultsDiv = document.getElementById('query-results');
                 if (resultsDiv) {
                     resultsDiv.innerHTML = `
-                        <div style="color: red; font-weight: bold;">Error loading ${tableName}:</div>
-                        <div style="color: #666; margin: 10px 0; padding: 10px; background: #fff0f0; border: 1px solid red;">
+                        <div style="color: red; padding: 20px; border: 2px solid red;">
+                            <strong>Error loading table "${tableName}":</strong><br>
                             ${error.message}
-                        </div>
-                        <div style="margin-top: 10px; color: #666;">
-                            SQL: SELECT * FROM ${tableName} LIMIT 20
                         </div>
                     `;
                 }
             }
+        }
+        
+        // Simple display function
+        function displayTableData(tableName, columns, values) {
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) return;
+            
+            if (values.length === 0) {
+                resultsDiv.innerHTML = `<div style="padding: 20px;">Table "${tableName}" is empty.</div>`;
+                return;
+            }
+            
+            // Build table HTML
+            let html = `
+                <div style="margin-bottom: 10px;">
+                    <h3 style="color: #0a3b9c;">Table: ${tableName}</h3>
+                    <p>Showing ${values.length} rows, ${columns.length} columns</p>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table border="1" style="border-collapse: collapse; width: 100%; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #245edc; color: white;">
+            `;
+            
+            // Add column headers
+            columns.forEach(col => {
+                html += `<th style="padding: 8px; text-align: left;">${col}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+            
+            // Add data rows (limit to 10 for display)
+            const displayRows = Math.min(values.length, 10);
+            for (let i = 0; i < displayRows; i++) {
+                html += `<tr>`;
+                values[i].forEach((cell, cellIndex) => {
+                    let displayValue;
+                    if (cell === null || cell === undefined) {
+                        displayValue = '<em style="color: #999;">NULL</em>';
+                    } else {
+                        const str = String(cell);
+                        displayValue = str.length > 30 ? str.substring(0, 30) + '...' : str;
+                    }
+                    html += `<td style="padding: 6px; border: 1px solid #ddd;">${displayValue}</td>`;
+                });
+                html += `</tr>`;
+            }
+            
+            html += `</tbody></table></div>`;
+            
+            if (values.length > 10) {
+                html += `<p style="color: #666; font-size: 12px; margin-top: 5px;">
+                    Showing first 10 of ${values.length} rows
+                </p>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+            console.log('DEBUG: Table displayed successfully');
         }
 
         // Test function - add to your JavaScript
@@ -2187,4 +2271,5 @@ LIMIT 50`
 </body>
 
 </html>
+
 
