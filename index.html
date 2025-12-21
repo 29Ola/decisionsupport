@@ -7,7 +7,7 @@
     <!-- 🛡️ COMPLETE FAVICON SET -->
     <!-- Primary shield icon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
-    
+    https://github.com/29Ola/decisionsupport/blob/main/index.html
     <!-- Apple devices -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
     
@@ -1680,7 +1680,7 @@
             }
         }
         
-        // 2. SIMPLE previewTableData function
+        // 2. SIMPLE previewTableData function WITH EXPORT STORAGE
         function previewTableData(tableName) {
             console.log("previewTableData called for:", tableName);
             
@@ -1701,20 +1701,42 @@
                     return;
                 }
                 
+                // ========== FIXED: GET FULL TABLE DATA FIRST ==========
+                // Query the ENTIRE table for export
+                console.log("Getting full table data for export...");
+                const fullQuery = `SELECT * FROM ${tableName}`;
+                const fullResult = db.exec(fullQuery);
+                
+                // Store full table data for export
+                window.currentTableData = {
+                    tableName: tableName,
+                    columns: fullResult[0]?.columns || [],
+                    values: fullResult[0]?.values || [],
+                    rowCount: fullResult[0]?.values?.length || 0
+                };
+                
+                console.log(`Stored ${window.currentTableData.rowCount} rows for export`);
+                
+                // ========== THEN GET LIMITED DATA FOR DISPLAY ==========
                 // Simple query - no quotes, just table name
-                const query = `SELECT * FROM ${tableName} LIMIT 10`;
-                console.log("Executing query:", query);
+                const displayQuery = `SELECT * FROM ${tableName} LIMIT 10`;
+                console.log("Executing display query:", displayQuery);
                 
-                const result = db.exec(query);
-                console.log("Query result:", result);
+                const displayResult = db.exec(displayQuery);
+                console.log("Display query result:", displayResult);
                 
-                if (!result.length || !result[0].values.length) {
+                if (!displayResult.length || !displayResult[0].values.length) {
                     resultsDiv.innerHTML = `<div style="padding: 20px;">Table "${tableName}" is empty or not found</div>`;
                     return;
                 }
                 
-                // Display the data
-                displayTablePreview(tableName, result[0].columns, result[0].values);
+                // Display the data WITH EXPORT BUTTON
+                displayTablePreview(
+                    tableName, 
+                    displayResult[0].columns, 
+                    displayResult[0].values,
+                    window.currentTableData.rowCount  // Pass total count for display
+                );
                 
             } catch (error) {
                 console.error("Error in previewTableData:", error);
@@ -1728,7 +1750,138 @@
             }
         }
         
-        // 3. SIMPLE display function
+        // 3. UPDATED display function with export button and total count
+        function displayTablePreview(tableName, columns, rows, totalRows = rows.length) {
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) return;
+            
+            console.log(`Displaying ${rows.length} of ${totalRows} rows from ${tableName}`);
+            
+            // Build HTML
+            let html = `<h3 style="color: #0a3b9c;">${tableName}</h3>`;
+            html += `<p>Showing ${rows.length} of ${totalRows} total rows</p>`;
+            html += `<div style="overflow-x: auto; margin-top: 10px;">`;
+            html += `<table border="1" style="border-collapse: collapse; width: 100%;">`;
+            
+            // Header
+            html += `<tr style="background: #245edc; color: white;">`;
+            columns.forEach(col => {
+                html += `<th style="padding: 8px; text-align: left;">${col}</th>`;
+            });
+            html += `</tr>`;
+            
+            // Data rows
+            rows.forEach((row, rowIndex) => {
+                html += `<tr style="${rowIndex % 2 === 0 ? 'background: #f8f8f8;' : ''}">`;
+                row.forEach(cell => {
+                    let displayValue;
+                    if (cell === null || cell === undefined) {
+                        displayValue = '<em style="color: #999;">NULL</em>';
+                    } else {
+                        const str = String(cell);
+                        displayValue = str.length > 30 ? str.substring(0, 30) + '...' : str;
+                    }
+                    html += `<td style="padding: 6px; border: 1px solid #ddd;">${displayValue}</td>`;
+                });
+                html += `</tr>`;
+            });
+            
+            html += `</table></div>`;
+            
+            // ADD EXPORT BUTTON - only if we have data
+            if (totalRows > 0) {
+                html += `
+                    <div style="margin-top: 15px; padding: 15px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px;">
+                        <button onclick="exportCurrentTable()" 
+                                style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 14px;">
+                            💾 Export Full Table (${totalRows} rows) to CSV
+                        </button>
+                        <div style="margin-top: 8px; color: #666; font-size: 13px;">
+                            Exports all ${totalRows} rows from the ${tableName} table
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+            console.log("Table displayed successfully with export button");
+        }
+        
+        // 4. EXPORT FUNCTION for current table
+        function exportCurrentTable() {
+            if (!window.currentTableData || !window.currentTableData.tableName) {
+                alert('No table data available for export. Click a table first.');
+                return;
+            }
+            
+            const { tableName, columns, values, rowCount } = window.currentTableData;
+            
+            console.log(`Exporting: ${tableName} with ${rowCount} rows`);
+            
+            if (!values || values.length === 0) {
+                alert(`Table "${tableName}" is empty.`);
+                return;
+            }
+            
+            try {
+                // Create CSV content
+                let csvContent = '';
+                
+                // Add column headers
+                csvContent += columns.join(',') + '\n';
+                
+                // Add data rows
+                values.forEach(row => {
+                    const csvRow = row.map(cell => {
+                        if (cell === null || cell === undefined) {
+                            return '';
+                        }
+                        
+                        let cellStr = String(cell);
+                        
+                        // Escape quotes
+                        if (cellStr.includes('"')) {
+                            cellStr = cellStr.replace(/"/g, '""');
+                        }
+                        
+                        // Wrap in quotes if contains comma, quote, or newline
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            cellStr = `"${cellStr}"`;
+                        }
+                        
+                        return cellStr;
+                    }).join(',');
+                    
+                    csvContent += csvRow + '\n';
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                // Create filename
+                const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+                const filename = `${tableName}_${timestamp}.csv`;
+                
+                link.href = url;
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                alert(`✅ Exported ${rowCount} rows from "${tableName}" to:\n${filename}`);
+                console.log(`Exported ${rowCount} rows to ${filename}`);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`❌ Error exporting "${tableName}": ${error.message}`);
+            }
+        }
+        
+        // 3. SIMPLE display function WITH EXPORT BUTTON
         function displayTablePreview(tableName, columns, rows) {
             const resultsDiv = document.getElementById('query-results');
             if (!resultsDiv) return;
@@ -1766,8 +1919,101 @@
             
             html += `</table></div>`;
             
+            // ADD EXPORT BUTTON
+            html += `
+                <div style="margin-top: 15px; padding: 10px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px;">
+                    <button onclick="exportTable('${tableName}')" 
+                            style="padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">
+                        💾 Export Full Table to CSV
+                    </button>
+                    <span style="margin-left: 10px; color: #666; font-size: 14px;">
+                        Export all data from ${tableName} table
+                    </span>
+                </div>
+            `;
+            
             resultsDiv.innerHTML = html;
-            console.log("Table displayed successfully");
+            console.log("Table displayed successfully with export button");
+        }
+        
+        // 4. EXPORT TABLE FUNCTION
+        function exportTable(tableName) {
+            console.log(`Exporting table: ${tableName}`);
+            
+            if (!db) {
+                alert('Database not loaded.');
+                return;
+            }
+            
+            try {
+                // Query the FULL table (no LIMIT)
+                const result = db.exec(`SELECT * FROM ${tableName}`);
+                
+                if (!result.length || !result[0].values.length) {
+                    alert(`Table "${tableName}" is empty.`);
+                    return;
+                }
+                
+                const columns = result[0].columns;
+                const values = result[0].values;
+                
+                console.log(`Exporting ${values.length} rows, ${columns.length} columns`);
+                
+                // Create CSV content
+                let csvContent = '';
+                
+                // Add column headers
+                csvContent += columns.join(',') + '\n';
+                
+                // Add data rows
+                values.forEach(row => {
+                    const csvRow = row.map(cell => {
+                        if (cell === null || cell === undefined) {
+                            return '';
+                        }
+                        
+                        let cellStr = String(cell);
+                        
+                        // Escape quotes
+                        if (cellStr.includes('"')) {
+                            cellStr = cellStr.replace(/"/g, '""');
+                        }
+                        
+                        // Wrap in quotes if contains comma, quote, or newline
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            cellStr = `"${cellStr}"`;
+                        }
+                        
+                        return cellStr;
+                    }).join(',');
+                    
+                    csvContent += csvRow + '\n';
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                // Create filename with timestamp
+                const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+                const filename = `${tableName}_export_${timestamp}.csv`;
+                
+                link.href = url;
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                alert(`✅ Exported ${values.length} rows from "${tableName}" to ${filename}`);
+                console.log(`Exported ${values.length} rows to ${filename}`);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`❌ Error exporting "${tableName}": ${error.message}`);
+            }
         }
         
         // 4. TEST function - call this from browser console
@@ -1908,47 +2154,236 @@
         }
 
         // Export results to CSV
+        // ================= CSV EXPORT FUNCTION =================
+
+        // Export current query results to CSV
         function exportResults() {
-            if (!currentQueryResults) {
-                alert('No query results to export. Run a query first.');
+            console.log("Export button clicked");
+            
+            // Check if we have results to export
+            if (!currentQueryResults || !currentQueryResults.query) {
+                alert('No query results to export. Please run a query first.');
+                return;
+            }
+            
+            const { query, result } = currentQueryResults;
+            const columns = result?.columns || [];
+            const values = result?.values || [];
+            
+            console.log("Exporting:", columns.length, "columns,", values.length, "rows");
+            
+            if (values.length === 0) {
+                alert('No data to export.');
                 return;
             }
             
             try {
-                const { query, result } = currentQueryResults;
-                const columns = result.columns || [];
-                const values = result.values || [];
+                // Create CSV content
+                let csvContent = '';
                 
-                if (values.length === 0) {
-                    alert('No data to export.');
+                // Add column headers
+                csvContent += columns.join(',') + '\n';
+                
+                // Add data rows
+                values.forEach(row => {
+                    const csvRow = row.map(cell => {
+                        if (cell === null || cell === undefined) {
+                            return '';
+                        }
+                        
+                        let cellStr = String(cell);
+                        
+                        // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                        if (cellStr.includes('"')) {
+                            cellStr = cellStr.replace(/"/g, '""');
+                        }
+                        
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            cellStr = `"${cellStr}"`;
+                        }
+                        
+                        return cellStr;
+                    }).join(',');
+                    
+                    csvContent += csvRow + '\n';
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                // Generate filename with timestamp
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
+                let filename = 'query_results.csv';
+                
+                // Try to extract table name from query for better filename
+                const tableMatch = query.match(/FROM\s+(\w+)/i) || query.match(/FROM\s+"(\w+)"/i);
+                if (tableMatch && tableMatch[1]) {
+                    filename = `${tableMatch[1]}_${timestamp}.csv`;
+                } else {
+                    filename = `query_${timestamp}.csv`;
+                }
+                
+                link.href = url;
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                alert(`✓ Exported ${values.length} rows to ${filename}`);
+                console.log(`Exported ${values.length} rows to ${filename}`);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting CSV: ' + error.message);
+            }
+        }
+        
+        // Also export table previews to CSV
+        function exportTablePreview(tableName) {
+            if (!db) {
+                alert('Database not loaded.');
+                return;
+            }
+            
+            try {
+                // Query the table
+                const result = db.exec(`SELECT * FROM ${tableName}`);
+                
+                if (!result.length || !result[0].values.length) {
+                    alert(`Table "${tableName}" is empty.`);
                     return;
                 }
                 
-                // Create CSV content
+                const columns = result[0].columns;
+                const values = result[0].values;
+                
+                // Create CSV
                 let csvContent = columns.join(',') + '\n';
                 values.forEach(row => {
                     csvContent += row.map(cell => {
                         if (cell === null || cell === undefined) return '';
-                        const str = String(cell);
-                        return str.includes(',') || str.includes('"') || str.includes('\n') ? 
-                            `"${str.replace(/"/g, '""')}"` : str;
+                        let str = String(cell);
+                        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                            str = `"${str.replace(/"/g, '""')}"`;
+                        }
+                        return str;
                     }).join(',') + '\n';
                 });
                 
-                // Create download link
+                // Download
                 const blob = new Blob([csvContent], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `query_results_${new Date().toISOString().slice(0, 10)}.csv`;
+                a.download = `${tableName}_export.csv`;
                 document.body.appendChild(a);
                 a.click();
-                window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
                 
+                alert(`Exported ${values.length} rows from "${tableName}"`);
+                
             } catch (error) {
-                console.error('Export error:', error);
-                alert('Error exporting results: ' + error.message);
+                alert(`Error exporting ${tableName}: ${error.message}`);
+            }
+        }
+        
+        // ================= UPDATE EXISTING FUNCTIONS =================
+        
+        // Update runSQLQuery to store results for export
+        function runSQLQuery() {
+            const query = document.getElementById('sql-query')?.value.trim();
+            if (!query) {
+                alert('Please enter a SQL query to run.');
+                return;
+            }
+            
+            if (!db) {
+                alert('Database not loaded yet. Please wait.');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('query-results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '<div style="color: blue; padding: 20px; text-align: center;">Executing query...</div>';
+            }
+            
+            try {
+                const result = db.exec(query);
+                
+                if (result.length === 0) {
+                    displayQueryResults({ columns: [], values: [] }, 'Query executed (no results)');
+                    currentQueryResults = { query, result: { columns: [], values: [] } };
+                } else {
+                    displayQueryResults(result[0], 'Query Results');
+                    // STORE RESULTS FOR EXPORT - THIS IS CRITICAL
+                    currentQueryResults = { query, result: result[0] };
+                }
+                
+            } catch (error) {
+                // ... error handling ...
+            }
+        }
+        
+        // Update previewTableData to store results for export
+        function previewTableData(tableName) {
+            console.log('DEBUG: previewTableData called with:', tableName);
+            
+            try {
+                if (!db) {
+                    alert('Database not loaded.');
+                    return;
+                }
+                
+                const resultsDiv = document.getElementById('query-results');
+                if (!resultsDiv) {
+                    console.error('ERROR: No element with id="query-results"');
+                    alert('Cannot find results display area.');
+                    return;
+                }
+                
+                resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: blue;">Loading ${tableName}...</div>`;
+                
+                // Query the table
+                const query = `SELECT * FROM ${tableName}`;
+                const result = db.exec(query);
+                
+                if (!result.length || !result[0].values.length) {
+                    resultsDiv.innerHTML = `<div style="padding: 20px;">Table "${tableName}" is empty or not found</div>`;
+                    currentQueryResults = { query, result: { columns: [], values: [] } };
+                    return;
+                }
+                
+                // Display first 20 rows
+                const displayResult = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
+                displayQueryResults(displayResult[0], `Table: ${tableName} (showing 20 of ${result[0].values.length} rows)`);
+                
+                // STORE FULL RESULTS FOR EXPORT
+                currentQueryResults = { query, result: result[0] };
+                
+            } catch (error) {
+                // ... error handling ...
+            }
+        }
+        
+        // Add export button to table preview
+        function addExportButtonToPreview(tableName) {
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) return;
+            
+            // Check if export button already exists
+            if (!document.getElementById('export-preview-btn')) {
+                const exportBtn = document.createElement('button');
+                exportBtn.id = 'export-preview-btn';
+                exportBtn.className = 'btn btn-secondary';
+                exportBtn.style.marginTop = '10px';
+                exportBtn.innerHTML = '💾 Export Full Table to CSV';
+                exportBtn.onclick = () => exportTablePreview(tableName);
+                
+                resultsDiv.appendChild(exportBtn);
             }
         }
 
@@ -2583,6 +3018,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
