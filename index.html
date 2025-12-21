@@ -1291,157 +1291,149 @@
         }
 
         // Load table list
+        // ============ WORKING VERSION ============
+
+        // 1. FIXED loadTableList function
         function loadTableList() {
+            console.log("loadTableList called");
+            
             try {
-                if (!db) return;
+                if (!db) {
+                    console.log("Database not ready");
+                    return;
+                }
                 
-                const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+                // Get tables
+                const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+                console.log("Tables query result:", result);
+                
+                if (!result.length) {
+                    console.log("No tables found");
+                    return;
+                }
+                
                 const tableList = document.getElementById('table-list');
+                if (!tableList) {
+                    console.error("table-list element not found");
+                    return;
+                }
                 
-                if (!tableList) return;
-                
+                // Clear existing
                 tableList.innerHTML = '';
                 
-                tables[0]?.values.forEach(table => {
-                    const tableName = table[0];
+                // Add each table
+                const tables = result[0].values;
+                console.log("Found tables:", tables);
+                
+                for (let i = 0; i < tables.length; i++) {
+                    const tableName = tables[i][0];
+                    
                     const tableItem = document.createElement('div');
                     tableItem.className = 'table-item';
-                    tableItem.innerHTML = `
-                        <strong>${tableName}</strong><br>
-                        <small>Click to preview</small>
-                    `;
+                    tableItem.dataset.tableName = tableName; // Store table name
+                    tableItem.innerHTML = `<strong>${tableName}</strong><br><small>Click to preview</small>`;
                     
-                    tableItem.addEventListener('click', function(e) {
-                        console.log('DEBUG: Table clicked:', tableName);
+                    // Add click handler
+                    tableItem.addEventListener('click', function(event) {
+                        event.stopPropagation();
+                        console.log("Table item clicked:", this.dataset.tableName);
                         
-                        // Remove selection from all tables
+                        // Remove previous selection
                         document.querySelectorAll('.table-item').forEach(item => {
                             item.classList.remove('selected');
                         });
                         
-                        // Add selection to clicked table
+                        // Select this one
                         this.classList.add('selected');
                         
-                        // Call preview function
-                        previewTableData(tableName);
+                        // Preview the table
+                        const clickedTableName = this.dataset.tableName;
+                        console.log("Calling previewTableData with:", clickedTableName);
+                        previewTableData(clickedTableName);
                     });
                     
-                    tableList.appendChild(tableItem);  // <-- CRITICAL: Add to DOM
-                });  // <-- CRITICAL: Close forEach
+                    tableList.appendChild(tableItem);
+                }
+                
+                console.log("Table list populated with", tables.length, "tables");
                 
             } catch (error) {
-                console.error('Error loading table list:', error);
-            }
-        }  // <-- Close loadTableList function
-
-        // Preview table data
-        // Preview table data - FIXED VERSION
-        // Improved preview function
-        function previewTableData(tableName) {
-            console.log('DEBUG: previewTableData called with:', tableName);
-            
-            try {
-                if (!db) {
-                    alert('Database not loaded.');
-                    return;
-                }
-                
-                const resultsDiv = document.getElementById('query-results');
-                if (!resultsDiv) {
-                    console.error('ERROR: No element with id="query-results"');
-                    alert('Cannot find results display area.');
-                    return;
-                }
-                
-                // Show loading message
-                resultsDiv.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: blue;">
-                        Loading data from table: <strong>${tableName}</strong>...
-                    </div>
-                `;
-                
-                // Execute query with error handling
-                let result;
-                try {
-                    result = db.exec(`SELECT * FROM "${tableName}" LIMIT 20`);
-                } catch (queryError) {
-                    console.error('Query error:', queryError);
-                    
-                    // Try without quotes (some tables don't need them)
-                    try {
-                        result = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
-                    } catch (secondError) {
-                        throw new Error(`Cannot query table "${tableName}": ${secondError.message}`);
-                    }
-                }
-                
-                console.log('DEBUG: Query result:', result);
-                
-                if (!result || result.length === 0) {
-                    resultsDiv.innerHTML = `
-                        <div style="padding: 20px; color: #666;">
-                            Table: <strong>${tableName}</strong> - No data returned
-                        </div>
-                    `;
-                    return;
-                }
-                
-                const columns = result[0].columns;
-                const values = result[0].values;
-                
-                console.log(`DEBUG: Loaded ${values.length} rows, ${columns.length} columns`);
-                
-                // Display results
-                displayTableData(tableName, columns, values);
-                
-            } catch (error) {
-                console.error('ERROR in previewTableData:', error);
-                
-                const resultsDiv = document.getElementById('query-results');
-                if (resultsDiv) {
-                    resultsDiv.innerHTML = `
-                        <div style="color: red; padding: 20px; border: 2px solid red;">
-                            <strong>Error loading table "${tableName}":</strong><br>
-                            ${error.message}
-                        </div>
-                    `;
-                }
+                console.error("Error in loadTableList:", error);
             }
         }
         
-        // Simple display function
-        function displayTableData(tableName, columns, values) {
-            const resultsDiv = document.getElementById('query-results');
-            if (!resultsDiv) return;
+        // 2. SIMPLE previewTableData function
+        function previewTableData(tableName) {
+            console.log("previewTableData called for:", tableName);
             
-            if (values.length === 0) {
-                resultsDiv.innerHTML = `<div style="padding: 20px;">Table "${tableName}" is empty.</div>`;
+            // Get results div
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) {
+                console.error("query-results div not found!");
+                alert("Error: Cannot find results area. Check HTML for id='query-results'");
                 return;
             }
             
-            // Build table HTML
-            let html = `
-                <div style="margin-bottom: 10px;">
-                    <h3 style="color: #0a3b9c;">Table: ${tableName}</h3>
-                    <p>Showing ${values.length} rows, ${columns.length} columns</p>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table border="1" style="border-collapse: collapse; width: 100%; font-size: 14px;">
-                        <thead>
-                            <tr style="background: #245edc; color: white;">
-            `;
+            // Show loading
+            resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: blue;">Loading ${tableName}...</div>`;
             
-            // Add column headers
+            try {
+                if (!db) {
+                    resultsDiv.innerHTML = `<div style="color: red;">Database not loaded</div>`;
+                    return;
+                }
+                
+                // Simple query - no quotes, just table name
+                const query = `SELECT * FROM ${tableName} LIMIT 10`;
+                console.log("Executing query:", query);
+                
+                const result = db.exec(query);
+                console.log("Query result:", result);
+                
+                if (!result.length || !result[0].values.length) {
+                    resultsDiv.innerHTML = `<div style="padding: 20px;">Table "${tableName}" is empty or not found</div>`;
+                    return;
+                }
+                
+                // Display the data
+                displayTablePreview(tableName, result[0].columns, result[0].values);
+                
+            } catch (error) {
+                console.error("Error in previewTableData:", error);
+                resultsDiv.innerHTML = `
+                    <div style="color: red; padding: 20px; border: 1px solid red;">
+                        <strong>Error loading ${tableName}:</strong><br>
+                        ${error.message}<br><br>
+                        Try a different table.
+                    </div>
+                `;
+            }
+        }
+        
+        // 3. SIMPLE display function
+        function displayTablePreview(tableName, columns, rows) {
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) return;
+            
+            console.log(`Displaying ${rows.length} rows from ${tableName}`);
+            
+            // Build HTML
+            let html = `<h3 style="color: #0a3b9c;">${tableName}</h3>`;
+            html += `<p>Showing ${rows.length} rows</p>`;
+            html += `<div style="overflow-x: auto; margin-top: 10px;">`;
+            html += `<table border="1" style="border-collapse: collapse; width: 100%;">`;
+            
+            // Header
+            html += `<tr style="background: #245edc; color: white;">`;
             columns.forEach(col => {
                 html += `<th style="padding: 8px; text-align: left;">${col}</th>`;
             });
-            html += `</tr></thead><tbody>`;
+            html += `</tr>`;
             
-            // Add data rows (limit to 10 for display)
-            const displayRows = Math.min(values.length, 10);
-            for (let i = 0; i < displayRows; i++) {
-                html += `<tr>`;
-                values[i].forEach((cell, cellIndex) => {
+            // Data rows
+            rows.forEach((row, rowIndex) => {
+                html += `<tr style="${rowIndex % 2 === 0 ? 'background: #f8f8f8;' : ''}">`;
+                row.forEach(cell => {
                     let displayValue;
                     if (cell === null || cell === undefined) {
                         displayValue = '<em style="color: #999;">NULL</em>';
@@ -1452,39 +1444,34 @@
                     html += `<td style="padding: 6px; border: 1px solid #ddd;">${displayValue}</td>`;
                 });
                 html += `</tr>`;
-            }
+            });
             
-            html += `</tbody></table></div>`;
-            
-            if (values.length > 10) {
-                html += `<p style="color: #666; font-size: 12px; margin-top: 5px;">
-                    Showing first 10 of ${values.length} rows
-                </p>`;
-            }
+            html += `</table></div>`;
             
             resultsDiv.innerHTML = html;
-            console.log('DEBUG: Table displayed successfully');
+            console.log("Table displayed successfully");
         }
-
-        // Test function - add to your JavaScript
+        
+        // 4. TEST function - call this from browser console
         function testTablePreview() {
+            console.log("=== TEST TABLE PREVIEW ===");
+            
             if (!db) {
-                alert('Database not loaded');
+                console.log("Database not loaded");
+                alert("Load database first");
                 return;
             }
             
-            // Get first table name
+            // Get first table
             const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' LIMIT 1");
-            if (result.length > 0 && result[0].values.length > 0) {
+            if (result.length && result[0].values.length) {
                 const firstTable = result[0].values[0][0];
-                console.log('Testing preview for table:', firstTable);
+                console.log("Testing with table:", firstTable);
                 previewTableData(firstTable);
             } else {
-                alert('No tables found in database');
+                console.log("No tables found");
             }
         }
-        
-        // Call this from browser console: testTablePreview()
 
         // Run SQL query
         function runSQLQuery() {
@@ -2278,6 +2265,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
