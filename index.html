@@ -883,6 +883,7 @@
                             <div style="display: flex; height: 600px; gap: 15px; padding: 10px;">
                                 <!-- LEFT SIDEBAR - Tree Navigation -->
                                 <!-- Update the sidebar in the knowledge tab to this: -->
+                                <<!-- Update the sidebar buttons in the knowledge tab: -->
                                 <aside style="width: 350px; background: #e8f0ff; border: 1px solid #a0c0ff; border-radius: 3px; display: flex; flex-direction: column; padding: 15px;">
                                     <div style="margin-bottom: 20px;">
                                         <h3 style="color: #0a3b9c; margin-bottom: 10px;">NWT Terminology Navigator</h3>
@@ -890,37 +891,34 @@
                                                id="treeSearch" 
                                                class="form-control" 
                                                placeholder="Search SNOMED/FHIR concepts..."
-                                               style="margin-bottom: 10px;">
-                                        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
-                                            Press Enter to search real terminology servers
-                                        </div>
+                                               style="margin-bottom: 15px;">
                                         
                                         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                            <button onclick="loadDemoTerminology()" class="btn btn-secondary" style="font-size: 12px; flex: 1;">
+                                            <button onclick="loadDemoTerminology()" class="btn btn-secondary" style="font-size: 12px;">
                                                 Load Demo Tree
                                             </button>
-                                            <button onclick="quickSearch('diabetes')" class="btn btn-secondary" style="font-size: 12px; flex: 1;">
-                                                Quick: Diabetes
+                                            <button onclick="clearTree()" class="btn btn-secondary" style="font-size: 12px;">
+                                                Clear Tree
                                             </button>
                                         </div>
-                                    </div>
-                                    
-                                    <!-- API Status Indicator -->
-                                    <div id="api-status" style="background: #d4edda; color: #155724; padding: 8px; border-radius: 3px; margin-bottom: 15px; font-size: 12px; display: none;">
-                                        <strong>✓ Connected:</strong> <span id="api-status-text">Ontoserver</span>
+                                        
+                                        <!-- Add a test button for debugging -->
+                                        <button onclick="testSpecTool()" style="font-size: 11px; padding: 3px 8px; background: #ff9900; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                            Debug Test
+                                        </button>
                                     </div>
                                     
                                     <div id="treeContainer" style="flex-grow: 1; overflow-y: auto; border: 1px solid #d4d0c8; padding: 10px; background: white;">
-                                        <!-- Dynamic tree/search results will be injected here -->
+                                        <!-- Dynamic tree will be injected here -->
                                         <div style="color: #666; text-align: center; padding: 20px;">
-                                            <p>Enter a search term above to query real terminology servers.</p>
-                                            <p>Or click "Load Demo Tree" for example data.</p>
+                                            Click "Load Demo Tree" to populate terminology
                                         </div>
                                     </div>
                                 </aside>
                 
                                 <!-- MAIN WORKSPACE - Specification Board -->
                                 <main style="flex-grow: 1; display: flex; flex-direction: column; background: #f8f8f8; border: 1px solid #d4d0c8; border-radius: 3px; padding: 15px;">
+                                    <!-- Update the header buttons in the main workspace: -->
                                     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #d4d0c8;">
                                         <h2 style="color: #0a3b9c;">Specification Board</h2>
                                         <div style="display: flex; gap: 10px;">
@@ -3667,6 +3665,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
