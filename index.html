@@ -481,6 +481,86 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Accordion Styles */
+        .accordion {
+            margin-bottom: 10px;
+        }
+        
+        .accordion-header {
+            background: linear-gradient(to bottom, #d4d0c8, #a0a0a0);
+            border: 1px solid #808080;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 3px;
+        }
+        
+        .accordion-header:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #c0c0c0);
+        }
+        
+        .accordion-header.active {
+            background: linear-gradient(to bottom, #ffffff, #d4d0c8);
+            border-bottom: 1px solid #ffffff;
+        }
+        
+        .accordion-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+        
+        .accordion-header.active .accordion-icon {
+            transform: rotate(45deg); /* Plus to X */
+        }
+        
+        .accordion-content {
+            border: 1px solid #808080;
+            border-top: none;
+            padding: 15px;
+            background-color: #ffffff;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .accordion-content.active {
+            display: block;
+        }
+        
+        /* Scrollable sections */
+        .scrollable-section {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #d4d0c8;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        /* Fixed height for query results */
+        .fixed-height-results {
+            height: 300px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        /* Compact layout */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .compact-section {
+            border: 1px solid #d4d0c8;
+            border-radius: 3px;
+            background: #f8f8f8;
+        }
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -796,34 +876,76 @@
                 </div>
 
                 <!-- NEW: EMR DATA EXPLORER TAB -->
+                <!-- NEW: EMR DATA EXPLORER TAB -->
                 <div id="emr-tab" class="tab-pane">
-                    <div class="emr-container">
-                        <!-- LEFT COLUMN: Schema Visualization -->
-                        <div class="emr-section">
-                            <div class="emr-section-header">
-                                <h3>EMR Schema Visualization</h3>
-                            </div>
-                            <div class="schema-diagram" id="schema-diagram">
-                                <!-- Schema will be rendered here by JavaScript -->
-                            </div>
-                            <div class="table-list" id="table-list">
-                                <!-- Table list will be populated by JavaScript -->
+                    <!-- Database Status Bar -->
+                    <div id="database-status" style="padding: 10px; margin-bottom: 10px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px;">
+                        Loading database...
+                    </div>
+                    
+                    <!-- DEBUG PANEL (optional) -->
+                    <div style="margin: 10px 0; padding: 10px; border: 2px solid orange; background: #fff8e1; display: none;" id="debug-panel">
+                        <h4>🔧 DEBUG PANEL</h4>
+                        <button onclick="testDisplayArea()" style="padding: 5px 10px; margin: 2px;">Test Display</button>
+                        <button onclick="testFirstTable()" style="padding: 5px 10px; margin: 2px;">Test First Table</button>
+                        <button onclick="reloadDatabase()" style="padding: 5px 10px; margin: 2px;">Reload DB</button>
+                    </div>
+                    
+                    <!-- ================= ACCORDION 1: SCHEMA & TABLES ================= -->
+                    <div class="accordion">
+                        <div class="accordion-header active" data-accordion="schema">
+                            <span>📊 Schema Visualization & Table Explorer</span>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content active" id="accordion-schema">
+                            <div class="compact-grid">
+                                <!-- Left: Schema Diagram -->
+                                <div class="compact-section">
+                                    <div class="emr-section-header">
+                                        <h3>Database Schema</h3>
+                                    </div>
+                                    <div class="scrollable-section">
+                                        <div class="schema-diagram" id="schema-diagram">
+                                            <!-- Schema will be rendered here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right: Table List -->
+                                <div class="compact-section">
+                                    <div class="emr-section-header">
+                                        <h3>Table Explorer</h3>
+                                    </div>
+                                    <div class="scrollable-section">
+                                        <div class="table-list" id="table-list">
+                                            Click table names to preview data...
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- MIDDLE COLUMN: Client Request Translator -->
-                        <div class="emr-section">
-                            <div class="emr-section-header">
-                                <h3>Client Request Translator</h3>
-                            </div>
+                    </div>
+                    
+                    <!-- ================= ACCORDION 2: CLIENT REQUEST TRANSLATOR ================= -->
+                    <div class="accordion">
+                        <div class="accordion-header active" data-accordion="translator">
+                            <span>🔍 Client Request Translator</span>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content active" id="accordion-translator">
                             <div class="form-group">
                                 <label for="client-request">Enter Client Request:</label>
                                 <textarea id="client-request" class="form-control textarea-large" 
-                                          placeholder="Example: 'I need all diabetic patients aged 50+ from Yellowknife with HbA1c > 7% in 2024'"></textarea>
+                                          placeholder="Example: 'I need all diabetic patients aged 50+ from Yellowknife with HbA1c > 7% in 2024'"
+                                          rows="3"></textarea>
                             </div>
-                            <button id="analyze-request" class="btn btn-primary">Analyze Request</button>
                             
-                            <div id="analysis-results" style="display: none; margin-top: 15px;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                <button id="analyze-request" class="btn btn-primary">Analyze Request</button>
+                                <button onclick="clearAnalysis()" class="btn btn-secondary">Clear</button>
+                            </div>
+                            
+                            <div id="analysis-results" style="display: none; background: #f8f8f8; padding: 15px; border: 1px solid #d4d0c8;">
                                 <h4>Analysis Results:</h4>
                                 <div class="form-group">
                                     <label>Tables Required:</label>
@@ -837,73 +959,106 @@
                                     <label>Sample SQL Query:</label>
                                     <div id="sample-sql" class="sql-preview"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label>ETL Requirements:</label>
-                                    <div id="etl-requirements" class="highlight"></div>
+                            </div>
+                            
+                            <!-- Quick Scenarios -->
+                            <div style="margin-top: 15px;">
+                                <h4>Quick Scenarios:</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                    <button onclick="loadScenario('diabetes')" class="btn btn-secondary" style="font-size: 12px;">
+                                        🩺 Diabetes Patients
+                                    </button>
+                                    <button onclick="loadScenario('appointments')" class="btn btn-secondary" style="font-size: 12px;">
+                                        📅 Appointments
+                                    </button>
+                                    <button onclick="loadScenario('medications')" class="btn btn-secondary" style="font-size: 12px;">
+                                        💊 Medications
+                                    </button>
+                                    <button onclick="loadScenario('admissions')" class="btn btn-secondary" style="font-size: 12px;">
+                                        🏥 Admissions
+                                    </button>
                                 </div>
                             </div>
-
-                            <div style="margin-top: 20px;">
-                                <h4>Common Scenarios:</h4>
-                                <div class="scenario-box" data-scenario="diabetes">
-                                    <div class="scenario-title">Diabetes Patient Analysis</div>
-                                    <div class="scenario-desc">Find diabetic patients with recent lab results</div>
-                                </div>
-                                <div class="scenario-box" data-scenario="appointments">
-                                    <div class="scenario-title">Appointment Tracking</div>
-                                    <div class="scenario-desc">Track appointments by region and provider</div>
-                                </div>
-                                <div class="scenario-box" data-scenario="medications">
-                                    <div class="scenario-title">Medication Prescriptions</div>
-                                    <div class="scenario-desc">Analyze prescription patterns by diagnosis</div>
-                                </div>
-                                <div class="scenario-box" data-scenario="admissions">
-                                    <div class="scenario-title">Hospital Admissions</div>
-                                    <div class="scenario-desc">Admission rates by reason and location</div>
-                                </div>
-                            </div>
-                            <!-- Add this button anywhere in your EMR tab -->
-                            <button onclick="debugDatabase()" style="padding: 5px 10px; background: #ff9900; color: black; border: none; border-radius: 3px; margin: 5px;">
-                                🔧 DEBUG DATABASE
-                            </button>
                         </div>
-
-                        <!-- Add this after the Common Scenarios section -->
-                        <div class="scenario-container" id="custom-scenarios">
-                            <!-- Custom scenarios will appear here -->
+                    </div>
+                    
+                    <!-- ================= ACCORDION 3: SQL PRACTICE ================= -->
+                    <div class="accordion">
+                        <div class="accordion-header active" data-accordion="sql">
+                            <span>💻 SQL Practice & Query Builder</span>
+                            <span class="accordion-icon">+</span>
                         </div>
-
-                        <!-- RIGHT COLUMN: SQL Practice -->
-                        <div class="emr-section">
-                            <div class="emr-section-header">
-                                <h3>SQL Practice & Query Builder</h3>
-                            </div>
-                            <div class="form-group">
-                                <label>Select Tables to Query:</label>
-                                <div id="table-selector" class="checkbox-group">
-                                    <!-- Tables will be populated by JavaScript -->
+                        <div class="accordion-content active" id="accordion-sql">
+                            <div class="compact-grid">
+                                <!-- Left: Query Input -->
+                                <div class="compact-section">
+                                    <div class="form-group">
+                                        <label>SQL Query:</label>
+                                        <textarea id="sql-query" class="form-control textarea-large" 
+                                                  placeholder="Write your SQL query here...
+                Example: SELECT first_name, last_name FROM patients WHERE city = 'Yellowknife' LIMIT 10"
+                                                  rows="6"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-buttons">
+                                        <button id="run-query" class="btn btn-primary">Run Query</button>
+                                        <button id="clear-query" class="btn btn-secondary">Clear</button>
+                                        <button id="save-query" class="btn btn-secondary">Save</button>
+                                        <button id="export-results" class="btn btn-secondary">Export CSV</button>
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-top: 15px;">
+                                        <label>Saved Queries:</label>
+                                        <select id="saved-queries" class="form-control">
+                                            <option value="">Select a saved query...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right: Table Selector -->
+                                <div class="compact-section">
+                                    <div class="form-group">
+                                        <label>Available Tables:</label>
+                                        <div class="scrollable-section" style="height: 200px;">
+                                            <div id="table-selector" class="checkbox-group">
+                                                <!-- Tables will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Quick Templates:</label>
+                                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                                            <button onclick="loadTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                                SELECT * FROM [table]
+                                            </button>
+                                            <button onclick="loadTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                                SELECT COUNT(*) FROM [table]
+                                            </button>
+                                            <button onclick="loadTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                                Simple JOIN template
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>SQL Query:</label>
-                                <textarea id="sql-query" class="query-input" placeholder="Write your SQL query here..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- ================= ACCORDION 4: QUERY RESULTS ================= -->
+                    <div class="accordion">
+                        <div class="accordion-header" data-accordion="results">
+                            <span>📋 Query Results</span>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content" id="accordion-results">
+                            <div id="query-results" class="fixed-height-results">
+                                Results will appear here when you run a query or click a table...
                             </div>
-                            <div class="form-buttons">
-                                <button id="run-query" class="btn btn-primary">Run Query</button>
-                                <button id="clear-query" class="btn btn-secondary">Clear</button>
-                                <button id="save-query" class="btn btn-secondary">Save Query</button>
-                            </div>
-                            <div class="form-group" style="margin-top: 15px;">
-                                <label>Query Results:</label>
-                                <div id="query-results" class="query-results">
-                                    Results will appear here...
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Saved Queries:</label>
-                                <select id="saved-queries" class="form-control">
-                                    <option value="">Select a saved query...</option>
-                                </select>
+                            
+                            <!-- Results Info -->
+                            <div id="results-info" style="margin-top: 10px; padding: 10px; background: #f0f8ff; border: 1px solid #a0c0ff; display: none;">
+                                <strong>Query Info:</strong> <span id="row-count">0</span> rows returned
                             </div>
                         </div>
                     </div>
@@ -1067,6 +1222,159 @@
                 createDemoDatabase();
             }
         }
+
+        // ================= ACCORDION FUNCTIONALITY =================
+
+        // Initialize accordions
+        function initAccordions() {
+            console.log("Initializing accordions...");
+            
+            // Set up click handlers for all accordion headers
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const accordionId = this.dataset.accordion;
+                    const content = document.getElementById(`accordion-${accordionId}`);
+                    const icon = this.querySelector('.accordion-icon');
+                    
+                    // Toggle active state
+                    const isActive = this.classList.contains('active');
+                    
+                    // Close all accordions if desired, or just toggle this one
+                    // For now, just toggle this one
+                    this.classList.toggle('active');
+                    content.classList.toggle('active');
+                    
+                    // Update icon
+                    if (this.classList.contains('active')) {
+                        icon.textContent = '−'; // Minus sign
+                    } else {
+                        icon.textContent = '+'; // Plus sign
+                    }
+                    
+                    // Auto-open results when query runs
+                    if (accordionId === 'results' && !isActive) {
+                        // Ensure it's visible
+                        setTimeout(() => {
+                            content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Auto-open results accordion when results are displayed
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        const resultsDiv = document.getElementById('query-results');
+                        if (resultsDiv && resultsDiv.textContent && 
+                            resultsDiv.textContent.trim() !== 'Results will appear here...' &&
+                            resultsDiv.textContent.trim() !== '') {
+                            
+                            // Open results accordion
+                            const resultsHeader = document.querySelector('[data-accordion="results"]');
+                            const resultsContent = document.getElementById('accordion-results');
+                            
+                            if (resultsHeader && !resultsHeader.classList.contains('active')) {
+                                resultsHeader.classList.add('active');
+                                resultsContent.classList.add('active');
+                                resultsHeader.querySelector('.accordion-icon').textContent = '−';
+                                
+                                // Scroll to results
+                                setTimeout(() => {
+                                    resultsContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                }, 300);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Observe the results div for changes
+            const resultsDiv = document.getElementById('query-results');
+            if (resultsDiv) {
+                observer.observe(resultsDiv, { 
+                    childList: true, 
+                    characterData: true, 
+                    subtree: true 
+                });
+            }
+            
+            console.log("Accordions initialized");
+        }
+        
+        // Update previewTableData to auto-open results
+        function previewTableData(tableName) {
+            console.log('DEBUG: previewTableData called with:', tableName);
+            
+            // ... [keep all your existing previewTableData code] ...
+            
+            // At the END of the function, after displaying results, add:
+            
+            // Auto-open results accordion
+            setTimeout(() => {
+                const resultsHeader = document.querySelector('[data-accordion="results"]');
+                const resultsContent = document.getElementById('accordion-results');
+                
+                if (resultsHeader && !resultsHeader.classList.contains('active')) {
+                    resultsHeader.classList.add('active');
+                    resultsContent.classList.add('active');
+                    resultsHeader.querySelector('.accordion-icon').textContent = '−';
+                    
+                    // Smooth scroll to results
+                    resultsContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+        
+        // Update runSQLQuery to auto-open results
+        function runSQLQuery() {
+            // ... [keep all your existing runSQLQuery code] ...
+            
+            // At the END, after displaying results, add same auto-open logic
+            
+            setTimeout(() => {
+                const resultsHeader = document.querySelector('[data-accordion="results"]');
+                const resultsContent = document.getElementById('accordion-results');
+                
+                if (resultsHeader && !resultsHeader.classList.contains('active')) {
+                    resultsHeader.classList.add('active');
+                    resultsContent.classList.add('active');
+                    resultsHeader.querySelector('.accordion-icon').textContent = '−';
+                    
+                    resultsContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+        
+        // Helper functions
+        function clearAnalysis() {
+            document.getElementById('client-request').value = '';
+            document.getElementById('analysis-results').style.display = 'none';
+        }
+        
+        function loadTemplate(templateType) {
+            const templates = {
+                'select_all': 'SELECT * FROM patients LIMIT 10',
+                'count': 'SELECT COUNT(*) as count FROM patients',
+                'join': `SELECT p.first_name, p.last_name, e.encounter_date
+        FROM patients p
+        JOIN encounters e ON p.patient_id = e.patient_id
+        LIMIT 10`
+            };
+            
+            const sqlQueryBox = document.getElementById('sql-query');
+            if (sqlQueryBox && templates[templateType]) {
+                sqlQueryBox.value = templates[templateType];
+            }
+        }
+        
+        // Initialize accordions when DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... your existing DOM loaded code ...
+            
+            // Initialize accordions
+            setTimeout(() => initAccordions(), 500);
+        });
 
         // Add this function to your JavaScript
         function debugDatabase() {
@@ -2265,6 +2573,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
