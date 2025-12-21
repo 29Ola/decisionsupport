@@ -3303,16 +3303,17 @@ LIMIT 50`
         window.updateCardField = updateCardField;
         
         // Initialize when Knowledge tab is clicked
+        // Initialize when Knowledge tab is clicked
         document.addEventListener('DOMContentLoaded', function() {
-            // ... existing code ...
             
             // Initialize spec tool when knowledge tab is activated
             const knowledgeTabButton = document.querySelector('[data-tab="knowledge-tab"]');
-            if (knowledgeTabButton) {`
+            if (knowledgeTabButton) {
                 knowledgeTabButton.addEventListener('click', function() {
                     console.log('Knowledge tab clicked, initializing spec tool...');
                     setTimeout(initSpecTool, 100);
                 });
+            }
             
             // Also initialize when page loads if on knowledge tab
             const currentTab = document.querySelector('.tab-button.active');
@@ -3664,6 +3665,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
