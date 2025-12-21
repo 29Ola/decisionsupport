@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMR Data Explorer - NWT Government</title>
+    <style>
+        /* Windows XP/2000 Theme Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+            background-color: #ece9d8;
+            color: #000;
+            line-height: 1.4;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #ece9d8;
+            border: 2px outset #d4d0c8;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(to bottom, #245edc, #424d63);
+            color: white;
+            padding: 15px 20px;
+            border-bottom: 2px solid #424d63;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #d4d0c8;
+            border-bottom: 2px solid #ffffff;
+            padding: 5px 5px 0;
+        }
+
+        .tab-button {
+            background: linear-gradient(to bottom, #d4d0c8, #a0a0a0);
+            border: 1px solid #808080;
+            border-bottom: none;
+            padding: 8px 20px;
+            margin-right: 5px;
+            cursor: pointer;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+            color: #000;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            top: 2px;
+        }
+
+        .tab-button:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #c0c0c0);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(to bottom, #ffffff, #d4d0c8);
+            border-bottom: 2px solid #ece9d8;
+            z-index: 1;
+        }
+
+        .tab-content {
+            background-color: #ffffff;
+            border: 1px solid #808080;
+            border-top: none;
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border: 2px inset #d4d0c8;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .form-header {
+            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+            padding: 10px 15px;
+            border-bottom: 1px solid #d4d0c8;
+            margin-bottom: 20px;
+        }
+
+        .form-header h2 {
+            font-size: 18px;
+            color: #000;
+        }
+
+        .form-columns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-column {
+            background-color: #f8f8f8;
+            border: 1px solid #d4d0c8;
+            padding: 15px;
+            border-radius: 3px;
+        }
+
+        .form-column h3 {
+            background-color: #e8e8e8;
+            padding: 8px 10px;
+            margin: -15px -15px 15px -15px;
+            border-bottom: 1px solid #d4d0c8;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #808080;
+            background-color: #ffffff;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: 2px solid #245edc;
+            border-color: #245edc;
+        }
+
+        .textarea-small {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .textarea-medium {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .textarea-large {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .small-input {
+            width: 120px;
+            padding: 4px 6px;
+            border: 1px solid #808080;
+            margin-left: 5px;
+        }
+
+        .date-input {
+            width: 100px;
+            padding: 4px 6px;
+            border: 1px solid #808080;
+            margin-left: 5px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #d4d0c8;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: 1px solid #808080;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, #245edc, #0a3b9c);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, #3a7afc, #1a5bbc);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to bottom, #d4d0c8, #a0a0a0);
+            color: #000;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to bottom, #e8e8e8, #c0c0c0);
+        }
+
+        .table-container {
+            background-color: #ffffff;
+            border: 2px inset #d4d0c8;
+            padding: 20px;
+        }
+
+        .table-header {
+            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+            padding: 10px 15px;
+            border-bottom: 1px solid #d4d0c8;
+            margin-bottom: 15px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #d4d0c8;
+        }
+
+        #requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        #requests-table thead {
+            background: linear-gradient(to bottom, #245edc, #0a3b9c);
+            color: white;
+        }
+
+        #requests-table th {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #0a3b9c;
+            font-weight: bold;
+        }
+
+        #requests-table tbody tr {
+            border-bottom: 1px solid #d4d0c8;
+        }
+
+        #requests-table tbody tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        #requests-table tbody tr:hover {
+            background-color: #e8f0ff;
+        }
+
+        #requests-table td {
+            padding: 8px 10px;
+            border: 1px solid #d4d0c8;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .footer {
+            background-color: #d4d0c8;
+            padding: 10px 20px;
+            text-align: center;
+            border-top: 2px solid #ffffff;
+            font-size: 12px;
+            color: #000;
+        }
+
+        /* VBA-style validation messages */
+        .validation-error {
+            border: 2px solid red !important;
+            background-color: #fff0f0 !important;
+        }
+
+        .validation-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 3px;
+            display: none;
+        }
+
+        /* NEW: EMR Explorer Styles */
+        .emr-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .emr-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f8f8f8;
+            border: 1px solid #d4d0c8;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .emr-section-header {
+            background-color: #e8e8e8;
+            padding: 8px 10px;
+            margin: -15px -15px 15px -15px;
+            border-bottom: 1px solid #d4d0c8;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .schema-diagram {
+            background-color: white;
+            border: 1px solid #d4d0c8;
+            padding: 10px;
+            min-height: 300px;
+            overflow: auto;
+        }
+
+        .table-node {
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            border: 1px solid #808080;
+            border-radius: 3px;
+            padding: 8px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 150px;
+            box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+        }
+
+        .table-name {
+            font-weight: bold;
+            color: #0a3b9c;
+            border-bottom: 1px solid #d4d0c8;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .table-field {
+            font-size: 12px;
+            padding: 2px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .relationship-line {
+            margin: 0 10px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .query-builder {
+            background-color: white;
+            border: 1px solid #d4d0c8;
+            padding: 10px;
+            min-height: 200px;
+        }
+
+        .query-input {
+            width: 100%;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #808080;
+            padding: 8px;
+            background-color: #f8f8f8;
+        }
+
+        .query-results {
+            background-color: white;
+            border: 1px solid #d4d0c8;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .scenario-box {
+            background-color: #e8f0ff;
+            border: 1px solid #a0c0ff;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .scenario-box:hover {
+            background-color: #d0e0ff;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: #0a3b9c;
+            margin-bottom: 5px;
+        }
+
+        .scenario-desc {
+            font-size: 12px;
+            color: #333;
+        }
+
+        .sql-preview {
+            background-color: #2b2b2b;
+            color: #f8f8f8;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .highlight {
+            background-color: #ffff88;
+            padding: 2px;
+        }
+
+        .table-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #d4d0c8;
+            padding: 10px;
+        }
+
+        .table-item {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        .table-item:hover {
+            background-color: #e8f0ff;
+        }
+
+        .table-item.selected {
+            background-color: #d0e0ff;
+            border-left: 3px solid #0a3b9c;
+        }
+
+        @media (max-width: 1200px) {
+            .form-columns {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .emr-container {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- SQL.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Data Request Decision Support Tool - NWT Government</h1>
+        </header>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="form-tab">Data Request Analysis</button>
+                <button class="tab-button" data-tab="knowledge-tab">Knowledge Management</button>
+                <button class="tab-button" data-tab="dashboard-tab">Dashboard</button>
+                <button class="tab-button" data-tab="emr-tab">EMR Data Explorer</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- FORM TAB -->
+                <div id="form-tab" class="tab-pane active">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2>Data Request Form</h2>
+                        </div>
+                        
+                        <div class="form-columns">
+                            <!-- COLUMN 1 -->
+                            <div class="form-column">
+                                <h3>Request Information</h3>
+                                
+                                <div class="form-group">
+                                    <label>Data Request Identification:</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="dhss" class="org-checkbox">
+                                            DHSS
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="hssa" class="org-checkbox">
+                                            HSSA
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="other-org" class="org-checkbox">
+                                            Other:
+                                        </label>
+                                        <input type="text" id="other-org-text" placeholder="Specify" class="small-input">
+                                    </div>
+                                    <input type="hidden" id="organization" value="">
+                                    <div class="validation-message" id="org-error"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="request-number">Data Request Number:</label>
+                                    <input type="text" id="request-number" class="form-control" required>
+                                    <div class="validation-message" id="reqnum-error"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="requestor">Data Requestor's Name/Org:</label>
+                                    <input type="text" id="requestor" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="classification">Data Request Classification:</label>
+                                    <input type="text" id="classification" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Data Request History:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="request-history" value="first" checked>
+                                            Request is first original
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="request-history" value="recurring">
+                                            Request occurred in past submitted on:
+                                            <input type="text" id="recurring-date" placeholder="yyyy-mm-dd" class="date-input">
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="history-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- COLUMN 2 -->
+                            <div class="form-column">
+                                <h3>Legal & Conditions</h3>
+                                
+                                <div class="form-group">
+                                    <label>Legislative Authority:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="legislative" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="legislative" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="legislative-error"></div>
+                                    <label for="legislative-desc">If Yes, describe authority:</label>
+                                    <textarea id="legislative-desc" class="form-control textarea-small" rows="4"></textarea>
+                                    <div class="validation-message" id="legdesc-error"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Conditions / Client Instructions:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="conditions" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="conditions" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <label for="conditions-desc">If Yes, describe conditions:</label>
+                                    <input type="text" id="conditions-desc" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Location:</label>
+                                    <label for="region">Region:</label>
+                                    <select id="region" class="form-control">
+                                        <option value="">Select Region</option>
+                                        <option value="Beaufort Delta Region">Beaufort Delta Region</option>
+                                        <option value="Dehcho Region">Dehcho Region</option>
+                                        <option value="Sahtu Region">Sahtu Region</option>
+                                        <option value="South Slave Region">South Slave Region</option>
+                                        <option value="Tłįchǫ Region">Tłįchǫ Region</option>
+                                        <option value="Yellowknife Region">Yellowknife Region</option>
+                                    </select>
+                                    
+                                    <label for="district">District:</label>
+                                    <select id="district" class="form-control" disabled>
+                                        <option value="">Select District</option>
+                                    </select>
+                                    <div class="validation-message" id="location-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- COLUMN 3 -->
+                            <div class="form-column">
+                                <h3>Purpose & Agreements</h3>
+                                
+                                <div class="form-group">
+                                    <label for="defined-purpose">Defined Purpose:</label>
+                                    <textarea id="defined-purpose" class="form-control textarea-medium" rows="5" required></textarea>
+                                    <div class="validation-message" id="purpose-error"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Statutory Owner:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="statutory" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="statutory" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="statutory-error"></div>
+                                    
+                                    <label>If Yes, identify statutory appointment:</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" class="statutory-option" value="Director, Medical Insurance">
+                                            Director, Medical Insurance
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" class="statutory-option" value="Registrar, Vital Statistics">
+                                            Registrar, Vital Statistics
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" class="statutory-option" value="Registrar, Professional Licensing">
+                                            Registrar, Professional Licensing
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" class="statutory-option" value="Chief Public Health Officer">
+                                            Chief Public Health Officer
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" class="statutory-option" value="Other">
+                                            Other
+                                        </label>
+                                    </div>
+                                    
+                                    <label for="statutory-other">If Other, describe:</label>
+                                    <input type="text" id="statutory-other" class="form-control">
+                                </div>
+                            </div>
+
+                            <!-- COLUMN 4 -->
+                            <div class="form-column">
+                                <h3>Data & Meetings</h3>
+                                
+                                <div class="form-group">
+                                    <label>Agreement Requirement:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="agreement" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="agreement" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="agreement-error"></div>
+                                    
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="existing-agreement">
+                                        Existing Agreement: Yes
+                                    </label>
+                                    
+                                    <label for="agreement-desc">Agreement Details:</label>
+                                    <input type="text" id="agreement-desc" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Data Matching:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="matching" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="matching" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="matching-error"></div>
+                                    
+                                    <label for="matching-desc">Describe Data Matching:</label>
+                                    <input type="text" id="matching-desc" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Meeting Requirement:</label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="meeting" value="yes">
+                                            Yes
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="meeting" value="no">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div class="validation-message" id="meeting-error"></div>
+                                    
+                                    <label for="meeting-desc">Meeting Details:</label>
+                                    <input type="text" id="meeting-desc" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="comments">Additional Comments:</label>
+                                    <textarea id="comments" class="form-control textarea-small" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-buttons">
+                            <button id="save-btn" class="btn btn-primary">Save Request</button>
+                            <button id="clear-btn" class="btn btn-secondary">Clear Form</button>
+                            <button id="refresh-btn" class="btn btn-secondary">Refresh Table</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Request Summary Table</h2>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="requests-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Organization</th>
+                                        <th>Legislative Authority</th>
+                                        <th>Defined Purpose</th>
+                                        <th>Timestamp</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Table rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KNOWLEDGE TAB -->
+                <div id="knowledge-tab" class="tab-pane">
+                    <div style="padding: 20px; text-align: center;">
+                        <h2>Knowledge Management</h2>
+                        <p>Coming Soon: Legislative reference library, precedent database, and policy repository.</p>
+                    </div>
+                </div>
+
+                <!-- DASHBOARD TAB -->
+                <div id="dashboard-tab" class="tab-pane">
+                    <div style="padding: 20px; text-align: center;">
+                        <h2>Dashboard & Analytics</h2>
+                        <p>Coming Soon: Visualizations, charts, and analytics for tracking requests.</p>
+                    </div>
+                </div>
+
+                <!-- NEW: EMR DATA EXPLORER TAB -->
+                <div id="emr-tab" class="tab-pane">
+                    <div class="emr-container">
+                        <!-- LEFT COLUMN: Schema Visualization -->
+                        <div class="emr-section">
+                            <div class="emr-section-header">
+                                <h3>EMR Schema Visualization</h3>
+                            </div>
+                            <div class="schema-diagram" id="schema-diagram">
+                                <!-- Schema will be rendered here by JavaScript -->
+                            </div>
+                            <div class="table-list" id="table-list">
+                                <!-- Table list will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- MIDDLE COLUMN: Client Request Translator -->
+                        <div class="emr-section">
+                            <div class="emr-section-header">
+                                <h3>Client Request Translator</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="client-request">Enter Client Request:</label>
+                                <textarea id="client-request" class="form-control textarea-large" 
+                                          placeholder="Example: 'I need all diabetic patients aged 50+ from Yellowknife with HbA1c > 7% in 2024'"></textarea>
+                            </div>
+                            <button id="analyze-request" class="btn btn-primary">Analyze Request</button>
+                            
+                            <div id="analysis-results" style="display: none; margin-top: 15px;">
+                                <h4>Analysis Results:</h4>
+                                <div class="form-group">
+                                    <label>Tables Required:</label>
+                                    <div id="tables-required" class="highlight"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>SQL Conditions:</label>
+                                    <div id="sql-conditions" class="highlight"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sample SQL Query:</label>
+                                    <div id="sample-sql" class="sql-preview"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>ETL Requirements:</label>
+                                    <div id="etl-requirements" class="highlight"></div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <h4>Common Scenarios:</h4>
+                                <div class="scenario-box" data-scenario="diabetes">
+                                    <div class="scenario-title">Diabetes Patient Analysis</div>
+                                    <div class="scenario-desc">Find diabetic patients with recent lab results</div>
+                                </div>
+                                <div class="scenario-box" data-scenario="appointments">
+                                    <div class="scenario-title">Appointment Tracking</div>
+                                    <div class="scenario-desc">Track appointments by region and provider</div>
+                                </div>
+                                <div class="scenario-box" data-scenario="medications">
+                                    <div class="scenario-title">Medication Prescriptions</div>
+                                    <div class="scenario-desc">Analyze prescription patterns by diagnosis</div>
+                                </div>
+                                <div class="scenario-box" data-scenario="admissions">
+                                    <div class="scenario-title">Hospital Admissions</div>
+                                    <div class="scenario-desc">Admission rates by reason and location</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add this after the Common Scenarios section -->
+                        <div class="scenario-container" id="custom-scenarios">
+                            <!-- Custom scenarios will appear here -->
+                        </div>
+
+                        <!-- RIGHT COLUMN: SQL Practice -->
+                        <div class="emr-section">
+                            <div class="emr-section-header">
+                                <h3>SQL Practice & Query Builder</h3>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Tables to Query:</label>
+                                <div id="table-selector" class="checkbox-group">
+                                    <!-- Tables will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>SQL Query:</label>
+                                <textarea id="sql-query" class="query-input" placeholder="Write your SQL query here..."></textarea>
+                            </div>
+                            <div class="form-buttons">
+                                <button id="run-query" class="btn btn-primary">Run Query</button>
+                                <button id="clear-query" class="btn btn-secondary">Clear</button>
+                                <button id="save-query" class="btn btn-secondary">Save Query</button>
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label>Query Results:</label>
+                                <div id="query-results" class="query-results">
+                                    Results will appear here...
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Saved Queries:</label>
+                                <select id="saved-queries" class="form-control">
+                                    <option value="">Select a saved query...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>NWT Government Data Request Tool • Windows XP/2000 Theme</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration
+        let db = null;
+        let databaseLoaded = false;
+        let currentQueryResults = null;
+        
+        // NWT Location Data
+        const locationData = {
+            "Beaufort Delta Region": ["Aklavik", "Fort McPherson", "Inuvik", "Paulatuk", "Sachs Harbour", "Tsiigehtchic", "Tuktoyaktuk", "Ulukhaktok"],
+            "Dehcho Region": ["Fort Liard", "Fort Providence", "Fort Simpson", "Hay River Dene Reserve", "Jean Marie River", "Kakisa", "Nahanni Butte", "Sambaa K'e", "Wrigley"],
+            "Sahtu Region": ["Colville Lake", "Délı̨nę", "Fort Good Hope", "Norman Wells", "Tulita"],
+            "South Slave Region": ["Enterprise", "Fort Resolution", "Fort Smith", "Hay River", "Łutselk'e"],
+            "Tłįchǫ Region": ["Behchokǫ̀", "Gamètı̀", "Wekweètı̀", "Whatı̀"],
+            "Yellowknife Region": ["Dettah", "Yellowknife"]
+        };
+
+        // Data storage for form tab
+        let requestsData = JSON.parse(localStorage.getItem('dataRequests')) || [];
+        let nextId = requestsData.length > 0 ? Math.max(...requestsData.map(r => r.id)) + 1 : 1;
+        let savedQueries = JSON.parse(localStorage.getItem('emrSavedQueries')) || [];
+        let customScenarios = JSON.parse(localStorage.getItem('customScenarios')) || [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab).classList.add('active');
+                    
+                    // Initialize EMR explorer when tab is activated
+                    if (this.dataset.tab === 'emr-tab' && !databaseLoaded) {
+                        loadDatabase();
+                    }
+                });
+            });
+
+            // Region selection
+            document.getElementById('region').addEventListener('change', function() {
+                const region = this.value;
+                const districtSelect = document.getElementById('district');
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                
+                if (region && locationData[region]) {
+                    districtSelect.disabled = false;
+                    locationData[region].forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                } else {
+                    districtSelect.disabled = true;
+                }
+            });
+
+            // Organization checkboxes
+            document.querySelectorAll('.org-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        document.querySelectorAll('.org-checkbox').forEach(cb => {
+                            if (cb !== this) cb.checked = false;
+                        });
+                    }
+                    updateOrganization();
+                });
+            });
+
+            // Other org text input
+            document.getElementById('other-org-text').addEventListener('input', updateOrganization);
+
+            // Clear validation on input
+            document.querySelectorAll('input, textarea, select').forEach(element => {
+                element.addEventListener('input', function() {
+                    this.classList.remove('validation-error');
+                    const errorId = this.id + '-error';
+                    if (document.getElementById(errorId)) {
+                        document.getElementById(errorId).style.display = 'none';
+                    }
+                });
+            });
+
+            // Form tab buttons
+            document.getElementById('save-btn').addEventListener('click', saveRequest);
+            document.getElementById('clear-btn').addEventListener('click', clearForm);
+            document.getElementById('refresh-btn').addEventListener('click', loadTableData);
+
+            // EMR tab buttons (will be set up after database loads)
+            
+            // Load initial table data for form tab
+            loadTableData();
+            
+            // Pre-load database when page loads
+            setTimeout(() => loadDatabase(), 1000);
+        });
+
+        // Load SQLite database
+        async function loadDatabase() {
+            const statusDiv = document.getElementById('database-status') || createStatusDiv();
+            
+            try {
+                statusDiv.innerHTML = 'Loading SQLite engine...';
+                
+                // Initialize SQL.js
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+                
+                statusDiv.innerHTML = 'Downloading database...';
+                
+                // Load your database file
+                // IMPORTANT: You need to convert your .db file to ArrayBuffer
+                // Option 1: Fetch from GitHub (if under 50MB)
+                const response = await fetch('OpenEMR_Sim.db');
+                if (!response.ok) {
+                    throw new Error(`Database not found: ${response.status}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                statusDiv.innerHTML = 'Initializing database...';
+                
+                // Create database
+                db = new SQL.Database(new Uint8Array(arrayBuffer));
+                databaseLoaded = true;
+                
+                // Update UI
+                statusDiv.innerHTML = `
+                    <span style="color: green;">✓ Database loaded successfully!</span>
+                    <button onclick="showDatabaseInfo()" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;">
+                        Show Info
+                    </button>
+                `;
+                
+                // Initialize EMR explorer
+                initEMRExplorer();
+                
+                console.log('Database loaded successfully');
+                
+            } catch (error) {
+                console.error('Database load error:', error);
+                statusDiv.innerHTML = `
+                    <span style="color: red;">✗ Error loading database: ${error.message}</span><br>
+                    <small>Using demo mode with sample data</small>
+                `;
+                
+                // Create demo database
+                createDemoDatabase();
+            }
+        }
+
+        // Create demo database if real one fails
+        function createDemoDatabase() {
+            try {
+                const SQL = window.SQL;
+                db = new SQL.Database();
+                
+                // Create sample tables
+                db.run(`
+                    CREATE TABLE patients (
+                        patient_id INTEGER PRIMARY KEY,
+                        first_name TEXT,
+                        last_name TEXT,
+                        dob DATE,
+                        city TEXT,
+                        province TEXT
+                    );
+                    
+                    CREATE TABLE encounters (
+                        encounter_id INTEGER PRIMARY KEY,
+                        patient_id INTEGER,
+                        encounter_date DATE,
+                        diagnosis_code TEXT
+                    );
+                    
+                    CREATE TABLE appointments (
+                        appt_id INTEGER PRIMARY KEY,
+                        patient_id INTEGER,
+                        appt_date DATE,
+                        type TEXT
+                    );
+                    
+                    INSERT INTO patients VALUES 
+                    (1, 'John', 'Doe', '1980-01-15', 'Yellowknife', 'NT'),
+                    (2, 'Jane', 'Smith', '1975-05-20', 'Inuvik', 'NT'),
+                    (3, 'Bob', 'Johnson', '1990-08-30', 'Hay River', 'NT');
+                    
+                    INSERT INTO encounters VALUES
+                    (1, 1, '2024-01-15', 'E11.9'),
+                    (2, 2, '2024-02-20', 'I10'),
+                    (3, 3, '2024-03-10', 'E11.9');
+                    
+                    INSERT INTO appointments VALUES
+                    (1, 1, '2024-01-10', 'Consultation'),
+                    (2, 2, '2024-02-15', 'Follow-up'),
+                    (3, 3, '2024-03-05', 'Check-up');
+                `);
+                
+                databaseLoaded = true;
+                initEMRExplorer();
+                
+            } catch (error) {
+                console.error('Demo database error:', error);
+            }
+        }
+
+        // Show database information
+        function showDatabaseInfo() {
+            if (!db) {
+                alert('Database not loaded yet.');
+                return;
+            }
+            
+            try {
+                const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+                let info = 'Database Tables:\n\n';
+                
+                tables[0]?.values.forEach(table => {
+                    const tableName = table[0];
+                    const columns = db.exec(`PRAGMA table_info(${tableName})`);
+                    info += `${tableName}:\n`;
+                    columns[0]?.values.forEach(col => {
+                        info += `  - ${col[1]} (${col[2]})\n`;
+                    });
+                    info += '\n';
+                });
+                
+                alert(info);
+            } catch (error) {
+                alert('Error getting database info: ' + error.message);
+            }
+        }
+
+        // Initialize EMR Explorer
+        function initEMRExplorer() {
+            if (!databaseLoaded) {
+                console.log('Database not loaded yet, skipping EMR init');
+                return;
+            }
+            
+            try {
+                // Load database schema
+                loadDatabaseSchema();
+                
+                // Load table list
+                loadTableList();
+                
+                // Setup event listeners for EMR tab
+                const analyzeBtn = document.getElementById('analyze-request');
+                const runQueryBtn = document.getElementById('run-query');
+                const clearQueryBtn = document.getElementById('clear-query');
+                const saveQueryBtn = document.getElementById('save-query');
+                const exportBtn = document.getElementById('export-results');
+                const savedQueriesSelect = document.getElementById('saved-queries');
+                
+                if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeClientRequest);
+                if (runQueryBtn) runQueryBtn.addEventListener('click', runSQLQuery);
+                if (clearQueryBtn) clearQueryBtn.addEventListener('click', clearQuery);
+                if (saveQueryBtn) saveQueryBtn.addEventListener('click', saveQuery);
+                if (exportBtn) exportBtn.addEventListener('click', exportResults);
+                if (savedQueriesSelect) savedQueriesSelect.addEventListener('change', loadSavedQuery);
+                
+                // Setup scenario click handlers
+                document.querySelectorAll('.scenario-box').forEach(box => {
+                    box.addEventListener('click', function() {
+                        loadScenario(this.dataset.scenario);
+                    });
+                });
+                
+                // Load custom scenarios
+                updateCustomScenariosDropdown();
+                
+                console.log('EMR Explorer initialized');
+                
+            } catch (error) {
+                console.error('Error initializing EMR Explorer:', error);
+            }
+        }
+
+        // Load database schema
+        function loadDatabaseSchema() {
+            try {
+                if (!db) return;
+                
+                const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+                window.emrSchema = {};
+                
+                tables[0]?.values.forEach(table => {
+                    const tableName = table[0];
+                    const columns = db.exec(`PRAGMA table_info(${tableName})`);
+                    
+                    window.emrSchema[tableName] = {
+                        columns: columns[0]?.values.map(col => ({
+                            name: col[1],
+                            type: col[2],
+                            notnull: col[3],
+                            pk: col[5]
+                        })) || []
+                    };
+                });
+                
+                renderSchemaDiagram();
+                renderTableSelector();
+                
+            } catch (error) {
+                console.error('Error loading schema:', error);
+            }
+        }
+
+        // Load table list
+        function loadTableList() {
+            try {
+                if (!db) return;
+                
+                const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+                const tableList = document.getElementById('table-list');
+                
+                if (!tableList) return;
+                
+                tableList.innerHTML = '';
+                
+                tables[0]?.values.forEach(table => {
+                    const tableName = table[0];
+                    const tableItem = document.createElement('div');
+                    tableItem.className = 'table-item';
+                    tableItem.innerHTML = `
+                        <strong>${tableName}</strong><br>
+                        <small>Click to preview</small>
+                    `;
+                    tableItem.addEventListener('click', () => {
+                        previewTableData(tableName);
+                    });
+                    tableList.appendChild(tableItem);
+                });
+                
+            } catch (error) {
+                console.error('Error loading table list:', error);
+            }
+        }
+
+        // Preview table data
+        function previewTableData(tableName) {
+            try {
+                if (!db) {
+                    alert('Database not loaded.');
+                    return;
+                }
+                
+                const result = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
+                if (!result.length) {
+                    displayQueryResults({ columns: [], values: [] }, `Table: ${tableName} (empty)`);
+                    return;
+                }
+                
+                const columns = result[0].columns;
+                const values = result[0].values;
+                
+                displayQueryResults({ columns, values }, `Table: ${tableName} (first 20 rows)`);
+                
+            } catch (error) {
+                alert(`Error loading table ${tableName}: ${error.message}`);
+            }
+        }
+
+        // Run SQL query
+        function runSQLQuery() {
+            const queryInput = document.getElementById('sql-query');
+            if (!queryInput) return;
+            
+            const query = queryInput.value.trim();
+            if (!query) {
+                alert('Please enter a SQL query to run.');
+                return;
+            }
+            
+            if (!db) {
+                alert('Database not loaded yet. Please wait.');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('query-results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '<div style="color: blue; padding: 20px; text-align: center;">Executing query...</div>';
+            }
+            
+            try {
+                // Basic query validation
+                const queryLower = query.toLowerCase();
+                if (queryLower.includes('drop ') || queryLower.includes('delete ') || 
+                    queryLower.includes('update ') || queryLower.includes('insert ') ||
+                    queryLower.includes('alter ') || queryLower.includes('create ')) {
+                    throw new Error('Only SELECT queries are allowed for safety.');
+                }
+                
+                const result = db.exec(query);
+                
+                if (result.length === 0) {
+                    displayQueryResults({ columns: [], values: [] }, 'Query executed (no results)');
+                } else {
+                    displayQueryResults(result[0], 'Query Results');
+                }
+                
+                // Store for export
+                currentQueryResults = { query, result: result[0] };
+                
+            } catch (error) {
+                const errorDiv = document.getElementById('query-results');
+                if (errorDiv) {
+                    errorDiv.innerHTML = `
+                        <div style="color: red; font-weight: bold;">SQL Error:</div>
+                        <div style="color: #666; margin: 10px 0; padding: 10px; background: #fff0f0; border: 1px solid red;">
+                            ${error.message}
+                        </div>
+                        <div style="margin-top: 10px; color: #666;">Query: ${query.substring(0, 200)}${query.length > 200 ? '...' : ''}</div>
+                    `;
+                }
+                console.error('SQL Error:', error);
+            }
+        }
+
+        // Display query results
+        function displayQueryResults(data, title = 'Results') {
+            const resultsDiv = document.getElementById('query-results');
+            if (!resultsDiv) return;
+            
+            const columns = data.columns || [];
+            const values = data.values || [];
+            
+            if (values.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div style="color: green; font-weight: bold;">✓ ${title}</div>
+                    <div style="margin-top: 10px; color: #666;">0 rows returned</div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="color: green; font-weight: bold;">✓ ${title}</div>
+                <div style="margin-top: 5px; color: #666;">
+                    Returned ${values.length} rows with ${columns.length} columns
+                </div>
+                <div style="margin-top: 10px; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <tr style="background-color: #245edc; color: white;">
+            `;
+            
+            // Add headers
+            columns.forEach(column => {
+                html += `<th style="padding: 8px; border: 1px solid #0a3b9c; text-align: left;">${column}</th>`;
+            });
+            html += '</tr>';
+            
+            // Add data rows (limit to 100 for display)
+            const displayLimit = Math.min(values.length, 100);
+            for (let i = 0; i < displayLimit; i++) {
+                const row = values[i];
+                html += '<tr style="border-bottom: 1px solid #ddd;' + (i % 2 === 0 ? ' background-color: #f8f8f8;' : '') + '">';
+                columns.forEach((column, colIndex) => {
+                    const value = row[colIndex];
+                    const displayValue = value !== null && value !== undefined ? 
+                        String(value).substring(0, 50) + (String(value).length > 50 ? '...' : '') : 
+                        '<em style="color: #999;">NULL</em>';
+                    html += `<td style="padding: 6px; border: 1px solid #ddd;" title="${value !== null ? String(value).replace(/"/g, '&quot;') : ''}">${displayValue}</td>`;
+                });
+                html += '</tr>';
+            }
+            
+            html += '</table></div>';
+            
+            if (values.length > 100) {
+                html += `
+                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                        Showing first 100 of ${values.length} rows
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Export results to CSV
+        function exportResults() {
+            if (!currentQueryResults) {
+                alert('No query results to export. Run a query first.');
+                return;
+            }
+            
+            try {
+                const { query, result } = currentQueryResults;
+                const columns = result.columns || [];
+                const values = result.values || [];
+                
+                if (values.length === 0) {
+                    alert('No data to export.');
+                    return;
+                }
+                
+                // Create CSV content
+                let csvContent = columns.join(',') + '\n';
+                values.forEach(row => {
+                    csvContent += row.map(cell => {
+                        if (cell === null || cell === undefined) return '';
+                        const str = String(cell);
+                        return str.includes(',') || str.includes('"') || str.includes('\n') ? 
+                            `"${str.replace(/"/g, '""')}"` : str;
+                    }).join(',') + '\n';
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `query_results_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting results: ' + error.message);
+            }
+        }
+
+        // Analyze client request
+        function analyzeClientRequest() {
+            const requestText = document.getElementById('client-request')?.value.trim();
+            if (!requestText) {
+                alert('Please enter a client request to analyze.');
+                return;
+            }
+            
+            // Simple keyword analysis
+            const analysis = analyzeRequestText(requestText);
+            displayAnalysisResults(analysis, requestText);
+        }
+
+        // Analyze request text
+        function analyzeRequestText(requestText) {
+            const requestLower = requestText.toLowerCase();
+            
+            // Detect tables
+            const tables = [];
+            if (requestLower.includes('patient')) tables.push('patients');
+            if (requestLower.includes('appointment') || requestLower.includes('schedule')) tables.push('appointments');
+            if (requestLower.includes('encounter') || requestLower.includes('visit')) tables.push('encounters');
+            if (requestLower.includes('diagnosis')) tables.push('diagnoses');
+            if (requestLower.includes('lab') || requestLower.includes('test')) tables.push('labs');
+            if (requestLower.includes('prescription') || requestLower.includes('medication')) tables.push('prescriptions');
+            
+            // Default tables if none detected
+            if (tables.length === 0) tables.push('patients', 'encounters');
+            
+            // Generate sample SQL
+            let sampleSQL = '';
+            if (tables.includes('patients') && tables.includes('encounters')) {
+                sampleSQL = `SELECT p.first_name, p.last_name, p.city, e.encounter_date
+FROM patients p
+JOIN encounters e ON p.patient_id = e.patient_id
+WHERE p.province = 'NT'
+LIMIT 50`;
+            } else if (tables.includes('patients')) {
+                sampleSQL = `SELECT first_name, last_name, city, province
+FROM patients
+WHERE province = 'NT'
+LIMIT 50`;
+            } else {
+                sampleSQL = `SELECT * FROM ${tables[0]} LIMIT 50`;
+            }
+            
+            return {
+                suggested_tables: tables,
+                suggested_conditions: ['patients.province = "NT"'],
+                sample_sql: sampleSQL,
+                etl_requirements: [
+                    `Extract data from ${tables.length} table(s)`,
+                    'Apply appropriate joins between tables',
+                    'Filter data based on request criteria',
+                    'Include relevant columns for analysis'
+                ]
+            };
+        }
+
+        // Display analysis results
+        function displayAnalysisResults(analysis, originalRequest) {
+            const resultsDiv = document.getElementById('analysis-results');
+            if (!resultsDiv) return;
+            
+            resultsDiv.style.display = 'block';
+            
+            // Update UI elements
+            const tablesRequired = document.getElementById('tables-required');
+            const sqlConditions = document.getElementById('sql-conditions');
+            const sampleSql = document.getElementById('sample-sql');
+            const etlRequirements = document.getElementById('etl-requirements');
+            const sqlQueryBox = document.getElementById('sql-query');
+            
+            if (tablesRequired) tablesRequired.textContent = analysis.suggested_tables.join(', ');
+            if (sqlConditions) sqlConditions.innerHTML = analysis.suggested_conditions.map(c => `<div>• ${c}</div>`).join('');
+            if (sampleSql) sampleSql.textContent = analysis.sample_sql;
+            if (etlRequirements) etlRequirements.innerHTML = analysis.etl_requirements.map(r => `<div>• ${r}</div>`).join('');
+            if (sqlQueryBox) sqlQueryBox.value = analysis.sample_sql;
+            
+            // Save as custom scenario
+            saveCustomScenario(originalRequest, analysis);
+        }
+
+        // Save custom scenario
+        function saveCustomScenario(request, analysis) {
+            const scenario = {
+                id: Date.now(),
+                request: request,
+                timestamp: new Date().toISOString(),
+                tables: analysis.suggested_tables,
+                conditions: analysis.suggested_conditions,
+                sql: analysis.sample_sql
+            };
+            
+            customScenarios.push(scenario);
+            localStorage.setItem('customScenarios', JSON.stringify(customScenarios));
+            
+            updateCustomScenariosDropdown();
+        }
+
+        // Update custom scenarios dropdown
+        function updateCustomScenariosDropdown() {
+            const container = document.querySelector('.scenario-container');
+            if (!container) return;
+            
+            container.innerHTML = '<h4 style="margin-top: 20px;">Your Custom Scenarios:</h4>';
+            
+            if (customScenarios.length === 0) {
+                container.innerHTML += '<p>No custom scenarios yet. Analyze a request to create one.</p>';
+                return;
+            }
+            
+            // Show last 5 custom scenarios
+            customScenarios.slice(-5).reverse().forEach(scenario => {
+                const scenarioBox = document.createElement('div');
+                scenarioBox.className = 'scenario-box';
+                scenarioBox.innerHTML = `
+                    <div class="scenario-title">Custom: ${scenario.request.substring(0, 50)}${scenario.request.length > 50 ? '...' : ''}</div>
+                    <div class="scenario-desc">${new Date(scenario.timestamp).toLocaleDateString()} - ${scenario.tables.length} tables</div>
+                `;
+                scenarioBox.addEventListener('click', () => {
+                    const clientRequestBox = document.getElementById('client-request');
+                    const sqlQueryBox = document.getElementById('sql-query');
+                    
+                    if (clientRequestBox) clientRequestBox.value = scenario.request;
+                    if (sqlQueryBox) sqlQueryBox.value = scenario.sql;
+                    
+                    analyzeClientRequest();
+                });
+                container.appendChild(scenarioBox);
+            });
+        }
+
+        // Load scenario
+        function loadScenario(scenarioName) {
+            const scenarios = {
+                diabetes: {
+                    clientRequest: "I need all diabetic patients aged 50+ from Yellowknife",
+                    sample_sql: `SELECT p.first_name, p.last_name, p.dob, p.city, d.icd_code, d.description
+FROM patients p
+JOIN encounters e ON p.patient_id = e.patient_id
+JOIN diagnoses d ON e.encounter_id = d.encounter_id
+WHERE p.city = 'Yellowknife'
+  AND d.icd_code LIKE 'E11%'
+LIMIT 50`
+                },
+                appointments: {
+                    clientRequest: "Show all appointments by region for 2024",
+                    sample_sql: `SELECT p.province, p.city, a.appt_type, a.appt_start, a.status
+FROM appointments a
+JOIN patients p ON a.patient_id = p.patient_id
+WHERE a.appt_start >= '2024-01-01'
+ORDER BY p.city, a.appt_start
+LIMIT 50`
+                }
+            };
+            
+            const scenario = scenarios[scenarioName];
+            if (scenario) {
+                const clientRequestBox = document.getElementById('client-request');
+                const sqlQueryBox = document.getElementById('sql-query');
+                
+                if (clientRequestBox) clientRequestBox.value = scenario.clientRequest;
+                if (sqlQueryBox) sqlQueryBox.value = scenario.sample_sql;
+                
+                analyzeClientRequest();
+            }
+        }
+
+        // Clear query
+        function clearQuery() {
+            const sqlQueryBox = document.getElementById('sql-query');
+            const resultsDiv = document.getElementById('query-results');
+            
+            if (sqlQueryBox) sqlQueryBox.value = '';
+            if (resultsDiv) resultsDiv.innerHTML = 'Results will appear here...';
+        }
+
+        // Save query
+        function saveQuery() {
+            const query = document.getElementById('sql-query')?.value.trim();
+            if (!query) {
+                alert('Please enter a query to save.');
+                return;
+            }
+            
+            const queryName = prompt('Enter a name for this query:', 'My Query');
+            if (queryName) {
+                savedQueries.push({
+                    name: queryName,
+                    query: query,
+                    timestamp: new Date().toISOString()
+                });
+                
+                localStorage.setItem('emrSavedQueries', JSON.stringify(savedQueries));
+                loadSavedQueries();
+                alert('Query saved successfully!');
+            }
+        }
+
+        // Load saved queries
+        function loadSavedQueries() {
+            const select = document.getElementById('saved-queries');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Select a saved query...</option>';
+            
+            savedQueries.forEach((q, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${q.name} (${new Date(q.timestamp).toLocaleDateString()})`;
+                select.appendChild(option);
+            });
+        }
+
+        // Load a saved query
+        function loadSavedQuery() {
+            const index = this.value;
+            const sqlQueryBox = document.getElementById('sql-query');
+            
+            if (index && savedQueries[index] && sqlQueryBox) {
+                sqlQueryBox.value = savedQueries[index].query;
+            }
+        }
+
+        // Render schema diagram
+        function renderSchemaDiagram() {
+            const diagram = document.getElementById('schema-diagram');
+            if (!diagram || !window.emrSchema) return;
+            
+            diagram.innerHTML = '';
+            
+            Object.keys(window.emrSchema).forEach(tableName => {
+                const table = window.emrSchema[tableName];
+                const tableNode = document.createElement('div');
+                tableNode.className = 'table-node';
+                tableNode.innerHTML = `
+                    <div class="table-name">${tableName}</div>
+                    <div class="table-fields">
+                        ${table.columns.slice(0, 5).map(col => 
+                            `<div class="table-field">${col.name} (${col.type})</div>`
+                        ).join('')}
+                        ${table.columns.length > 5 ? 
+                            `<div class="table-field">... ${table.columns.length - 5} more fields</div>` : ''}
+                    </div>
+                `;
+                diagram.appendChild(tableNode);
+            });
+        }
+
+        // Render table selector
+        function renderTableSelector() {
+            const selector = document.getElementById('table-selector');
+            if (!selector || !window.emrSchema) return;
+            
+            selector.innerHTML = '';
+            
+            Object.keys(window.emrSchema).forEach(tableName => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-label';
+                label.innerHTML = `
+                    <input type="checkbox" class="table-checkbox" value="${tableName}">
+                    ${tableName} (${window.emrSchema[tableName].columns.length} fields)
+                `;
+                selector.appendChild(label);
+            });
+        }
+
+        // Create status div for database loading
+        function createStatusDiv() {
+            const emrTab = document.getElementById('emr-tab');
+            if (!emrTab) return null;
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.id = 'database-status';
+            statusDiv.style.cssText = `
+                padding: 10px;
+                margin: 10px 0;
+                background: #f0f8ff;
+                border: 1px solid #a0c0ff;
+                border-radius: 3px;
+                font-size: 14px;
+            `;
+            
+            emrTab.insertBefore(statusDiv, emrTab.firstChild);
+            return statusDiv;
+        }
+
+        // ============================================
+        // FORM TAB FUNCTIONS (Keep your existing code)
+        // ============================================
+        
+        // Update organization variable
+        function updateOrganization() {
+            const dhss = document.getElementById('dhss').checked;
+            const hssa = document.getElementById('hssa').checked;
+            const otherOrg = document.getElementById('other-org').checked;
+            const otherText = document.getElementById('other-org-text').value;
+            
+            let org = "";
+            if (dhss) {
+                org = "DHSS";
+            } else if (hssa) {
+                org = "HSSA";
+            } else if (otherOrg) {
+                org = otherText ? `Other: ${otherText}` : "Other";
+            }
+            
+            const orgInput = document.getElementById('organization');
+            if (orgInput) orgInput.value = org;
+        }
+
+        // Validate form
+        function validateForm() {
+            clearValidationErrors();
+            let hasErrors = false;
+
+            // Organization check
+            const dhss = document.getElementById('dhss')?.checked;
+            const hssa = document.getElementById('hssa')?.checked;
+            const otherOrg = document.getElementById('other-org')?.checked;
+            if ((!dhss && !hssa && !otherOrg)) {
+                showValidationError('org-error', 'Compliance Rule: You must select DHSS, HSSA, or Other.');
+                hasErrors = true;
+            }
+
+            // Request number
+            const requestNumber = document.getElementById('request-number')?.value.trim();
+            if (!requestNumber) {
+                showValidationError('reqnum-error', 'Compliance Rule: RequestNumber cannot be blank.');
+                document.getElementById('request-number')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+
+            // Request history
+            const requestHistory = document.querySelector('input[name="request-history"]:checked');
+            if (!requestHistory) {
+                showValidationError('history-error', 'Compliance Rule: You must select First Original or Recurring.');
+                hasErrors = true;
+            }
+
+            // Legislative Authority
+            const legislative = document.querySelector('input[name="legislative"]:checked');
+            if (!legislative) {
+                showValidationError('legislative-error', 'Compliance Rule: You must select Yes or No for Legislative Authority.');
+                hasErrors = true;
+            }
+
+            // If Legislative Authority is Yes, description required
+            if (legislative && legislative.value === "yes") {
+                const legDesc = document.getElementById('legislative-desc')?.value.trim();
+                if (!legDesc) {
+                    showValidationError('legdesc-error', 'Compliance Rule: If Legislative Authority is Yes, you must describe it.');
+                    document.getElementById('legislative-desc')?.classList.add('validation-error');
+                    hasErrors = true;
+                }
+            }
+
+            // Statutory Owner
+            const statutory = document.querySelector('input[name="statutory"]:checked');
+            if (!statutory) {
+                showValidationError('statutory-error', 'Compliance Rule: You must select Yes or No for Statutory Owner.');
+                hasErrors = true;
+            }
+
+            // Agreement Requirement
+            const agreement = document.querySelector('input[name="agreement"]:checked');
+            if (!agreement) {
+                showValidationError('agreement-error', 'Compliance Rule: You must select Yes or No for Agreement Requirement.');
+                hasErrors = true;
+            }
+
+            // Data Matching
+            const matching = document.querySelector('input[name="matching"]:checked');
+            if (!matching) {
+                showValidationError('matching-error', 'Compliance Rule: You must select Yes or No for Data Matching.');
+                hasErrors = true;
+            }
+
+            // Meeting Requirement
+            const meeting = document.querySelector('input[name="meeting"]:checked');
+            if (!meeting) {
+                showValidationError('meeting-error', 'Compliance Rule: You must select Yes or No for Meeting Requirement.');
+                hasErrors = true;
+            }
+
+            // Location
+            const region = document.getElementById('region')?.value;
+            const district = document.getElementById('district')?.value;
+            if (!region || !district) {
+                showValidationError('location-error', 'Compliance Rule: You must select both Region and District for Location.');
+                if (!region) document.getElementById('region')?.classList.add('validation-error');
+                if (!district) document.getElementById('district')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+
+            // Defined Purpose
+            const definedPurpose = document.getElementById('defined-purpose')?.value.trim();
+            if (!definedPurpose) {
+                showValidationError('purpose-error', 'Compliance Rule: You must enter a Defined Purpose.');
+                document.getElementById('defined-purpose')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+
+            return !hasErrors;
+        }
+
+        function showValidationError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function clearValidationErrors() {
+            document.querySelectorAll('.validation-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            document.querySelectorAll('.validation-error').forEach(el => {
+                el.classList.remove('validation-error');
+            });
+        }
+
+        // Get form data
+        function getFormData() {
+            updateOrganization();
+            const org = document.getElementById('organization')?.value || '';
+            
+            const requestHistory = document.querySelector('input[name="request-history"]:checked')?.value;
+            const recurringDate = requestHistory === 'recurring' ? document.getElementById('recurring-date')?.value : '';
+            
+            const legislative = document.querySelector('input[name="legislative"]:checked')?.value;
+            const legislativeDesc = document.getElementById('legislative-desc')?.value || '';
+            
+            const conditions = document.querySelector('input[name="conditions"]:checked')?.value;
+            const conditionsDesc = document.getElementById('conditions-desc')?.value || '';
+            
+            const statutory = document.querySelector('input[name="statutory"]:checked')?.value;
+            const statutoryOptions = document.querySelectorAll('.statutory-option:checked');
+            const statutorySelected = Array.from(statutoryOptions).map(option => option.value);
+            const statutoryOther = document.getElementById('statutory-other')?.value || '';
+            
+            const agreement = document.querySelector('input[name="agreement"]:checked')?.value;
+            const existingAgreement = document.getElementById('existing-agreement')?.checked;
+            const agreementDesc = document.getElementById('agreement-desc')?.value || '';
+            
+            const matching = document.querySelector('input[name="matching"]:checked')?.value;
+            const matchingDesc = document.getElementById('matching-desc')?.value || '';
+            
+            const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
+            const meetingDesc = document.getElementById('meeting-desc')?.value || '';
+            
+            const region = document.getElementById('region')?.value || '';
+            const district = document.getElementById('district')?.value || '';
+            
+            const requestNumber = document.getElementById('request-number')?.value || '';
+            const requestor = document.getElementById('requestor')?.value || '';
+            const classification = document.getElementById('classification')?.value || '';
+            const definedPurpose = document.getElementById('defined-purpose')?.value || '';
+            const comments = document.getElementById('comments')?.value || '';
+            
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+            
+            return {
+                id: nextId++,
+                organization: org,
+                request_number: requestNumber,
+                requestor: requestor,
+                classification: classification,
+                request_history: requestHistory === 'first' ? 'First Original' : `Recurring: ${recurringDate}`,
+                legislative_authority: legislative,
+                legislative_description: legislativeDesc,
+                conditions: conditions,
+                conditions_description: conditionsDesc,
+                statutory_owner: statutory,
+                statutory_selected: statutorySelected,
+                statutory_other: statutoryOther,
+                defined_purpose: definedPurpose,
+                agreement_required: agreement,
+                existing_agreement: existingAgreement ? 'Yes' : 'No',
+                agreement_description: agreementDesc,
+                data_matching: matching,
+                matching_description: matchingDesc,
+                meeting_required: meeting,
+                meeting_description: meetingDesc,
+                region: region,
+                district: district,
+                comments: comments,
+                timestamp: timestamp
+            };
+        }
+
+        // Save request
+        function saveRequest() {
+            if (!validateForm()) {
+                alert("Cannot save: Please fix all validation errors.");
+                return;
+            }
+            
+            const formData = getFormData();
+            
+            // Add to storage
+            requestsData.push(formData);
+            localStorage.setItem('dataRequests', JSON.stringify(requestsData));
+            
+            // Clear and refresh
+            clearForm();
+            loadTableData();
+            
+            alert("Data request saved successfully!");
+        }
+
+        // Load table data for form tab
+        function loadTableData() {
+            const tbody = document.getElementById('table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (requestsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No requests saved yet.</td></tr>';
+                return;
+            }
+            
+            const sortedData = [...requestsData].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedData.forEach(data => {
+                const row = document.createElement('tr');
+                
+                const legislativeAuth = data.legislative_authority === 'yes' ? 
+                    `Yes: ${data.legislative_description.substring(0, 100)}...` : 'No';
+                
+                const definedPurpose = data.defined_purpose.length > 50 ? 
+                    data.defined_purpose.substring(0, 50) + '...' : data.defined_purpose;
+                
+                const location = `${data.region} / ${data.district}`;
+                
+                row.innerHTML = `
+                    <td>${data.id}</td>
+                    <td>${data.organization}</td>
+                    <td>${legislativeAuth}</td>
+                    <td>${definedPurpose}</td>
+                    <td>${data.timestamp}</td>
+                    <td>${location}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Clear form
+        function clearForm() {
+            clearValidationErrors();
+            
+            // Organization
+            document.querySelectorAll('.org-checkbox').forEach(cb => cb.checked = false);
+            const otherOrgText = document.getElementById('other-org-text');
+            if (otherOrgText) otherOrgText.value = '';
+            const orgInput = document.getElementById('organization');
+            if (orgInput) orgInput.value = '';
+            
+            // Request details
+            const requestNumber = document.getElementById('request-number');
+            if (requestNumber) requestNumber.value = '';
+            const requestor = document.getElementById('requestor');
+            if (requestor) requestor.value = '';
+            const classification = document.getElementById('classification');
+            if (classification) classification.value = '';
+            const recurringDate = document.getElementById('recurring-date');
+            if (recurringDate) recurringDate.value = '';
+            const firstRadio = document.querySelector('input[name="request-history"][value="first"]');
+            if (firstRadio) firstRadio.checked = true;
+            
+            // Legislative
+            document.querySelectorAll('input[name="legislative"]').forEach(r => r.checked = false);
+            const legislativeDesc = document.getElementById('legislative-desc');
+            if (legislativeDesc) legislativeDesc.value = '';
+            
+            // Conditions
+            document.querySelectorAll('input[name="conditions"]').forEach(r => r.checked = false);
+            const conditionsDesc = document.getElementById('conditions-desc');
+            if (conditionsDesc) conditionsDesc.value = '';
+            
+            // Statutory
+            document.querySelectorAll('input[name="statutory"]').forEach(r => r.checked = false);
+            document.querySelectorAll('.statutory-option').forEach(cb => cb.checked = false);
+            const statutoryOther = document.getElementById('statutory-other');
+            if (statutoryOther) statutoryOther.value = '';
+            
+            // Agreement
+            document.querySelectorAll('input[name="agreement"]').forEach(r => r.checked = false);
+            const existingAgreement = document.getElementById('existing-agreement');
+            if (existingAgreement) existingAgreement.checked = false;
+            const agreementDesc = document.getElementById('agreement-desc');
+            if (agreementDesc) agreementDesc.value = '';
+            
+            // Data Matching
+            document.querySelectorAll('input[name="matching"]').forEach(r => r.checked = false);
+            const matchingDesc = document.getElementById('matching-desc');
+            if (matchingDesc) matchingDesc.value = '';
+            
+            // Meeting
+            document.querySelectorAll('input[name="meeting"]').forEach(r => r.checked = false);
+            const meetingDesc = document.getElementById('meeting-desc');
+            if (meetingDesc) meetingDesc.value = '';
+            
+            // Location
+            const regionSelect = document.getElementById('region');
+            const districtSelect = document.getElementById('district');
+            if (regionSelect) regionSelect.value = '';
+            if (districtSelect) {
+                districtSelect.value = '';
+                districtSelect.disabled = true;
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+            }
+            
+            // Other
+            const definedPurpose = document.getElementById('defined-purpose');
+            if (definedPurpose) definedPurpose.value = '';
+            const comments = document.getElementById('comments');
+            if (comments) comments.value = '';
+        }
+    </script>
+</body>
+</html>
