@@ -885,36 +885,89 @@
                                 <!-- Update the sidebar in the knowledge tab to this: -->
                                 <!-- Update the sidebar buttons in the knowledge tab: -->
                                 <aside style="width: 350px; background: #e8f0ff; border: 1px solid #a0c0ff; border-radius: 3px; display: flex; flex-direction: column; padding: 15px;">
-                                    <div style="margin-bottom: 20px;">
-                                        <h3 style="color: #0a3b9c; margin-bottom: 10px;">NWT Terminology Navigator</h3>
+                                <div style="margin-bottom: 20px;">
+                                    <h3 style="color: #0a3b9c; margin-bottom: 10px;">NWT Terminology Navigator</h3>
+                                    
+                                    <!-- SEARCH BOX WITH BUTTON -->
+                                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
                                         <input type="text" 
                                                id="treeSearch" 
                                                class="form-control" 
-                                               placeholder="Search SNOMED/FHIR concepts..."
-                                               style="margin-bottom: 15px;">
-                                        
-                                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                            <button onclick="loadDemoTerminology()" class="btn btn-secondary" style="font-size: 12px;">
-                                                Load Demo Tree
-                                            </button>
-                                            <button onclick="clearTree()" class="btn btn-secondary" style="font-size: 12px;">
-                                                Clear Tree
-                                            </button>
-                                        </div>
-                                        
-                                        <!-- Add a test button for debugging -->
-                                        <button onclick="testSpecTool()" style="font-size: 11px; padding: 3px 8px; background: #ff9900; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                                            Debug Test
+                                               placeholder="Search SNOMED/FHIR..."
+                                               style="flex-grow: 1; padding: 8px;">
+                                        <button onclick="searchTerminology()" 
+                                                class="btn btn-primary"
+                                                style="padding: 8px 15px; white-space: nowrap;">
+                                            Search
                                         </button>
                                     </div>
                                     
-                                    <div id="treeContainer" style="flex-grow: 1; overflow-y: auto; border: 1px solid #d4d0c8; padding: 10px; background: white;">
-                                        <!-- Dynamic tree will be injected here -->
-                                        <div style="color: #666; text-align: center; padding: 20px;">
-                                            Click "Load Demo Tree" to populate terminology
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                        Search real terminology servers or use demo data
+                                    </div>
+                                    
+                                    <!-- API SELECTOR -->
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px;">Data Source:</label>
+                                        <select id="api-provider" class="form-control" style="font-size: 12px; padding: 5px;">
+                                            <option value="DEMO">Demo Mode (Sample Data)</option>
+                                            <option value="ONTOSERVER">Ontoserver (Live FHIR)</option>
+                                            <option value="SNOWSTORM">Snowstorm (Live SNOMED)</option>
+                                        </select>
+                                        <button onclick="openApiSettings()" 
+                                                style="margin-top: 5px; font-size: 11px; padding: 3px 8px;" 
+                                                class="btn btn-secondary">
+                                            API Settings
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- QUICK SEARCH BUTTONS -->
+                                    <div style="margin-bottom: 15px;">
+                                        <div style="font-weight: bold; font-size: 12px; margin-bottom: 5px;">Quick Searches:</div>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                            <button onclick="quickSearch('diabetes')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                Diabetes
+                                            </button>
+                                            <button onclick="quickSearch('hypertension')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                Hypertension
+                                            </button>
+                                            <button onclick="quickSearch('cancer')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                Cancer
+                                            </button>
+                                            <button onclick="quickSearch('vaccine')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                Vaccine
+                                            </button>
+                                            <button onclick="quickSearch('pregnancy')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                Pregnancy
+                                            </button>
                                         </div>
                                     </div>
-                                </aside>
+                                    
+                                    <!-- ACTION BUTTONS -->
+                                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                        <button onclick="loadDemoTerminology()" class="btn btn-secondary" style="font-size: 12px; flex: 1;">
+                                            📁 Load Demo Tree
+                                        </button>
+                                        <button onclick="clearTree()" class="btn btn-secondary" style="font-size: 12px; flex: 1;">
+                                            🗑️ Clear
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- DEBUG BUTTON (optional) -->
+                                    <button onclick="testSpecTool()" 
+                                            style="font-size: 11px; padding: 3px 8px; background: #ff9900; color: white; border: none; border-radius: 3px; cursor: pointer; width: 100%;">
+                                        🐛 Debug Test
+                                    </button>
+                                </div>
+                                
+                                <!-- TREE/RESULTS CONTAINER -->
+                                <div id="treeContainer" style="flex-grow: 1; overflow-y: auto; border: 1px solid #d4d0c8; padding: 10px; background: white;">
+                                    <div style="color: #666; text-align: center; padding: 20px;">
+                                        <p>Enter a search term above to find medical terminology.</p>
+                                        <p>Or click "Load Demo Tree" for example data.</p>
+                                    </div>
+                                </div>
+                            </aside>
                 
                                 <!-- MAIN WORKSPACE - Specification Board -->
                                 <main style="flex-grow: 1; display: flex; flex-direction: column; background: #f8f8f8; border: 1px solid #d4d0c8; border-radius: 3px; padding: 15px;">
@@ -3284,6 +3337,190 @@ LIMIT 50`
                 }
             }
         }
+
+
+        // Search terminology function
+        function searchTerminology() {
+            const searchInput = document.getElementById('treeSearch');
+            const searchTerm = searchInput.value.trim();
+            
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                searchInput.focus();
+                return;
+            }
+            
+            const apiProvider = document.getElementById('api-provider').value;
+            
+            if (apiProvider === 'DEMO') {
+                // Use demo search
+                searchDemoTerminology(searchTerm);
+            } else {
+                // Use real API search
+                searchRealTerminology(searchTerm);
+            }
+        }
+        
+        // Quick search function
+        function quickSearch(term) {
+            const searchInput = document.getElementById('treeSearch');
+            const apiSelect = document.getElementById('api-provider');
+            
+            searchInput.value = term;
+            apiSelect.value = 'ONTOSERVER'; // Default to live API for quick searches
+            
+            searchTerminology();
+        }
+        
+        // Demo search function
+        function searchDemoTerminology(searchTerm) {
+            const demoData = [
+                {
+                    name: "Diabetes mellitus",
+                    code: "SNOMED:73211009",
+                    description: "Diabetes mellitus (disorder)",
+                    system: "SNOMED CT"
+                },
+                {
+                    name: "Type 2 diabetes mellitus",
+                    code: "SNOMED:44054006",
+                    description: "Diabetes mellitus type 2",
+                    system: "SNOMED CT"
+                },
+                {
+                    name: "Essential hypertension",
+                    code: "SNOMED:59621000",
+                    description: "Essential hypertension",
+                    system: "SNOMED CT"
+                },
+                {
+                    name: "Body mass index",
+                    code: "LOINC:39156-5",
+                    description: "Body mass index (BMI)",
+                    system: "LOINC"
+                },
+                {
+                    name: "Hemoglobin A1c",
+                    code: "LOINC:4548-4",
+                    description: "Hemoglobin A1c/Hemoglobin.total in Blood",
+                    system: "LOINC"
+                },
+                {
+                    name: "Influenza vaccine",
+                    code: "SNOMED:86198006",
+                    description: "Influenza virus vaccine",
+                    system: "SNOMED CT"
+                },
+                {
+                    name: "Pregnancy",
+                    code: "SNOMED:289908002",
+                    description: "Pregnant",
+                    system: "SNOMED CT"
+                }
+            ];
+            
+            const filtered = demoData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.system.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displaySearchResults(filtered, searchTerm, 'Demo Data');
+        }
+        
+        // Display search results
+        function displaySearchResults(results, searchTerm, source) {
+            const treeContainer = document.getElementById('treeContainer');
+            if (!treeContainer) return;
+            
+            if (results.length === 0) {
+                treeContainer.innerHTML = `
+                    <div style="color: #666; text-align: center; padding: 30px;">
+                        <div style="margin-bottom: 10px;">No results found for "${searchTerm}"</div>
+                        <p>Try a different search term or use demo data.</p>
+                        <button onclick="loadDemoTerminology()" class="btn btn-secondary" style="font-size: 12px; margin-top: 10px;">
+                            Load Demo Terminology
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f0f8ff; border-radius: 3px;">
+                    <strong>Search Results:</strong> "${searchTerm}"
+                    <span style="float: right; font-size: 12px;">
+                        ${results.length} results • ${source}
+                    </span>
+                </div>
+                <ul style="list-style-type: none; padding-left: 0;">
+            `;
+            
+            results.forEach((item, index) => {
+                html += `
+                    <li style="margin-bottom: 8px;">
+                        <div class="search-result-item" 
+                             onclick="addParameterCard(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                             style="padding: 12px; background: white; border: 1px solid #d4d0c8; border-radius: 3px; cursor: pointer; transition: all 0.2s;"
+                             onmouseover="this.style.backgroundColor='#e8f0ff'; this.style.borderColor='#a0c0ff';"
+                             onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#d4d0c8';">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex-grow: 1;">
+                                    <strong style="color: #0a3b9c; font-size: 14px;">${item.name}</strong>
+                                    <div style="font-family: 'Courier New', monospace; font-size: 12px; color: #666; margin-top: 3px;">
+                                        ${item.code}
+                                    </div>
+                                </div>
+                                <span style="background: #4CAF50; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; white-space: nowrap;">
+                                    ADD
+                                </span>
+                            </div>
+                            
+                            ${item.description ? `<div style="font-size: 12px; color: #666; margin-top: 8px;">${item.description}</div>` : ''}
+                            
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #888;">
+                                <span>${item.system}</span>
+                                <span>Click to add to board</span>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            
+            // Add search tips
+            html += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #d4d0c8;">
+                    <div style="font-weight: bold; margin-bottom: 8px; font-size: 12px;">Search Tips:</div>
+                    <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 15px;">
+                        <li>Use specific terms like "Type 2 diabetes" not just "diabetes"</li>
+                        <li>Try both common names and medical terms</li>
+                        <li>Switch to "Demo Mode" if live APIs are slow</li>
+                        <li>Click any result to add it to your specification board</li>
+                    </ul>
+                </div>
+            `;
+            
+            treeContainer.innerHTML = html;
+        }
+        
+        // Also keep the Enter key functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('treeSearch');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchTerminology();
+                    }
+                });
+            }
+        });
+        
+        // Make functions globally available
+        window.searchTerminology = searchTerminology;
+        window.quickSearch = quickSearch;
+        window.searchDemoTerminology = searchDemoTerminology;
         
         // Add a simple test function to check if buttons work
         function testSpecTool() {
@@ -3665,6 +3902,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
