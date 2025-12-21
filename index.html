@@ -862,6 +862,10 @@
                                     <div class="scenario-desc">Admission rates by reason and location</div>
                                 </div>
                             </div>
+                            <!-- Add this button anywhere in your EMR tab -->
+                            <button onclick="debugDatabase()" style="padding: 5px 10px; background: #ff9900; color: black; border: none; border-radius: 3px; margin: 5px;">
+                                🔧 DEBUG DATABASE
+                            </button>
                         </div>
 
                         <!-- Add this after the Common Scenarios section -->
@@ -1062,6 +1066,70 @@
                 // Create demo database
                 createDemoDatabase();
             }
+        }
+
+        // Add this function to your JavaScript
+        function debugDatabase() {
+            console.log("=== DATABASE DEBUG ===");
+            
+            // Check basic setup
+            console.log("1. Database object exists:", !!db);
+            console.log("2. Database loaded flag:", databaseLoaded);
+            console.log("3. Window.SQL available:", !!window.SQL);
+            
+            if (!db) {
+                alert("❌ Database object is null/undefined");
+                return;
+            }
+            
+            try {
+                // Test 1: List all tables
+                console.log("4. Testing: Listing tables...");
+                const tablesResult = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+                console.log("   Tables found:", tablesResult[0]?.values?.length || 0);
+                
+                if (tablesResult.length > 0 && tablesResult[0].values.length > 0) {
+                    console.log("   Table names:", tablesResult[0].values.map(t => t[0]));
+                    
+                    // Test 2: Try to query first table
+                    const firstTable = tablesResult[0].values[0][0];
+                    console.log("5. Testing: Querying first table (" + firstTable + ")...");
+                    
+                    const dataResult = db.exec(`SELECT * FROM ${firstTable} LIMIT 3`);
+                    console.log("   Query successful:", dataResult.length > 0);
+                    
+                    if (dataResult.length > 0) {
+                        console.log("   Columns:", dataResult[0].columns);
+                        console.log("   Sample data (first row):", dataResult[0].values[0]);
+                        
+                        // Show in alert
+                        let alertMsg = `✅ DATABASE WORKS!\n\n`;
+                        alertMsg += `Tables: ${tablesResult[0].values.length}\n`;
+                        alertMsg += `First table: ${firstTable}\n`;
+                        alertMsg += `Columns: ${dataResult[0].columns.length}\n\n`;
+                        alertMsg += `Click "patients" in table list to test preview.`;
+                        
+                        alert(alertMsg);
+                        
+                        // Try to trigger preview
+                        setTimeout(() => {
+                            console.log("6. Attempting to trigger preview...");
+                            previewTableData(firstTable);
+                        }, 100);
+                        
+                    } else {
+                        alert("❌ Query returned no data");
+                    }
+                } else {
+                    alert("❌ No tables found in database");
+                }
+                
+            } catch (error) {
+                console.error("Database error:", error);
+                alert("❌ DATABASE ERROR:\n" + error.message + "\n\nCheck console for details.");
+            }
+            
+            console.log("=== DEBUG COMPLETE ===");
         }
 
         // Create demo database if real one fails
@@ -2119,3 +2187,4 @@ LIMIT 50`
 </body>
 
 </html>
+
