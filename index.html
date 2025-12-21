@@ -1254,14 +1254,28 @@
         }
 
         // Preview table data
+        // Preview table data - FIXED VERSION
         function previewTableData(tableName) {
+            console.log('Preview clicked for table:', tableName); // Debug log
+            
             try {
                 if (!db) {
                     alert('Database not loaded.');
                     return;
                 }
                 
+                const resultsDiv = document.getElementById('query-results');
+                if (!resultsDiv) {
+                    console.error('Results div not found');
+                    return;
+                }
+                
+                // Show loading
+                resultsDiv.innerHTML = `<div style="color: blue; padding: 10px;">Loading ${tableName}...</div>`;
+                
+                // Execute query
                 const result = db.exec(`SELECT * FROM ${tableName} LIMIT 20`);
+                
                 if (!result.length) {
                     displayQueryResults({ columns: [], values: [] }, `Table: ${tableName} (empty)`);
                     return;
@@ -1270,12 +1284,48 @@
                 const columns = result[0].columns;
                 const values = result[0].values;
                 
+                console.log(`Loaded ${values.length} rows from ${tableName}`); // Debug
+                
                 displayQueryResults({ columns, values }, `Table: ${tableName} (first 20 rows)`);
                 
             } catch (error) {
-                alert(`Error loading table ${tableName}: ${error.message}`);
+                console.error(`Error loading table ${tableName}:`, error);
+                
+                // Show error in results div
+                const resultsDiv = document.getElementById('query-results');
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `
+                        <div style="color: red; font-weight: bold;">Error loading ${tableName}:</div>
+                        <div style="color: #666; margin: 10px 0; padding: 10px; background: #fff0f0; border: 1px solid red;">
+                            ${error.message}
+                        </div>
+                        <div style="margin-top: 10px; color: #666;">
+                            SQL: SELECT * FROM ${tableName} LIMIT 20
+                        </div>
+                    `;
+                }
             }
         }
+
+        // Test function - add to your JavaScript
+        function testTablePreview() {
+            if (!db) {
+                alert('Database not loaded');
+                return;
+            }
+            
+            // Get first table name
+            const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' LIMIT 1");
+            if (result.length > 0 && result[0].values.length > 0) {
+                const firstTable = result[0].values[0][0];
+                console.log('Testing preview for table:', firstTable);
+                previewTableData(firstTable);
+            } else {
+                alert('No tables found in database');
+            }
+        }
+        
+        // Call this from browser console: testTablePreview()
 
         // Run SQL query
         function runSQLQuery() {
@@ -2067,4 +2117,5 @@ LIMIT 50`
         }
     </script>
 </body>
+
 </html>
