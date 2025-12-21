@@ -1306,25 +1306,33 @@
                     const tableName = table[0];
                     const tableItem = document.createElement('div');
                     tableItem.className = 'table-item';
-                    // In loadTableList() function:
-                tableItem.addEventListener('click', function(e) {
-                    console.log('DEBUG: Table clicked:', tableName);
+                    tableItem.innerHTML = `
+                        <strong>${tableName}</strong><br>
+                        <small>Click to preview</small>
+                    `;
                     
-                    // Remove selection from all tables
-                    document.querySelectorAll('.table-item').forEach(item => {
-                        item.classList.remove('selected');
+                    tableItem.addEventListener('click', function(e) {
+                        console.log('DEBUG: Table clicked:', tableName);
+                        
+                        // Remove selection from all tables
+                        document.querySelectorAll('.table-item').forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                        
+                        // Add selection to clicked table
+                        this.classList.add('selected');
+                        
+                        // Call preview function
+                        previewTableData(tableName);
                     });
                     
-                    // Add selection to clicked table
-                    this.classList.add('selected');
-                    
-                    // Call preview function
-                    previewTableData(tableName);
-                });
+                    tableList.appendChild(tableItem);  // <-- CRITICAL: Add to DOM
+                });  // <-- CRITICAL: Close forEach
                 
             } catch (error) {
                 console.error('Error loading table list:', error);
             }
+        }  // <-- Close loadTableList function
 
         // Preview table data
         // Preview table data - FIXED VERSION
@@ -2270,6 +2278,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
