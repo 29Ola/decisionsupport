@@ -768,8 +768,22 @@
                                 <h3>Purpose & Agreements</h3>
                                 
                                 <div class="form-group">
-                                    <label for="classification">
+                                    <label for="defined-purpose">
                                         Defined Purpose:
+                                        <span class="help-bubble" onclick="showPurposeHelp()" 
+                                              style="cursor: help; 
+                                                     background: #0a3b9c; 
+                                                     color: white; 
+                                                     width: 18px; 
+                                                     height: 18px; 
+                                                     border-radius: 50%; 
+                                                     display: inline-flex; 
+                                                     align-items: center; 
+                                                     justify-content: center; 
+                                                     margin-left: 8px; 
+                                                     font-weight: bold;
+                                                     font-size: 12px;
+                                                     vertical-align: middle;">?</span>
                                     </label>
                                     <textarea id="defined-purpose" class="form-control textarea-medium" rows="5" required></textarea>
                                     <div class="validation-message" id="purpose-error"></div>
@@ -4604,6 +4618,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
