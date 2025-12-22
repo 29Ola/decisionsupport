@@ -3788,7 +3788,7 @@ LIMIT 50`
         function validateForm() {
             clearValidationErrors();
             let hasErrors = false;
-
+        
             // Organization check
             const dhss = document.getElementById('dhss')?.checked;
             const hssa = document.getElementById('hssa')?.checked;
@@ -3797,86 +3797,8 @@ LIMIT 50`
                 showValidationError('org-error', 'Compliance Rule: You must select DHSS, HSSA, or Other.');
                 hasErrors = true;
             }
-
-            // Request number
-            const requestNumber = document.getElementById('request-number')?.value.trim();
-            if (!requestNumber) {
-                showValidationError('reqnum-error', 'Compliance Rule: RequestNumber cannot be blank.');
-                document.getElementById('request-number')?.classList.add('validation-error');
-                hasErrors = true;
-            }
-
-            // Request history
-            const requestHistory = document.querySelector('input[name="request-history"]:checked');
-            if (!requestHistory) {
-                showValidationError('history-error', 'Compliance Rule: You must select First Original or Recurring.');
-                hasErrors = true;
-            }
-
-            // Legislative Authority
-            const legislative = document.querySelector('input[name="legislative"]:checked');
-            if (!legislative) {
-                showValidationError('legislative-error', 'Compliance Rule: You must select Yes or No for Legislative Authority.');
-                hasErrors = true;
-            }
-
-            // If Legislative Authority is Yes, description required
-            if (legislative && legislative.value === "yes") {
-                const legDesc = document.getElementById('legislative-desc')?.value.trim();
-                if (!legDesc) {
-                    showValidationError('legdesc-error', 'Compliance Rule: If Legislative Authority is Yes, you must describe it.');
-                    document.getElementById('legislative-desc')?.classList.add('validation-error');
-                    hasErrors = true;
-                }
-            }
-
-            // Statutory Owner
-            const statutory = document.querySelector('input[name="statutory"]:checked');
-            if (!statutory) {
-                showValidationError('statutory-error', 'Compliance Rule: You must select Yes or No for Statutory Owner.');
-                hasErrors = true;
-            }
-
-            // Agreement Requirement
-            const agreement = document.querySelector('input[name="agreement"]:checked');
-            if (!agreement) {
-                showValidationError('agreement-error', 'Compliance Rule: You must select Yes or No for Agreement Requirement.');
-                hasErrors = true;
-            }
-
-            // Data Matching
-            const matching = document.querySelector('input[name="matching"]:checked');
-            if (!matching) {
-                showValidationError('matching-error', 'Compliance Rule: You must select Yes or No for Data Matching.');
-                hasErrors = true;
-            }
-
-            // Meeting Requirement
-            const meeting = document.querySelector('input[name="meeting"]:checked');
-            if (!meeting) {
-                showValidationError('meeting-error', 'Compliance Rule: You must select Yes or No for Meeting Requirement.');
-                hasErrors = true;
-            }
-
-            // Location
-            const region = document.getElementById('region')?.value;
-            const district = document.getElementById('district')?.value;
-            if (!region || !district) {
-                showValidationError('location-error', 'Compliance Rule: You must select both Region and District for Location.');
-                if (!region) document.getElementById('region')?.classList.add('validation-error');
-                if (!district) document.getElementById('district')?.classList.add('validation-error');
-                hasErrors = true;
-            }
-
-            // Defined Purpose
-            const definedPurpose = document.getElementById('defined-purpose')?.value.trim();
-            if (!definedPurpose) {
-                showValidationError('purpose-error', 'Compliance Rule: You must enter a Defined Purpose.');
-                document.getElementById('defined-purpose')?.classList.add('validation-error');
-                hasErrors = true;
-            }
-            
-            // Request Number Validation - ONLY ONCE!
+        
+            // Request number - ONLY ONCE!
             const requestNumber = document.getElementById('request-number')?.value.trim();
             const requestNumberError = document.getElementById('reqnum-error');
             
@@ -3886,21 +3808,91 @@ LIMIT 50`
                 document.getElementById('request-number')?.classList.add('validation-error');
                 hasErrors = true;
             } 
-            // Check 2: Is format valid?
+            // Check 2: Is format valid? (Add this check)
             else if (!isValidRequestNumber(requestNumber)) {
                 showValidationError('reqnum-error', 'Invalid format. Must be like: IM-703546 (letters, dash, numbers)');
                 document.getElementById('request-number')?.classList.add('validation-error');
                 hasErrors = true;
             }
-            // Check 3: Is it a duplicate? (Only check if it's not empty and format is valid)
+            // Check 3: Is it a duplicate?
             else if (isDuplicateRequestNumber(requestNumber)) {
                 showValidationError('reqnum-error', 'This Request Number already exists. Use a unique number.');
                 document.getElementById('request-number')?.classList.add('validation-error');
                 hasErrors = true;
             }
-            
+        
+            // Request history
+            const requestHistory = document.querySelector('input[name="request-history"]:checked');
+            if (!requestHistory) {
+                showValidationError('history-error', 'Compliance Rule: You must select First Original or Recurring.');
+                hasErrors = true;
+            }
+        
+            // Legislative Authority
+            const legislative = document.querySelector('input[name="legislative"]:checked');
+            if (!legislative) {
+                showValidationError('legislative-error', 'Compliance Rule: You must select Yes or No for Legislative Authority.');
+                hasErrors = true;
+            }
+        
+            // If Legislative Authority is Yes, description required
+            if (legislative && legislative.value === "yes") {
+                const legDesc = document.getElementById('legislative-desc')?.value.trim();
+                if (!legDesc) {
+                    showValidationError('legdesc-error', 'Compliance Rule: If Legislative Authority is Yes, you must describe it.');
+                    document.getElementById('legislative-desc')?.classList.add('validation-error');
+                    hasErrors = true;
+                }
+            }
+        
+            // Statutory Owner
+            const statutory = document.querySelector('input[name="statutory"]:checked');
+            if (!statutory) {
+                showValidationError('statutory-error', 'Compliance Rule: You must select Yes or No for Statutory Owner.');
+                hasErrors = true;
+            }
+        
+            // Agreement Requirement
+            const agreement = document.querySelector('input[name="agreement"]:checked');
+            if (!agreement) {
+                showValidationError('agreement-error', 'Compliance Rule: You must select Yes or No for Agreement Requirement.');
+                hasErrors = true;
+            }
+        
+            // Data Matching
+            const matching = document.querySelector('input[name="matching"]:checked');
+            if (!matching) {
+                showValidationError('matching-error', 'Compliance Rule: You must select Yes or No for Data Matching.');
+                hasErrors = true;
+            }
+        
+            // Meeting Requirement
+            const meeting = document.querySelector('input[name="meeting"]:checked');
+            if (!meeting) {
+                showValidationError('meeting-error', 'Compliance Rule: You must select Yes or No for Meeting Requirement.');
+                hasErrors = true;
+            }
+        
+            // Location
+            const region = document.getElementById('region')?.value;
+            const district = document.getElementById('district')?.value;
+            if (!region || !district) {
+                showValidationError('location-error', 'Compliance Rule: You must select both Region and District for Location.');
+                if (!region) document.getElementById('region')?.classList.add('validation-error');
+                if (!district) document.getElementById('district')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+        
+            // Defined Purpose
+            const definedPurpose = document.getElementById('defined-purpose')?.value.trim();
+            if (!definedPurpose) {
+                showValidationError('purpose-error', 'Compliance Rule: You must enter a Defined Purpose.');
+                document.getElementById('defined-purpose')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+        
             return !hasErrors;
-
+        }
         // NEW: Request Number Format Validation
         function isValidRequestNumber(requestNum) {
             // Pattern: letters (2-4), dash, numbers (4-6)
@@ -4417,6 +4409,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
