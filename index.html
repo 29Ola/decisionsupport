@@ -611,6 +611,131 @@
             background: #3a7afc;
             transform: scale(1.1);
         }
+
+        /* Intelligence Accordion Styles */
+        .intelligence-container {
+            padding: 20px;
+            background: #f8faff;
+            border: 1px solid #a0c0ff;
+            border-radius: 3px;
+        }
+        
+        .intelligence-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #d4d0c8;
+            border-radius: 3px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0a3b9c;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .intelligence-section {
+            background: white;
+            border: 1px solid #d4d0c8;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .intelligence-section h4 {
+            margin-top: 0;
+            color: #0a3b9c;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .request-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .request-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .request-item:hover {
+            background: #f0f8ff;
+        }
+        
+        .request-id {
+            font-weight: bold;
+            color: #0a3b9c;
+        }
+        
+        .request-purpose {
+            flex-grow: 1;
+            margin: 0 15px;
+            font-size: 13px;
+        }
+        
+        .request-match {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .recommendation-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            background: #fff8e1;
+            border-left: 4px solid #FF9800;
+            margin-bottom: 8px;
+            border-radius: 2px;
+        }
+        
+        .rec-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .rec-content {
+            flex-grow: 1;
+            font-size: 13px;
+        }
+        
+        .intelligence-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-style: italic;
+        }
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -978,6 +1103,79 @@
                             </div>
                         </div>
                     </div>
+
+                    !-- ================= NEW: REQUEST INTELLIGENCE ACCORDION ================= -->
+                    <div class="accordion">
+                        <div class="accordion-header" data-accordion="request-intelligence">
+                            <span>💡 Request Intelligence & Recommendations</span>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content" id="accordion-request-intelligence">
+                            <!-- Intelligence Panel Content Goes Here -->
+                            <div class="intelligence-container">
+                                
+                                <!-- Row 1: Quick Stats -->
+                                <div class="intelligence-stats">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="similar-count">0</div>
+                                        <div class="stat-label">Similar Requests</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="confidence-score">0%</div>
+                                        <div class="stat-label">Match Confidence</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="avg-days">--</div>
+                                        <div class="stat-label">Avg. Approval Days</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <button onclick="analyzeCurrentRequest()" class="btn btn-primary">
+                                            🔍 Analyze Request
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Row 2: Similar Requests -->
+                                <div class="intelligence-section">
+                                    <h4>📚 Similar Historical Requests</h4>
+                                    <div id="similar-requests-list" class="request-list">
+                                        <div class="empty-state">
+                                            Start typing in the form above to see similar requests...
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Row 3: Recommendations -->
+                                <div class="intelligence-section">
+                                    <h4>💡 Smart Recommendations</h4>
+                                    <div id="recommendations-list">
+                                        <div class="recommendation-card">
+                                            <div class="rec-icon">⚖️</div>
+                                            <div class="rec-content">
+                                                <strong>Legislative Authority:</strong>
+                                                <span>Based on similar requests, consider: Public Health Act Section 12</span>
+                                            </div>
+                                        </div>
+                                        <!-- More recommendations will appear here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Row 4: Quick Actions -->
+                                <div class="intelligence-actions">
+                                    <button onclick="showComparisonView()" class="btn btn-secondary">
+                                        🔄 Compare with Precedents
+                                    </button>
+                                    <button onclick="showClusterAnalysis()" class="btn btn-secondary">
+                                        🌍 View Cluster Analysis
+                                    </button>
+                                    <button onclick="generateRecommendationReport()" class="btn btn-primary">
+                                        📥 Download Intelligence Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     
                     <!-- ================= ACCORDION 2: REQUEST RESULTS TABLE ================= -->
                     <div class="accordion">
@@ -1197,10 +1395,364 @@
                 </div>
 
                 <!-- DASHBOARD TAB -->
+                <!-- DASHBOARD TAB -->
                 <div id="dashboard-tab" class="tab-pane">
-                    <div style="padding: 20px; text-align: center;">
-                        <h2>Dashboard & Analytics</h2>
-                        <p>Coming Soon: Visualizations, charts, and analytics for tracking requests.</p>
+                    <!-- Dashboard Header -->
+                    <div class="dashboard-header" style="background: linear-gradient(to right, #0a3b9c, #1e88e5); color: white; padding: 20px; margin: -20px -20px 20px -20px;">
+                        <h1 style="margin: 0; display: flex; align-items: center; gap: 15px;">
+                            <span style="font-size: 32px;">📈</span>
+                            NWT Data Request Intelligence Dashboard
+                        </h1>
+                        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 14px;">
+                            Analyzing <span id="total-requests">1,247</span> historical requests across 5 NWT health regions
+                        </p>
+                    </div>
+                    
+                    <!-- Dashboard Controls -->
+                    <div style="padding: 15px 20px; background: #f5f5f5; border: 1px solid #d4d0c8; border-radius: 3px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                        <div style="display: flex; gap: 15px;">
+                            <div>
+                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Time Period:</label>
+                                <select id="time-period" class="form-control" style="width: 150px;" onchange="updateDashboard()">
+                                    <option value="12">Last 12 months</option>
+                                    <option value="36">Last 3 years</option>
+                                    <option value="all">All time</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Region:</label>
+                                <select id="region-filter" class="form-control" style="width: 180px;" onchange="updateDashboard()">
+                                    <option value="all">All NWT Regions</option>
+                                    <option value="beaufort">Beaufort Delta</option>
+                                    <option value="dehcho">Dehcho</option>
+                                    <option value="sahtu">Sahtu</option>
+                                    <option value="southslave">South Slave</option>
+                                    <option value="yellowknife">Yellowknife</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Organization:</label>
+                                <select id="org-filter" class="form-control" style="width: 120px;" onchange="updateDashboard()">
+                                    <option value="all">All</option>
+                                    <option value="DHSS">DHSS</option>
+                                    <option value="HSSA">HSSA</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="flex-grow: 1; display: flex; justify-content: flex-end; gap: 10px;">
+                            <button onclick="exportDashboardData()" class="btn btn-primary">
+                                📥 Export Dashboard Data
+                            </button>
+                            <button onclick="refreshDashboard()" class="btn btn-secondary">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Metrics Row -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="metric-value" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">1,247</div>
+                            <div class="metric-label" style="font-size: 14px; color: #666;">Total Requests</div>
+                            <div class="metric-trend" style="font-size: 12px; color: #4CAF50; margin-top: 5px;">↑ 12% from last year</div>
+                        </div>
+                        
+                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="metric-value" style="font-size: 32px; font-weight: bold; color: #4CAF50; margin-bottom: 5px;">87%</div>
+                            <div class="metric-label" style="font-size: 14px; color: #666;">Approval Rate</div>
+                            <div class="metric-trend" style="font-size: 12px; color: #4CAF50; margin-top: 5px;">↑ 3% from last quarter</div>
+                        </div>
+                        
+                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="metric-value" style="font-size: 32px; font-weight: bold; color: #2196F3; margin-bottom: 5px;">14.2</div>
+                            <div class="metric-label" style="font-size: 14px; color: #666;">Avg. Days to Approve</div>
+                            <div class="metric-trend" style="font-size: 12px; color: #f44336; margin-top: 5px;">↑ 1.5 days from avg</div>
+                        </div>
+                        
+                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="metric-value" style="font-size: 32px; font-weight: bold; color: #9c27b0; margin-bottom: 5px">5</div>
+                            <div class="metric-label" style="font-size: 14px; color: #666;">Major Clusters</div>
+                            <div class="metric-trend" style="font-size: 12px; color: #2196F3; margin-top: 5px;">2 new clusters this year</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Dashboard Content -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        
+                        <!-- Left Column: Cluster Visualization -->
+                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <span>🌍 Request Clusters Analysis</span>
+                                <button onclick="showClusterDetails()" class="btn btn-secondary" style="font-size: 12px;">
+                                    View Cluster Details
+                                </button>
+                            </h3>
+                            
+                            <!-- Cluster Visualization -->
+                            <div style="height: 300px; display: flex; justify-content: center; align-items: center; background: #f8f8f8; border-radius: 3px; margin-bottom: 20px; position: relative;">
+                                <!-- Interactive Cluster Map -->
+                                <div class="cluster-bubble" onclick="focusCluster('chronic')" 
+                                     style="position: absolute; left: 30%; top: 30%; width: 120px; height: 120px; background: #e3f2fd; border: 3px solid #2196F3; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(33,150,243,0.3);">
+                                    <div style="font-weight: bold; color: #0a3b9c;">Chronic Disease</div>
+                                    <div style="font-size: 24px; font-weight: bold;">142</div>
+                                    <div style="font-size: 11px;">requests</div>
+                                </div>
+                                
+                                <div class="cluster-bubble" onclick="focusCluster('communicable')"
+                                     style="position: absolute; left: 60%; top: 20%; width: 90px; height: 90px; background: #f3e5f5; border: 3px solid #9c27b0; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(156,39,176,0.3);">
+                                    <div style="font-weight: bold; color: #7b1fa2;">Communicable</div>
+                                    <div style="font-size: 20px; font-weight: bold;">89</div>
+                                </div>
+                                
+                                <div class="cluster-bubble" onclick="focusCluster('utilization')"
+                                     style="position: absolute; left: 20%; top: 60%; width: 140px; height: 140px; background: #e8f5e9; border: 3px solid #4CAF50; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(76,175,80,0.3);">
+                                    <div style="font-weight: bold; color: #2e7d32;">Service Utilization</div>
+                                    <div style="font-size: 28px; font-weight: bold;">203</div>
+                                    <div style="font-size: 12px;">requests</div>
+                                </div>
+                                
+                                <div class="cluster-bubble" onclick="focusCluster('medication')"
+                                     style="position: absolute; left: 65%; top: 55%; width: 80px; height: 80px; background: #fff3e0; border: 3px solid #FF9800; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(255,152,0,0.3);">
+                                    <div style="font-weight: bold; color: #f57c00;">Medication</div>
+                                    <div style="font-size: 18px; font-weight: bold;">76</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cluster Quick Stats -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                                <div class="cluster-mini-card" onclick="focusCluster('chronic')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h4 style="margin: 0; color: #2196F3; font-size: 14px;">Chronic Disease</h4>
+                                        <span style="background: #e3f2fd; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;">142</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                        Diabetes, hypertension, CKD, COPD
+                                    </div>
+                                    <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 8px;">
+                                        <div style="width: 65%; height: 100%; background: #2196F3; border-radius: 2px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="cluster-mini-card" onclick="focusCluster('communicable')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h4 style="margin: 0; color: #9c27b0; font-size: 14px;">Communicable</h4>
+                                        <span style="background: #f3e5f5; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;">89</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                        TB, STI, COVID, influenza
+                                    </div>
+                                    <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 8px;">
+                                        <div style="width: 42%; height: 100%; background: #9c27b0; border-radius: 2px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="cluster-mini-card" onclick="focusCluster('utilization')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h4 style="margin: 0; color: #4CAF50; font-size: 14px;">Service Utilization</h4>
+                                        <span style="background: #e8f5e9; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;">203</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                        ER visits, admissions, referrals
+                                    </div>
+                                    <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 8px;">
+                                        <div style="width: 82%; height: 100%; background: #4CAF50; border-radius: 2px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="cluster-mini-card" onclick="focusCluster('medication')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h4 style="margin: 0; color: #FF9800; font-size: 14px;">Medication</h4>
+                                        <span style="background: #fff3e0; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;">76</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                                        Opioids, antibiotics, psychotropics
+                                    </div>
+                                    <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 8px;">
+                                        <div style="width: 31%; height: 100%; background: #FF9800; border-radius: 2px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Regional Analysis -->
+                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                🗺️ NWT Regional Analysis
+                            </h3>
+                            
+                            <div style="margin-top: 15px;">
+                                <div class="region-item" onclick="focusRegion('yellowknife')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                        <div>
+                                            <strong style="color: #0a3b9c;">Yellowknife Region</strong>
+                                            <div style="font-size: 11px; color: #666;">Highest volume, urban focus</div>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">487</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="region-item" onclick="focusRegion('southslave')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                        <div>
+                                            <strong style="color: #0a3b9c;">South Slave Region</strong>
+                                            <div style="font-size: 11px; color: #666;">Rural communities, seasonal patterns</div>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">256</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="region-item" onclick="focusRegion('dehcho')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                        <div>
+                                            <strong style="color: #0a3b9c;">Dehcho Region</strong>
+                                            <div style="font-size: 11px; color: #666;">Maternal-child health focus</div>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">189</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="region-item" onclick="focusRegion('sahtu')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                        <div>
+                                            <strong style="color: #0a3b9c;">Sahtu Region</strong>
+                                            <div style="font-size: 11px; color: #666;">Traditional medicine integration</div>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">154</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="region-item" onclick="focusRegion('beaufort')" style="cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                                        <div>
+                                            <strong style="color: #0a3b9c;">Beaufort Delta Region</strong>
+                                            <div style="font-size: 11px; color: #666;">Remote communities, translator needs</div>
+                                        </div>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">161</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Regional Insights -->
+                            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 3px;">
+                                <h5 style="margin-top: 0; color: #2e7d32;">📌 Regional Insights</h5>
+                                <ul style="font-size: 12px; margin: 10px 0 0 15px; padding: 0;">
+                                    <li><strong>Beaufort Delta:</strong> Highest per-capita request rate</li>
+                                    <li><strong>Sahtu:</strong> Most requests for communicable disease data</li>
+                                    <li><strong>Dehcho:</strong> Strong focus on maternal-child health</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Row: Trends and Top Requestors -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        
+                        <!-- Trends Over Time -->
+                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                📅 Request Trends (Last 12 Months)
+                            </h3>
+                            
+                            <!-- Simple Bar Chart -->
+                            <div style="height: 200px; display: flex; align-items: flex-end; gap: 20px; margin-top: 20px; padding: 0 20px;">
+                                <div style="text-align: center; flex: 1;">
+                                    <div style="height: 150px; display: flex; align-items: flex-end;">
+                                        <div style="width: 30px; background: #2196F3; margin: 0 auto;"></div>
+                                    </div>
+                                    <div style="font-size: 11px; margin-top: 5px;">Jan</div>
+                                    <div style="font-size: 10px; color: #666;">42</div>
+                                </div>
+                                <!-- More months... -->
+                                <div style="text-align: center; flex: 1;">
+                                    <div style="height: 150px; display: flex; align-items: flex-end;">
+                                        <div style="width: 30px; background: #4CAF50; margin: 0 auto; height: 80%;"></div>
+                                    </div>
+                                    <div style="font-size: 11px; margin-top: 5px;">Dec</div>
+                                    <div style="font-size: 10px; color: #666;">78</div>
+                                </div>
+                            </div>
+                            
+                            <div style="font-size: 12px; color: #666; margin-top: 15px; text-align: center;">
+                                ↑ 45% increase in Q4 (Annual reporting season)
+                            </div>
+                        </div>
+                        
+                        <!-- Top Requestors -->
+                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                👥 Top Requesting Units
+                            </h3>
+                            
+                            <div style="margin-top: 15px;">
+                                <div class="requestor-item">
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                        <span>Public Health Surveillance</span>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 2px 10px; border-radius: 10px; font-weight: bold;">312</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="requestor-item">
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                        <span>Health Analytics Unit</span>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 2px 10px; border-radius: 10px; font-weight: bold;">287</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="requestor-item">
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                        <span>Regional Health Authorities</span>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 2px 10px; border-radius: 10px; font-weight: bold;">201</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="requestor-item">
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                        <span>Medical Affairs</span>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 2px 10px; border-radius: 10px; font-weight: bold;">156</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="requestor-item">
+                                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                                        <span>Quality Improvement</span>
+                                        <span style="background: #e3f2fd; color: #0a3b9c; padding: 2px 10px; border-radius: 10px; font-weight: bold;">89</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 20px; padding: 15px; background: #fff3e0; border-radius: 3px;">
+                                <h5 style="margin-top: 0; color: #f57c00;">💡 Requestor Insights</h5>
+                                <ul style="font-size: 12px; margin: 10px 0 0 15px; padding: 0;">
+                                    <li><strong>Public Health:</strong> Most requests for surveillance data</li>
+                                    <li><strong>Regional HAs:</strong> Focus on service delivery metrics</li>
+                                    <li><strong>Medical Affairs:</strong> Professional licensing & standards</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions Footer -->
+                    <div style="margin-top: 20px; padding: 20px; background: #f8f8f8; border: 1px solid #d4d0c8; border-radius: 3px;">
+                        <h4 style="margin-top: 0; color: #0a3b9c;">⚡ Quick Actions</h4>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button onclick="generateAnnualReport()" class="btn btn-primary">
+                                📋 Generate Annual Report
+                            </button>
+                            <button onclick="identifyDataGaps()" class="btn btn-secondary">
+                                🔍 Identify Data Gaps
+                            </button>
+                            <button onclick="viewComplianceTrends()" class="btn btn-secondary">
+                                ⚖️ Compliance Trends Report
+                            </button>
+                            <button onclick="exportDashboardData()" class="btn btn-secondary">
+                                📊 Export to Excel
+                            </button>
+                            <button onclick="showAdvancedAnalytics()" class="btn btn-secondary">
+                                📈 Advanced Analytics
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1793,6 +2345,18 @@
                 }
             }
         }
+
+        // Auto-open intelligence accordion when user starts typing purpose
+        document.getElementById('defined-purpose').addEventListener('input', function(e) {
+            if (e.target.value.length > 15) {
+                // Open the intelligence accordion
+                const intelAccordion = document.querySelector('[data-accordion="request-intelligence"]');
+                if (intelAccordion) {
+                    intelAccordion.click(); // Simulate click to open
+                    analyzeRequest(e.target.value);
+                }
+            }
+        });
         
         // Configuration
         let db = null;
@@ -4650,6 +5214,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
