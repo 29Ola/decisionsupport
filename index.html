@@ -4496,13 +4496,6 @@ LIMIT 50`
                 districtSelect.disabled = true;
                 districtSelect.innerHTML = '<option value="">Select District</option>';
             }
-
-            // NEW FIELDS - ADD THESE:
-            const dataTypeSpec = document.getElementById('data-type-spec');
-            const dataRequestFrequency = document.getElementById('data-request-frequency');
-            
-            if (dataTypeSpec) dataTypeSpec.value = '';
-            if (dataRequestFrequency) dataRequestFrequency.value = '';
             
             // Other
             const definedPurpose = document.getElementById('defined-purpose');
@@ -4514,6 +4507,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
