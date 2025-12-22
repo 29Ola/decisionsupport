@@ -3875,31 +3875,31 @@ LIMIT 50`
                 document.getElementById('defined-purpose')?.classList.add('validation-error');
                 hasErrors = true;
             }
-
-            const requestNumber = document.getElementById('request-number')?.value.trim();
-    
-            if (requestNumber && isDuplicateRequestNumber(requestNumber)) {
-                showValidationError('reqnum-error', 'This Request Number already exists. Use a unique number.');
-                document.getElementById('request-number')?.classList.add('validation-error');
-                hasErrors = true;
-            }
-
-            // NEW: Request Number Validation
+            
+            // Request Number Validation - ONLY ONCE!
             const requestNumber = document.getElementById('request-number')?.value.trim();
             const requestNumberError = document.getElementById('reqnum-error');
             
+            // Check 1: Is it empty?
             if (!requestNumber) {
                 showValidationError('reqnum-error', 'Compliance Rule: Request Number cannot be blank.');
                 document.getElementById('request-number')?.classList.add('validation-error');
                 hasErrors = true;
-            } else if (!isValidRequestNumber(requestNumber)) {
+            } 
+            // Check 2: Is format valid?
+            else if (!isValidRequestNumber(requestNumber)) {
                 showValidationError('reqnum-error', 'Invalid format. Must be like: IM-703546 (letters, dash, numbers)');
                 document.getElementById('request-number')?.classList.add('validation-error');
                 hasErrors = true;
             }
-
+            // Check 3: Is it a duplicate? (Only check if it's not empty and format is valid)
+            else if (isDuplicateRequestNumber(requestNumber)) {
+                showValidationError('reqnum-error', 'This Request Number already exists. Use a unique number.');
+                document.getElementById('request-number')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+            
             return !hasErrors;
-        }
 
         // NEW: Request Number Format Validation
         function isValidRequestNumber(requestNum) {
@@ -4417,6 +4417,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
