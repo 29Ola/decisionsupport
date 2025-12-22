@@ -589,6 +589,28 @@
             background-color: #ffffff;
             border: 1px solid #245edc;
         }
+        
+        /* Help bubble styling */
+        .help-bubble {
+            cursor: help;
+            background: #0a3b9c;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+        
+        .help-bubble:hover {
+            background: #3a7afc;
+            transform: scale(1.1);
+        }
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -854,44 +876,63 @@
                                     <label for="meeting-desc">Meeting Details:</label>
                                     <input type="text" id="meeting-desc" class="form-control">
                                 </div>
-                                <!-- NEW: Data Type Specifications Section -->
-                                <div class="form-group data-guidance-section">
-                                    <label for="data-type-specs">
-                                        Data Type Specifications:
-                                        <span class="tooltip-container">
-                                            <span class="tooltip-icon">?</span>
-                                            <span class="tooltip-text">
-                                                <strong>What type of data should be requested?</strong><br><br>
-                                                <strong>HIA Compliance:</strong> Restrict to absolute minimum data required.<br><br>
-                                                <strong>Rules:</strong><br>
-                                                • No "Just in Case" Data<br>
-                                                • Parameters vs. Elements distinction<br>
-                                                • Finalized List only (no "options")<br>
-                                                • Confirm with IM Analyst before submission
-                                            </span>
-                                        </span>
-                                    </label>
-                                    <textarea id="data-type-specs" class="form-control textarea-small" rows="4" 
-                                              placeholder="Describe the specific data elements needed..."></textarea>
-                                </div>
+                                                                <!-- COLUMN 4 -->
+                                <div class="form-column">
+                                    <h3>Data & Meetings</h3>
+                                    
+                                    <!-- NEW: Data Type Specification -->
+                                    <div class="form-group data-guidance-section">
+                                        <label for="data-type-spec">
+                                            Data Type Specification:
+                                            <span class="help-bubble" onclick="showDataTypeHelp()" 
+                                                  style="cursor: help; 
+                                                         background: #0a3b9c; 
+                                                         color: white; 
+                                                         width: 18px; 
+                                                         height: 18px; 
+                                                         border-radius: 50%; 
+                                                         display: inline-flex; 
+                                                         align-items: center; 
+                                                         justify-content: center; 
+                                                         margin-left: 8px; 
+                                                         font-weight: bold;
+                                                         font-size: 12px;
+                                                         vertical-align: middle;">?</span>
+                                        </label>
+                                        <textarea id="data-type-spec" class="form-control textarea-small" rows="4" 
+                                                  placeholder="Specify the exact data elements needed, distinguishing between parameters and elements..."></textarea>
+                                    </div>
                                 
-                                <!-- NEW: Request Frequency Feasibility Section -->
-                                <div class="form-group data-guidance-section">
-                                    <label for="frequency-feasibility">
-                                        Request Frequency Feasibility:
-                                        <span class="tooltip-container">
-                                            <span class="tooltip-icon">?</span>
-                                            <span class="tooltip-text">
-                                                <strong>Scheduling Tip: Specific vs. Relative Dates</strong><br><br>
-                                                For recurring requests:<br><br>
-                                                <strong>Initial Extract:</strong> Specific dates (e.g., Jan 1 – Mar 31, 2025)<br>
-                                                <strong>Recurring Logic:</strong> Relative terms (e.g., "Prior Quarter")<br>
-                                                <strong>Avoid:</strong> Specific dates in recurring description
-                                            </span>
-                                        </span>
-                                    </label>
-                                    <textarea id="frequency-feasibility" class="form-control textarea-small" rows="4"
-                                              placeholder="Specify initial extract dates and recurring logic..."></textarea>
+                                    <!-- NEW: Data Request Frequency -->
+                                    <div class="form-group data-guidance-section">
+                                        <label for="data-request-frequency">
+                                            Data Request Frequency:
+                                            <span class="help-bubble" onclick="showFrequencyHelp()" 
+                                                  style="cursor: help; 
+                                                         background: #0a3b9c; 
+                                                         color: white; 
+                                                         width: 18px; 
+                                                         height: 18px; 
+                                                         border-radius: 50%; 
+                                                         display: inline-flex; 
+                                                         align-items: center; 
+                                                         justify-content: center; 
+                                                         margin-left: 8px; 
+                                                         font-weight: bold;
+                                                         font-size: 12px;
+                                                         vertical-align: middle;">?</span>
+                                        </label>
+                                        <textarea id="data-request-frequency" class="form-control textarea-small" rows="4"
+                                                  placeholder="Specify initial extract dates and recurring logic..."></textarea>
+                                    </div>
+                                    
+                                    <!-- Existing Agreement Requirement Section -->
+                                    <div class="form-group">
+                                        <label>Agreement Requirement:</label>
+                                        <!-- ... keep existing agreement code ... -->
+                                    </div>
+                                    
+                                    <!-- ... rest of existing column 4 code ... -->
                                 </div>
 
                                 <div class="form-group">
@@ -3969,6 +4010,12 @@ LIMIT 50`
         
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+
+         // NEW FIELDS - UPDATED NAMES:
+        const dataTypeSpec = document.getElementById('data-type-spec')?.value || '';
+        const dataRequestFrequency = document.getElementById('data-request-frequency')?.value || '';
+    
+    return {
         
         return {
             id: nextId++,
@@ -3996,7 +4043,8 @@ LIMIT 50`
             district: district,
             data_type_specifications: dataTypeSpecs,      // NEW FIELD
             frequency_feasibility: frequencyFeasibility,  // NEW FIELD
-            comments: comments,
+            comments: comments,data_type_specification: dataTypeSpec,
+            data_request_frequency: dataRequestFrequency,
             timestamp: timestamp
         };
     }
@@ -4147,6 +4195,13 @@ LIMIT 50`
                 districtSelect.disabled = true;
                 districtSelect.innerHTML = '<option value="">Select District</option>';
             }
+
+            // NEW FIELDS - ADD THESE:
+            const dataTypeSpec = document.getElementById('data-type-spec');
+            const dataRequestFrequency = document.getElementById('data-request-frequency');
+            
+            if (dataTypeSpec) dataTypeSpec.value = '';
+            if (dataRequestFrequency) dataRequestFrequency.value = '';
             
             // Other
             const definedPurpose = document.getElementById('defined-purpose');
@@ -4271,6 +4326,77 @@ LIMIT 50`
             `;
             
             showTooltipWindow('Define Purpose', message);
+        }
+
+        // Show Data Type Specification Help
+        function showDataTypeHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    📋 DATA TYPE SPECIFICATION                    ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ Under the Health Information Act (HIA), you must ║
+        ║ restrict your request to the absolute minimum    ║
+        ║ data required to meet your objective.            ║
+        ║                                                  ║
+        ║ 📌 KEY RULES:                                    ║
+        ║                                                  ║
+        ║ 1. NO "Just in Case" Data                        ║
+        ║    • Do not include elements for hypothetical use║
+        ║    • Example: Patient address rarely needed      ║
+        ║      if you only need facility community         ║
+        ║                                                  ║
+        ║ 2. Parameters vs. Elements                       ║
+        ║    • Parameters: Used to filter the list         ║
+        ║    • Elements: Columns in final extract          ║
+        ║    • If field is only a filter, do NOT include   ║
+        ║      it as a column unless strictly required     ║
+        ║                                                  ║
+        ║ 3. Finalized List                                ║
+        ║    • Remove all "options" or "maybes"            ║
+        ║    • List must be definitive                     ║
+        ║    • Confirm with IM Analyst before submission   ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Type Specification', message);
+        }
+        
+        // Show Data Request Frequency Help
+        function showFrequencyHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    📅 DATA REQUEST FREQUENCY                    ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ Scheduling Tip: Specific vs. Relative Dates      ║
+        ║                                                  ║
+        ║ For recurring requests, your timeframe must      ║
+        ║ distinguish between the first delivery and       ║
+        ║ future runs:                                     ║
+        ║                                                  ║
+        ║ 📌 INITIAL EXTRACT:                             ║
+        ║    • List specific dates                         ║
+        ║    • Example: Jan 1 – Mar 31, 2025              ║
+        ║    • Defines the starting data set              ║
+        ║                                                  ║
+        ║ 📌 RECURRING LOGIC:                             ║
+        ║    • Use relative terms                         ║
+        ║    • Example: "Prior Quarter" or "Last 3 months"║
+        ║    • Ensures data stays current                 ║
+        ║                                                  ║
+        ║ ⚠️ AVOID:                                       ║
+        ║    • Putting specific years/dates in recurring   ║
+        ║    • This may result in receiving the same      ║
+        ║      historical data every period               ║
+        ║                                                  ║
+        ║ 🎯 EXAMPLE:                                     ║
+        ║ "Initial: Jan 1 - Dec 31, 2024                  ║
+        ║  Recurring: Previous calendar quarter"          ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Request Frequency', message);
         }
         
         // 5. SHOW TOOLTIP WINDOW (Beautiful popup)
@@ -4409,6 +4535,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
