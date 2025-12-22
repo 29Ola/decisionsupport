@@ -681,7 +681,11 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="classification">Data Request Classification:</label>
+                                    <label for="classification">
+                                        Data Request Classification:
+                                        <span class="help-bubble" onclick="showClassificationHelp()" 
+                                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
+                                    </label>
                                     <input type="text" id="classification" class="form-control">
                                 </div>
 
@@ -766,7 +770,11 @@
                                 <h3>Purpose & Agreements</h3>
                                 
                                 <div class="form-group">
-                                    <label for="defined-purpose">Defined Purpose:</label>
+                                    <label for="defined-purpose">
+                                        Defined Purpose:
+                                        <span class="help-bubble" onclick="showPurposeHelp()" 
+                                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
+                                    </label>
                                     <textarea id="defined-purpose" class="form-control textarea-medium" rows="5" required></textarea>
                                     <div class="validation-message" id="purpose-error"></div>
                                 </div>
@@ -1379,145 +1387,249 @@
             console.log('Tooltips added to Classification and Purpose fields');
         }
         
-        // 3. SHOW CLASSIFICATION HELP
-        function showClassificationHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📋 DATA REQUEST CLASSIFICATION                ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ This section is for recording the FINAL DATA     ║
-        ║ that will be shared.                             ║
-        ║                                                  ║
-        ║ 📝 FORMAT:                                       ║
-        ║                                                  ║
-        ║ 1. [ehealth information system]                  ║
-        ║    • E.g., EMR, MediPatient, HMIS                ║
-        ║                                                  ║
-        ║ 2. [parameters of request]                       ║
-        ║    • Type of data                                ║
-        ║    • Inclusion/exclusion criteria                ║
-        ║    • Timeframe of data                           ║
-        ║    • Communities included/excluded               ║
-        ║                                                  ║
-        ║ 3. [list of data elements or stats]              ║
-        ║    • Specific fields to be provided              ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                      ║
-        ║ "EMR - Diabetes patients (Jan-Dec 2024) -        ║
-        ║  HbA1c values, diagnosis dates, age"             ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Data Request Classification', message);
-        }
-        
-        // 4. SHOW PURPOSE HELP
-        function showPurposeHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    🎯 DEFINE PURPOSE                             ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Tailor the purpose to what the requestor states. ║
-        ║ Reference the Request Form if Necessary.         ║
-        ║                                                  ║
-        ║ 🔄 LOGIC FLOW:                                   ║
-        ║                                                  ║
-        ║ 1. PURPOSE                                       ║
-        ║    • Requestor's stated need                     ║
-        ║    • Why they need the data                      ║
-        ║                                                  ║
-        ║ 2. LEGISLATIVE AUTHORITY                         ║
-        ║    • Appropriate legal basis                     ║
-        ║    • HIA or other legislation                    ║
-        ║                                                  ║
-        ║ 3. DATA IDENTIFICATION                           ║
-        ║    • Data needed for the purpose                 ║
-        ║    • Minimum required data only                  ║
-        ║                                                  ║
-        ║ 4. SHARING JUSTIFICATION                         ║
-        ║    • Clear rationale for sharing                 ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                      ║
-        ║ "Monitor diabetes prevalence in Beaufort Delta   ║
-        ║ region to inform clinic staffing decisions."     ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Define Purpose', message);
-        }
+        // ================= COMPLETE TOOLTIP FUNCTIONS =================
 
-        // Show Data Type Specification Help
         function showDataTypeHelp() {
             const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📋 DATA TYPE SPECIFICATION                    ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Under the Health Information Act (HIA), you must ║
-        ║ restrict your request to the absolute minimum    ║
-        ║ data required to meet your objective.            ║
-        ║                                                  ║
-        ║ 📌 KEY RULES:                                    ║
-        ║                                                  ║
-        ║ 1. NO "Just in Case" Data                        ║
-        ║    • Do not include elements for hypothetical use║
-        ║    • Example: Patient address rarely needed      ║
-        ║      if you only need facility community         ║
-        ║                                                  ║
-        ║ 2. Parameters vs. Elements                       ║
-        ║    • Parameters: Used to filter the list         ║
-        ║    • Elements: Columns in final extract          ║
-        ║    • If field is only a filter, do NOT include   ║
-        ║      it as a column unless strictly required     ║
-        ║                                                  ║
-        ║ 3. Finalized List                                ║
-        ║    • Remove all "options" or "maybes"            ║
-        ║    • List must be definitive                     ║
-        ║    • Confirm with IM Analyst before submission   ║
-        ╚══════════════════════════════════════════════════╝
+        ╔══════════════════════════════════════════════════════════════╗
+        ║                DATA TYPE SPECIFICATION                       ║
+        ╠══════════════════════════════════════════════════════════════╣
+        ║                                                              ║
+        ║  Under the Health Information Act (HIA), you must restrict   ║
+        ║  your request to the absolute minimum data required to meet  ║
+        ║  your objective.                                             ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🔴 NO "Just in Case" Data:                                  ║
+        ║     • Do not include elements for hypothetical use           ║
+        ║     • or "future verification"                               ║
+        ║     • Example: patient address is rarely necessary           ║
+        ║       if you only need to know the facility community        ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🔴 Parameters vs. Elements:                                 ║
+        ║     • If a field is only used to filter the list             ║
+        ║       (a parameter), do not include it as a column           ║
+        ║       in the final extract (an element) unless it            ║
+        ║       is strictly required for your work.                    ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🔴 Finalized List:                                          ║
+        ║     • Remove all "options" or "maybes."                      ║
+        ║     • The list must be definitive and confirmed              ║
+        ║       with the IM Analyst before submission.                 ║
+        ║                                                              ║
+        ╚══════════════════════════════════════════════════════════════╝
             `;
             
             showTooltipWindow('Data Type Specification', message);
         }
         
-        // Show Data Request Frequency Help
         function showFrequencyHelp() {
             const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📅 DATA REQUEST FREQUENCY                    ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Scheduling Tip: Specific vs. Relative Dates      ║
-        ║                                                  ║
-        ║ For recurring requests, your timeframe must      ║
-        ║ distinguish between the first delivery and       ║
-        ║ future runs:                                     ║
-        ║                                                  ║
-        ║ 📌 INITIAL EXTRACT:                             ║
-        ║    • List specific dates                         ║
-        ║    • Example: Jan 1 – Mar 31, 2025              ║
-        ║    • Defines the starting data set              ║
-        ║                                                  ║
-        ║ 📌 RECURRING LOGIC:                             ║
-        ║    • Use relative terms                         ║
-        ║    • Example: "Prior Quarter" or "Last 3 months"║
-        ║    • Ensures data stays current                 ║
-        ║                                                  ║
-        ║ ⚠️ AVOID:                                       ║
-        ║    • Putting specific years/dates in recurring   ║
-        ║    • This may result in receiving the same      ║
-        ║      historical data every period               ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                     ║
-        ║ "Initial: Jan 1 - Dec 31, 2024                  ║
-        ║  Recurring: Previous calendar quarter"          ║
-        ╚══════════════════════════════════════════════════╝
+        ╔══════════════════════════════════════════════════════════════╗
+        ║              DATA REQUEST FREQUENCY                          ║
+        ╠══════════════════════════════════════════════════════════════╣
+        ║                                                              ║
+        ║  Scheduling Tip: Specific vs. Relative Dates                 ║
+        ║                                                              ║
+        ║  For recurring requests, your timeframe must distinguish     ║
+        ║  between the first delivery and future runs:                 ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🟢 Initial Extract:                                         ║
+        ║     • List specific dates                                    ║
+        ║     • Example: Jan 1 – Mar 31, 2025                          ║
+        ║     • To define the starting data set                        ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🟢 Recurring Logic:                                         ║
+        ║     • Use relative terms                                     ║
+        ║     • Example: "Prior Quarter" or "Last 3 months"            ║
+        ║     • To ensure the data stays current                       ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  🔴 AVOID:                                                   ║
+        ║     • Putting specific years or dates in the recurring       ║
+        ║       description                                            ║
+        ║     • This may result in receiving the same historical       ║
+        ║       data every period                                      ║
+        ║                                                              ║
+        ╚══════════════════════════════════════════════════════════════╝
             `;
             
             showTooltipWindow('Data Request Frequency', message);
         }
+        
+        function showTooltipWindow(title, content) {
+            // Remove any existing tooltip window
+            const existing = document.getElementById('custom-tooltip-window');
+            if (existing) existing.remove();
+            
+            // Create new tooltip window
+            const tooltipWindow = document.createElement('div');
+            tooltipWindow.id = 'custom-tooltip-window';
+            tooltipWindow.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(to bottom, #0a3b9c, #245edc);
+                color: white;
+                padding: 25px;
+                border: 3px solid white;
+                border-radius: 5px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.7);
+                z-index: 10000;
+                width: 650px;
+                max-height: 80vh;
+                overflow-y: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+                line-height: 1.5;
+                white-space: pre;
+            `;
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ CLOSE';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #cc0000;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 14px;
+            `;
+            closeBtn.onclick = () => tooltipWindow.remove();
+            
+            // Add title
+            const titleDiv = document.createElement('div');
+            titleDiv.textContent = title;
+            titleDiv.style.cssText = `
+                font-weight: bold;
+                font-size: 18px;
+                margin-bottom: 20px;
+                color: #ffff88;
+                text-align: center;
+                border-bottom: 2px solid #ffff88;
+                padding-bottom: 10px;
+                text-shadow: 1px 1px 2px black;
+            `;
+            
+            // Add content
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            contentDiv.style.cssText = `
+                margin-top: 15px;
+                font-size: 13px;
+                line-height: 1.6;
+            `;
+            
+            // Assemble
+            tooltipWindow.appendChild(closeBtn);
+            tooltipWindow.appendChild(titleDiv);
+            tooltipWindow.appendChild(contentDiv);
+            
+            // Add to page
+            document.body.appendChild(tooltipWindow);
+            
+            // Close on escape key
+            const closeOnEscape = (e) => {
+                if (e.key === 'Escape') tooltipWindow.remove();
+            };
+            document.addEventListener('keydown', closeOnEscape);
+            
+            // Remove listener when window closes
+            tooltipWindow.addEventListener('remove', () => {
+                document.removeEventListener('keydown', closeOnEscape);
+            });
+        }
+        
+        // ================= ALSO ADD FOR EXISTING FIELDS =================
+        
+        function showClassificationHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════════════════╗
+        ║          DATA REQUEST CLASSIFICATION                         ║
+        ╠══════════════════════════════════════════════════════════════╣
+        ║                                                              ║
+        ║  This section is for recording the final data that will be   ║
+        ║  shared. The format is:                                      ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  1. [ehealth information system]                             ║
+        ║     • e.g., EMR, MediPatient, HMIS                           ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  2. [parameters of request]                                  ║
+        ║     • Type of data                                           ║
+        ║     • Inclusion/exclusion criteria if applicable             ║
+        ║     • Timeframe of data                                      ║
+        ║     • Communities included/excluded                          ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  3. [list of data elements or stats]                         ║
+        ║     • To be provided                                         ║
+        ║                                                              ║
+        ╚══════════════════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Request Classification', message);
+        }
+        
+        function showPurposeHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════════════════╗
+        ║                   DEFINE PURPOSE                             ║
+        ╠══════════════════════════════════════════════════════════════╣
+        ║                                                              ║
+        ║  Tailor the purpose to what the requestor states.            ║
+        ║  Reference the Request Form if Necessary.                    ║
+        ║                                                              ║
+        ║  Clearly identify the logic that flows from:                 ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  1. PURPOSE                                                  ║
+        ║     • Requestor's need                                       ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  2. LEGISLATIVE AUTHORITY                                    ║
+        ║     • Through appropriate legislative authorization          ║
+        ║                                                              ║
+        ║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+        ║                                                              ║
+        ║  3. DATA IDENTIFICATION                                      ║
+        ║     • The data that's identified for the purpose of sharing  ║
+        ║                                                              ║
+        ╚══════════════════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Define Purpose', message);
+        }
+        
+        // ================= INITIALIZE ALL TOOLTIPS =================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('All tooltip functions are ready!');
+            // The ? buttons in your HTML will call these functions when clicked
+        });
         
         // 5. SHOW TOOLTIP WINDOW (Beautiful popup)
         function showTooltipWindow(title, content) {
@@ -4507,6 +4619,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
