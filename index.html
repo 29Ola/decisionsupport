@@ -875,34 +875,30 @@
                                     
                                     <label for="meeting-desc">Meeting Details:</label>
                                     <input type="text" id="meeting-desc" class="form-control">
+                                </div> 
+                                <!-- NEW: Data Type Specification -->
+                                <div class="form-group data-guidance-section">
+                                    <label for="data-type-spec">
+                                        Data Type Specification:
+                                        <span class="help-bubble" onclick="showDataTypeHelp()" 
+                                              style="cursor: help; 
+                                                     background: #0a3b9c; 
+                                                     color: white; 
+                                                     width: 18px; 
+                                                     height: 18px; 
+                                                     border-radius: 50%; 
+                                                     display: inline-flex; 
+                                                     align-items: center; 
+                                                     justify-content: center; 
+                                                     margin-left: 8px; 
+                                                     font-weight: bold;
+                                                     font-size: 12px;
+                                                     vertical-align: middle;">?</span>
+                                    </label>
+                                    <textarea id="data-type-spec" class="form-control textarea-small" rows="4" 
+                                              placeholder="Specify the exact data elements needed, distinguishing between parameters and elements..."></textarea>
                                 </div>
-                                                                <!-- COLUMN 4 -->
-                                <div class="form-column">
-                                    <h3>Data & Meetings</h3>
-                                    
-                                    <!-- NEW: Data Type Specification -->
-                                    <div class="form-group data-guidance-section">
-                                        <label for="data-type-spec">
-                                            Data Type Specification:
-                                            <span class="help-bubble" onclick="showDataTypeHelp()" 
-                                                  style="cursor: help; 
-                                                         background: #0a3b9c; 
-                                                         color: white; 
-                                                         width: 18px; 
-                                                         height: 18px; 
-                                                         border-radius: 50%; 
-                                                         display: inline-flex; 
-                                                         align-items: center; 
-                                                         justify-content: center; 
-                                                         margin-left: 8px; 
-                                                         font-weight: bold;
-                                                         font-size: 12px;
-                                                         vertical-align: middle;">?</span>
-                                        </label>
-                                        <textarea id="data-type-spec" class="form-control textarea-small" rows="4" 
-                                                  placeholder="Specify the exact data elements needed, distinguishing between parameters and elements..."></textarea>
-                                    </div>
-                                
+                            
                                     <!-- NEW: Data Request Frequency -->
                                     <div class="form-group data-guidance-section">
                                         <label for="data-request-frequency">
@@ -925,15 +921,6 @@
                                         <textarea id="data-request-frequency" class="form-control textarea-small" rows="4"
                                                   placeholder="Specify initial extract dates and recurring logic..."></textarea>
                                     </div>
-                                    
-                                    <!-- Existing Agreement Requirement Section -->
-                                    <div class="form-group">
-                                        <label>Agreement Requirement:</label>
-                                        <!-- ... keep existing agreement code ... -->
-                                    </div>
-                                    
-                                    <!-- ... rest of existing column 4 code ... -->
-                                </div>
 
                                 <div class="form-group">
                                     <label for="comments">Additional Comments:</label>
@@ -1342,6 +1329,328 @@
     </div>
 
     <script>
+
+        // ================= TOOLTIP SYSTEM =================
+        function setupTooltips() {
+            console.log('Setting up tooltips...');
+            
+            // 1. TOOLTIP FOR DATA REQUEST CLASSIFICATION
+            const classLabel = document.querySelector('label[for="classification"]');
+            if (classLabel) {
+                classLabel.innerHTML += `
+                    <span class="help-bubble" onclick="showClassificationHelp()" 
+                          style="cursor: help; 
+                                 background: #0a3b9c; 
+                                 color: white; 
+                                 width: 18px; 
+                                 height: 18px; 
+                                 border-radius: 50%; 
+                                 display: inline-flex; 
+                                 align-items: center; 
+                                 justify-content: center; 
+                                 margin-left: 8px; 
+                                 font-weight: bold;
+                                 font-size: 12px;
+                                 vertical-align: middle;">?</span>
+                `;
+            }
+            
+            // 2. TOOLTIP FOR DEFINED PURPOSE
+            const purposeLabel = document.querySelector('label[for="defined-purpose"]');
+            if (purposeLabel) {
+                purposeLabel.innerHTML += `
+                    <span class="help-bubble" onclick="showPurposeHelp()" 
+                          style="cursor: help; 
+                                 background: #0a3b9c; 
+                                 color: white; 
+                                 width: 18px; 
+                                 height: 18px; 
+                                 border-radius: 50%; 
+                                 display: inline-flex; 
+                                 align-items: center; 
+                                 justify-content: center; 
+                                 margin-left: 8px; 
+                                 font-weight: bold;
+                                 font-size: 12px;
+                                 vertical-align: middle;">?</span>
+                `;
+            }
+            
+            console.log('Tooltips added to Classification and Purpose fields');
+        }
+        
+        // 3. SHOW CLASSIFICATION HELP
+        function showClassificationHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    📋 DATA REQUEST CLASSIFICATION                ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ This section is for recording the FINAL DATA     ║
+        ║ that will be shared.                             ║
+        ║                                                  ║
+        ║ 📝 FORMAT:                                       ║
+        ║                                                  ║
+        ║ 1. [ehealth information system]                  ║
+        ║    • E.g., EMR, MediPatient, HMIS                ║
+        ║                                                  ║
+        ║ 2. [parameters of request]                       ║
+        ║    • Type of data                                ║
+        ║    • Inclusion/exclusion criteria                ║
+        ║    • Timeframe of data                           ║
+        ║    • Communities included/excluded               ║
+        ║                                                  ║
+        ║ 3. [list of data elements or stats]              ║
+        ║    • Specific fields to be provided              ║
+        ║                                                  ║
+        ║ 🎯 EXAMPLE:                                      ║
+        ║ "EMR - Diabetes patients (Jan-Dec 2024) -        ║
+        ║  HbA1c values, diagnosis dates, age"             ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Request Classification', message);
+        }
+        
+        // 4. SHOW PURPOSE HELP
+        function showPurposeHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    🎯 DEFINE PURPOSE                             ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ Tailor the purpose to what the requestor states. ║
+        ║ Reference the Request Form if Necessary.         ║
+        ║                                                  ║
+        ║ 🔄 LOGIC FLOW:                                   ║
+        ║                                                  ║
+        ║ 1. PURPOSE                                       ║
+        ║    • Requestor's stated need                     ║
+        ║    • Why they need the data                      ║
+        ║                                                  ║
+        ║ 2. LEGISLATIVE AUTHORITY                         ║
+        ║    • Appropriate legal basis                     ║
+        ║    • HIA or other legislation                    ║
+        ║                                                  ║
+        ║ 3. DATA IDENTIFICATION                           ║
+        ║    • Data needed for the purpose                 ║
+        ║    • Minimum required data only                  ║
+        ║                                                  ║
+        ║ 4. SHARING JUSTIFICATION                         ║
+        ║    • Clear rationale for sharing                 ║
+        ║                                                  ║
+        ║ 🎯 EXAMPLE:                                      ║
+        ║ "Monitor diabetes prevalence in Beaufort Delta   ║
+        ║ region to inform clinic staffing decisions."     ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Define Purpose', message);
+        }
+
+        // Show Data Type Specification Help
+        function showDataTypeHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    📋 DATA TYPE SPECIFICATION                    ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ Under the Health Information Act (HIA), you must ║
+        ║ restrict your request to the absolute minimum    ║
+        ║ data required to meet your objective.            ║
+        ║                                                  ║
+        ║ 📌 KEY RULES:                                    ║
+        ║                                                  ║
+        ║ 1. NO "Just in Case" Data                        ║
+        ║    • Do not include elements for hypothetical use║
+        ║    • Example: Patient address rarely needed      ║
+        ║      if you only need facility community         ║
+        ║                                                  ║
+        ║ 2. Parameters vs. Elements                       ║
+        ║    • Parameters: Used to filter the list         ║
+        ║    • Elements: Columns in final extract          ║
+        ║    • If field is only a filter, do NOT include   ║
+        ║      it as a column unless strictly required     ║
+        ║                                                  ║
+        ║ 3. Finalized List                                ║
+        ║    • Remove all "options" or "maybes"            ║
+        ║    • List must be definitive                     ║
+        ║    • Confirm with IM Analyst before submission   ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Type Specification', message);
+        }
+        
+        // Show Data Request Frequency Help
+        function showFrequencyHelp() {
+            const message = `
+        ╔══════════════════════════════════════════════════╗
+        ║    📅 DATA REQUEST FREQUENCY                    ║
+        ╠══════════════════════════════════════════════════╣
+        ║                                                  ║
+        ║ Scheduling Tip: Specific vs. Relative Dates      ║
+        ║                                                  ║
+        ║ For recurring requests, your timeframe must      ║
+        ║ distinguish between the first delivery and       ║
+        ║ future runs:                                     ║
+        ║                                                  ║
+        ║ 📌 INITIAL EXTRACT:                             ║
+        ║    • List specific dates                         ║
+        ║    • Example: Jan 1 – Mar 31, 2025              ║
+        ║    • Defines the starting data set              ║
+        ║                                                  ║
+        ║ 📌 RECURRING LOGIC:                             ║
+        ║    • Use relative terms                         ║
+        ║    • Example: "Prior Quarter" or "Last 3 months"║
+        ║    • Ensures data stays current                 ║
+        ║                                                  ║
+        ║ ⚠️ AVOID:                                       ║
+        ║    • Putting specific years/dates in recurring   ║
+        ║    • This may result in receiving the same      ║
+        ║      historical data every period               ║
+        ║                                                  ║
+        ║ 🎯 EXAMPLE:                                     ║
+        ║ "Initial: Jan 1 - Dec 31, 2024                  ║
+        ║  Recurring: Previous calendar quarter"          ║
+        ╚══════════════════════════════════════════════════╝
+            `;
+            
+            showTooltipWindow('Data Request Frequency', message);
+        }
+        
+        // 5. SHOW TOOLTIP WINDOW (Beautiful popup)
+        function showTooltipWindow(title, content) {
+            // Remove any existing tooltip window
+            const existing = document.getElementById('custom-tooltip-window');
+            if (existing) existing.remove();
+            
+            // Create new tooltip window
+            const tooltipWindow = document.createElement('div');
+            tooltipWindow.id = 'custom-tooltip-window';
+            tooltipWindow.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(to bottom, #0a3b9c, #245edc);
+                color: white;
+                padding: 20px;
+                border: 3px solid white;
+                border-radius: 5px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                z-index: 10000;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+                line-height: 1.4;
+                white-space: pre;
+            `;
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Close';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: #cc0000;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-weight: bold;
+            `;
+            closeBtn.onclick = () => tooltipWindow.remove();
+            
+            // Add title
+            const titleDiv = document.createElement('div');
+            titleDiv.textContent = title;
+            titleDiv.style.cssText = `
+                font-weight: bold;
+                font-size: 16px;
+                margin-bottom: 15px;
+                color: #ffff88;
+                text-align: center;
+                border-bottom: 2px solid #ffff88;
+                padding-bottom: 5px;
+            `;
+            
+            // Add content
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            contentDiv.style.cssText = `
+                margin-top: 10px;
+                font-size: 13px;
+            `;
+            
+            // Assemble
+            tooltipWindow.appendChild(closeBtn);
+            tooltipWindow.appendChild(titleDiv);
+            tooltipWindow.appendChild(contentDiv);
+            
+            // Add to page
+            document.body.appendChild(tooltipWindow);
+            
+            // Close on escape key
+            const closeOnEscape = (e) => {
+                if (e.key === 'Escape') tooltipWindow.remove();
+            };
+            document.addEventListener('keydown', closeOnEscape);
+            
+            // Remove listener when window closes
+            tooltipWindow.addEventListener('remove', () => {
+                document.removeEventListener('keydown', closeOnEscape);
+            });
+        }
+        
+        // 6. Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setupTooltips();
+            console.log('Tooltip system ready. Click the ? buttons!');
+        });
+
+        // Add to your existing JavaScript tooltip setup
+        function addNewFieldTooltips() {
+            // Tooltip for Data Type Specifications
+            const dataTypeField = document.getElementById('data-type-specs');
+            if (dataTypeField) {
+                const label = dataTypeField.previousElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    label.innerHTML += `
+                        <span class="help-bubble" onclick="showDataTypeHelp()" 
+                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
+                    `;
+                }
+            }
+            
+            // Tooltip for Request Frequency Feasibility
+            const freqField = document.getElementById('frequency-feasibility');
+            if (freqField) {
+                const label = freqField.previousElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    label.innerHTML += `
+                        <span class="help-bubble" onclick="showFrequencyHelp()" 
+                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
+                    `;
+                }
+            }
+        }
+        
+        // Show Data Type Help
+        function showDataTypeHelp() {
+            const message = `YOUR FULL DATA TYPE SPECIFICATION MESSAGE HERE`;
+            showTooltipWindow('Data Type Specifications', message);
+        }
+        
+        // Show Frequency Help  
+        function showFrequencyHelp() {
+            const message = `YOUR FULL FREQUENCY FEASIBILITY MESSAGE HERE`;
+            showTooltipWindow('Request Frequency Feasibility', message);
+        }
         // Configuration
         let db = null;
         let databaseLoaded = false;
@@ -3966,90 +4275,82 @@ LIMIT 50`
             });
         }
 
-        // Get form data
         function getFormData() {
-        updateOrganization();
-        const org = document.getElementById('organization')?.value || '';
+            updateOrganization();
+            const org = document.getElementById('organization')?.value || '';
+            
+            const requestHistory = document.querySelector('input[name="request-history"]:checked')?.value;
+            const recurringDate = requestHistory === 'recurring' ? document.getElementById('recurring-date')?.value : '';
+            
+            const legislative = document.querySelector('input[name="legislative"]:checked')?.value;
+            const legislativeDesc = document.getElementById('legislative-desc')?.value || '';
+            
+            const conditions = document.querySelector('input[name="conditions"]:checked')?.value;
+            const conditionsDesc = document.getElementById('conditions-desc')?.value || '';
+            
+            const statutory = document.querySelector('input[name="statutory"]:checked')?.value;
+            const statutoryOptions = document.querySelectorAll('.statutory-option:checked');
+            const statutorySelected = Array.from(statutoryOptions).map(option => option.value);
+            const statutoryOther = document.getElementById('statutory-other')?.value || '';
+            
+            const agreement = document.querySelector('input[name="agreement"]:checked')?.value;
+            const existingAgreement = document.getElementById('existing-agreement')?.checked;
+            const agreementDesc = document.getElementById('agreement-desc')?.value || '';
+            
+            const matching = document.querySelector('input[name="matching"]:checked')?.value;
+            const matchingDesc = document.getElementById('matching-desc')?.value || '';
+            
+            const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
+            const meetingDesc = document.getElementById('meeting-desc')?.value || '';
+            
+            const region = document.getElementById('region')?.value || '';
+            const district = document.getElementById('district')?.value || '';
+            
+            const requestNumber = document.getElementById('request-number')?.value.trim() || '';
+            const requestor = document.getElementById('requestor')?.value || '';
+            const classification = document.getElementById('classification')?.value || '';
+            const definedPurpose = document.getElementById('defined-purpose')?.value || '';
+            const comments = document.getElementById('comments')?.value || '';
+            
+            // NEW FIELDS - Use the CORRECT IDs based on your HTML:
+            const dataTypeSpec = document.getElementById('data-type-spec')?.value || '';
+            const dataRequestFrequency = document.getElementById('data-request-frequency')?.value || '';
+            
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
         
-        const requestHistory = document.querySelector('input[name="request-history"]:checked')?.value;
-        const recurringDate = requestHistory === 'recurring' ? document.getElementById('recurring-date')?.value : '';
-        
-        const legislative = document.querySelector('input[name="legislative"]:checked')?.value;
-        const legislativeDesc = document.getElementById('legislative-desc')?.value || '';
-        
-        const conditions = document.querySelector('input[name="conditions"]:checked')?.value;
-        const conditionsDesc = document.getElementById('conditions-desc')?.value || '';
-        
-        const statutory = document.querySelector('input[name="statutory"]:checked')?.value;
-        const statutoryOptions = document.querySelectorAll('.statutory-option:checked');
-        const statutorySelected = Array.from(statutoryOptions).map(option => option.value);
-        const statutoryOther = document.getElementById('statutory-other')?.value || '';
-        
-        const agreement = document.querySelector('input[name="agreement"]:checked')?.value;
-        const existingAgreement = document.getElementById('existing-agreement')?.checked;
-        const agreementDesc = document.getElementById('agreement-desc')?.value || '';
-        
-        const matching = document.querySelector('input[name="matching"]:checked')?.value;
-        const matchingDesc = document.getElementById('matching-desc')?.value || '';
-        
-        const meeting = document.querySelector('input[name="meeting"]:checked')?.value;
-        const meetingDesc = document.getElementById('meeting-desc')?.value || '';
-        
-        const region = document.getElementById('region')?.value || '';
-        const district = document.getElementById('district')?.value || '';
-        
-        const requestNumber = document.getElementById('request-number')?.value.trim() || '';  // FIXED: Only once, with trim()
-        const requestor = document.getElementById('requestor')?.value || '';
-        const classification = document.getElementById('classification')?.value || '';
-        const definedPurpose = document.getElementById('defined-purpose')?.value || '';
-        const comments = document.getElementById('comments')?.value || '';
-        
-        // NEW FIELDS - ADD THESE:
-        const dataTypeSpecs = document.getElementById('data-type-specs')?.value || '';
-        const frequencyFeasibility = document.getElementById('frequency-feasibility')?.value || '';
-        
-        const now = new Date();
-        const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+            return {  // ✅ ONLY ONE return statement!
+                id: nextId++,
+                organization: org,
+                request_number: requestNumber,
+                requestor: requestor,
+                classification: classification,
+                request_history: requestHistory === 'first' ? 'First Original' : `Recurring: ${recurringDate}`,
+                legislative_authority: legislative,
+                legislative_description: legislativeDesc,
+                conditions: conditions,
+                conditions_description: conditionsDesc,
+                statutory_owner: statutory,
+                statutory_selected: statutorySelected,
+                statutory_other: statutoryOther,
+                defined_purpose: definedPurpose,
+                agreement_required: agreement,
+                existing_agreement: existingAgreement ? 'Yes' : 'No',
+                agreement_description: agreementDesc,
+                data_matching: matching,
+                matching_description: matchingDesc,
+                meeting_required: meeting,
+                meeting_description: meetingDesc,
+                region: region,
+                district: district,
+                data_type_specification: dataTypeSpec,      // Use the new field names
+                data_request_frequency: dataRequestFrequency, // Use the new field names
+                comments: comments,
+                timestamp: timestamp
+            };
+        }  // ✅ Don't forget the closing brace for the function!
 
-         // NEW FIELDS - UPDATED NAMES:
-        const dataTypeSpec = document.getElementById('data-type-spec')?.value || '';
-        const dataRequestFrequency = document.getElementById('data-request-frequency')?.value || '';
-    
-    return {
         
-        return {
-            id: nextId++,
-            organization: org,
-            request_number: requestNumber,  // This is the CRUCIAL field!
-            requestor: requestor,
-            classification: classification,
-            request_history: requestHistory === 'first' ? 'First Original' : `Recurring: ${recurringDate}`,
-            legislative_authority: legislative,
-            legislative_description: legislativeDesc,
-            conditions: conditions,
-            conditions_description: conditionsDesc,
-            statutory_owner: statutory,
-            statutory_selected: statutorySelected,
-            statutory_other: statutoryOther,
-            defined_purpose: definedPurpose,
-            agreement_required: agreement,
-            existing_agreement: existingAgreement ? 'Yes' : 'No',
-            agreement_description: agreementDesc,
-            data_matching: matching,
-            matching_description: matchingDesc,
-            meeting_required: meeting,
-            meeting_description: meetingDesc,
-            region: region,
-            district: district,
-            data_type_specifications: dataTypeSpecs,      // NEW FIELD
-            frequency_feasibility: frequencyFeasibility,  // NEW FIELD
-            comments: comments,data_type_specification: dataTypeSpec,
-            data_request_frequency: dataRequestFrequency,
-            timestamp: timestamp
-        };
-    }
-
-        // Save request
         function saveRequest() {
             if (!validateForm()) {
                 alert("Cannot save: Please fix all validation errors.");
@@ -4079,7 +4380,7 @@ LIMIT 50`
             loadTableData();
             
             alert(`Data request saved successfully!\nRequest Number: ${formData.request_number}`);
-        }
+        }  // ✅ Closing brace for saveRequest function
 
         // Load table data for form tab
        function loadTableData() {
@@ -4156,12 +4457,12 @@ LIMIT 50`
             const conditionsDesc = document.getElementById('conditions-desc');
             if (conditionsDesc) conditionsDesc.value = '';
 
-            // NEW FIELDS - ADD THESE:
-            const dataTypeSpecs = document.getElementById('data-type-specs');
-            const frequencyFeasibility = document.getElementById('frequency-feasibility');
+            // NEW FIELDS - Use correct IDs:
+            const dataTypeSpec = document.getElementById('data-type-spec');
+            const dataRequestFrequency = document.getElementById('data-request-frequency');
             
-            if (dataTypeSpecs) dataTypeSpecs.value = '';
-            if (frequencyFeasibility) frequencyFeasibility.value = '';
+            if (dataTypeSpec) dataTypeSpec.value = '';
+            if (dataRequestFrequency) dataRequestFrequency.value = '';
             
             // Statutory
             document.querySelectorAll('input[name="statutory"]').forEach(r => r.checked = false);
@@ -4209,332 +4510,11 @@ LIMIT 50`
             const comments = document.getElementById('comments');
             if (comments) comments.value = '';
         }
-
-        // ================= TOOLTIP SYSTEM =================
-        function setupTooltips() {
-            console.log('Setting up tooltips...');
-            
-            // 1. TOOLTIP FOR DATA REQUEST CLASSIFICATION
-            const classLabel = document.querySelector('label[for="classification"]');
-            if (classLabel) {
-                classLabel.innerHTML += `
-                    <span class="help-bubble" onclick="showClassificationHelp()" 
-                          style="cursor: help; 
-                                 background: #0a3b9c; 
-                                 color: white; 
-                                 width: 18px; 
-                                 height: 18px; 
-                                 border-radius: 50%; 
-                                 display: inline-flex; 
-                                 align-items: center; 
-                                 justify-content: center; 
-                                 margin-left: 8px; 
-                                 font-weight: bold;
-                                 font-size: 12px;
-                                 vertical-align: middle;">?</span>
-                `;
-            }
-            
-            // 2. TOOLTIP FOR DEFINED PURPOSE
-            const purposeLabel = document.querySelector('label[for="defined-purpose"]');
-            if (purposeLabel) {
-                purposeLabel.innerHTML += `
-                    <span class="help-bubble" onclick="showPurposeHelp()" 
-                          style="cursor: help; 
-                                 background: #0a3b9c; 
-                                 color: white; 
-                                 width: 18px; 
-                                 height: 18px; 
-                                 border-radius: 50%; 
-                                 display: inline-flex; 
-                                 align-items: center; 
-                                 justify-content: center; 
-                                 margin-left: 8px; 
-                                 font-weight: bold;
-                                 font-size: 12px;
-                                 vertical-align: middle;">?</span>
-                `;
-            }
-            
-            console.log('Tooltips added to Classification and Purpose fields');
-        }
-        
-        // 3. SHOW CLASSIFICATION HELP
-        function showClassificationHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📋 DATA REQUEST CLASSIFICATION                ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ This section is for recording the FINAL DATA     ║
-        ║ that will be shared.                             ║
-        ║                                                  ║
-        ║ 📝 FORMAT:                                       ║
-        ║                                                  ║
-        ║ 1. [ehealth information system]                  ║
-        ║    • E.g., EMR, MediPatient, HMIS                ║
-        ║                                                  ║
-        ║ 2. [parameters of request]                       ║
-        ║    • Type of data                                ║
-        ║    • Inclusion/exclusion criteria                ║
-        ║    • Timeframe of data                           ║
-        ║    • Communities included/excluded               ║
-        ║                                                  ║
-        ║ 3. [list of data elements or stats]              ║
-        ║    • Specific fields to be provided              ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                      ║
-        ║ "EMR - Diabetes patients (Jan-Dec 2024) -        ║
-        ║  HbA1c values, diagnosis dates, age"             ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Data Request Classification', message);
-        }
-        
-        // 4. SHOW PURPOSE HELP
-        function showPurposeHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    🎯 DEFINE PURPOSE                             ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Tailor the purpose to what the requestor states. ║
-        ║ Reference the Request Form if Necessary.         ║
-        ║                                                  ║
-        ║ 🔄 LOGIC FLOW:                                   ║
-        ║                                                  ║
-        ║ 1. PURPOSE                                       ║
-        ║    • Requestor's stated need                     ║
-        ║    • Why they need the data                      ║
-        ║                                                  ║
-        ║ 2. LEGISLATIVE AUTHORITY                         ║
-        ║    • Appropriate legal basis                     ║
-        ║    • HIA or other legislation                    ║
-        ║                                                  ║
-        ║ 3. DATA IDENTIFICATION                           ║
-        ║    • Data needed for the purpose                 ║
-        ║    • Minimum required data only                  ║
-        ║                                                  ║
-        ║ 4. SHARING JUSTIFICATION                         ║
-        ║    • Clear rationale for sharing                 ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                      ║
-        ║ "Monitor diabetes prevalence in Beaufort Delta   ║
-        ║ region to inform clinic staffing decisions."     ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Define Purpose', message);
-        }
-
-        // Show Data Type Specification Help
-        function showDataTypeHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📋 DATA TYPE SPECIFICATION                    ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Under the Health Information Act (HIA), you must ║
-        ║ restrict your request to the absolute minimum    ║
-        ║ data required to meet your objective.            ║
-        ║                                                  ║
-        ║ 📌 KEY RULES:                                    ║
-        ║                                                  ║
-        ║ 1. NO "Just in Case" Data                        ║
-        ║    • Do not include elements for hypothetical use║
-        ║    • Example: Patient address rarely needed      ║
-        ║      if you only need facility community         ║
-        ║                                                  ║
-        ║ 2. Parameters vs. Elements                       ║
-        ║    • Parameters: Used to filter the list         ║
-        ║    • Elements: Columns in final extract          ║
-        ║    • If field is only a filter, do NOT include   ║
-        ║      it as a column unless strictly required     ║
-        ║                                                  ║
-        ║ 3. Finalized List                                ║
-        ║    • Remove all "options" or "maybes"            ║
-        ║    • List must be definitive                     ║
-        ║    • Confirm with IM Analyst before submission   ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Data Type Specification', message);
-        }
-        
-        // Show Data Request Frequency Help
-        function showFrequencyHelp() {
-            const message = `
-        ╔══════════════════════════════════════════════════╗
-        ║    📅 DATA REQUEST FREQUENCY                    ║
-        ╠══════════════════════════════════════════════════╣
-        ║                                                  ║
-        ║ Scheduling Tip: Specific vs. Relative Dates      ║
-        ║                                                  ║
-        ║ For recurring requests, your timeframe must      ║
-        ║ distinguish between the first delivery and       ║
-        ║ future runs:                                     ║
-        ║                                                  ║
-        ║ 📌 INITIAL EXTRACT:                             ║
-        ║    • List specific dates                         ║
-        ║    • Example: Jan 1 – Mar 31, 2025              ║
-        ║    • Defines the starting data set              ║
-        ║                                                  ║
-        ║ 📌 RECURRING LOGIC:                             ║
-        ║    • Use relative terms                         ║
-        ║    • Example: "Prior Quarter" or "Last 3 months"║
-        ║    • Ensures data stays current                 ║
-        ║                                                  ║
-        ║ ⚠️ AVOID:                                       ║
-        ║    • Putting specific years/dates in recurring   ║
-        ║    • This may result in receiving the same      ║
-        ║      historical data every period               ║
-        ║                                                  ║
-        ║ 🎯 EXAMPLE:                                     ║
-        ║ "Initial: Jan 1 - Dec 31, 2024                  ║
-        ║  Recurring: Previous calendar quarter"          ║
-        ╚══════════════════════════════════════════════════╝
-            `;
-            
-            showTooltipWindow('Data Request Frequency', message);
-        }
-        
-        // 5. SHOW TOOLTIP WINDOW (Beautiful popup)
-        function showTooltipWindow(title, content) {
-            // Remove any existing tooltip window
-            const existing = document.getElementById('custom-tooltip-window');
-            if (existing) existing.remove();
-            
-            // Create new tooltip window
-            const tooltipWindow = document.createElement('div');
-            tooltipWindow.id = 'custom-tooltip-window';
-            tooltipWindow.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(to bottom, #0a3b9c, #245edc);
-                color: white;
-                padding: 20px;
-                border: 3px solid white;
-                border-radius: 5px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                z-index: 10000;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow-y: auto;
-                font-family: 'Courier New', monospace;
-                font-size: 13px;
-                line-height: 1.4;
-                white-space: pre;
-            `;
-            
-            // Add close button
-            const closeBtn = document.createElement('button');
-            closeBtn.textContent = '✕ Close';
-            closeBtn.style.cssText = `
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: #cc0000;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 3px;
-                cursor: pointer;
-                font-weight: bold;
-            `;
-            closeBtn.onclick = () => tooltipWindow.remove();
-            
-            // Add title
-            const titleDiv = document.createElement('div');
-            titleDiv.textContent = title;
-            titleDiv.style.cssText = `
-                font-weight: bold;
-                font-size: 16px;
-                margin-bottom: 15px;
-                color: #ffff88;
-                text-align: center;
-                border-bottom: 2px solid #ffff88;
-                padding-bottom: 5px;
-            `;
-            
-            // Add content
-            const contentDiv = document.createElement('div');
-            contentDiv.textContent = content;
-            contentDiv.style.cssText = `
-                margin-top: 10px;
-                font-size: 13px;
-            `;
-            
-            // Assemble
-            tooltipWindow.appendChild(closeBtn);
-            tooltipWindow.appendChild(titleDiv);
-            tooltipWindow.appendChild(contentDiv);
-            
-            // Add to page
-            document.body.appendChild(tooltipWindow);
-            
-            // Close on escape key
-            const closeOnEscape = (e) => {
-                if (e.key === 'Escape') tooltipWindow.remove();
-            };
-            document.addEventListener('keydown', closeOnEscape);
-            
-            // Remove listener when window closes
-            tooltipWindow.addEventListener('remove', () => {
-                document.removeEventListener('keydown', closeOnEscape);
-            });
-        }
-        
-        // 6. Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setupTooltips();
-            console.log('Tooltip system ready. Click the ? buttons!');
-        });
-
-        // Add to your existing JavaScript tooltip setup
-        function addNewFieldTooltips() {
-            // Tooltip for Data Type Specifications
-            const dataTypeField = document.getElementById('data-type-specs');
-            if (dataTypeField) {
-                const label = dataTypeField.previousElementSibling;
-                if (label && label.tagName === 'LABEL') {
-                    label.innerHTML += `
-                        <span class="help-bubble" onclick="showDataTypeHelp()" 
-                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
-                    `;
-                }
-            }
-            
-            // Tooltip for Request Frequency Feasibility
-            const freqField = document.getElementById('frequency-feasibility');
-            if (freqField) {
-                const label = freqField.previousElementSibling;
-                if (label && label.tagName === 'LABEL') {
-                    label.innerHTML += `
-                        <span class="help-bubble" onclick="showFrequencyHelp()" 
-                              style="cursor: help; background: #0a3b9c; color: white; ...">?</span>
-                    `;
-                }
-            }
-        }
-        
-        // Show Data Type Help
-        function showDataTypeHelp() {
-            const message = `YOUR FULL DATA TYPE SPECIFICATION MESSAGE HERE`;
-            showTooltipWindow('Data Type Specifications', message);
-        }
-        
-        // Show Frequency Help  
-        function showFrequencyHelp() {
-            const message = `YOUR FULL FREQUENCY FEASIBILITY MESSAGE HERE`;
-            showTooltipWindow('Request Frequency Feasibility', message);
-        }
     </script>
 </body>
 
 </html>
+
 
 
 
