@@ -1373,28 +1373,6 @@
                 `;
             }
             
-            // 2. TOOLTIP FOR DEFINED PURPOSE
-            const purposeLabel = document.querySelector('label[for="defined-purpose"]');
-            if (purposeLabel) {
-                purposeLabel.innerHTML += `
-                    <span class="help-bubble" onclick="showPurposeHelp()" 
-                          style="cursor: help; 
-                                 background: #0a3b9c; 
-                                 color: white; 
-                                 width: 18px; 
-                                 height: 18px; 
-                                 border-radius: 50%; 
-                                 display: inline-flex; 
-                                 align-items: center; 
-                                 justify-content: center; 
-                                 margin-left: 8px; 
-                                 font-weight: bold;
-                                 font-size: 12px;
-                                 vertical-align: middle;">?</span>
-                `;
-            }
-            
-            console.log('Tooltips added to Classification and Purpose fields');
         }
         
         // ================= COMPLETE TOOLTIP FUNCTIONS =================
@@ -4618,6 +4596,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
