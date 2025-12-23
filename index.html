@@ -712,6 +712,68 @@
         padding: 6px 12px;
         font-size: 12px;
     }
+        /* Tizzy Tool Styles */
+.tizzy-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: 1px solid #d4d0c8;
+    border-radius: 3px;
+    background: #f0f0f0;
+    color: #000;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: #0a3b9c;
+    color: white;
+    border-color: #0a3b9c;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+    border-color: #bdbdbd;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.result-card {
+    transition: all 0.2s ease;
+}
+
+.result-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Windows XP scrollbar styling */
+textarea, .scrollable-section {
+    scrollbar-width: thin;
+    scrollbar-color: #d4d0c8 #f0f0f0;
+}
+
+textarea::-webkit-scrollbar, .scrollable-section::-webkit-scrollbar {
+    width: 12px;
+}
+
+textarea::-webkit-scrollbar-track, .scrollable-section::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb {
+    background-color: #d4d0c8;
+    border-radius: 6px;
+    border: 3px solid #f0f0f0;
+}
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -1366,18 +1428,151 @@
                     </div>
                     
                     <!-- ================= ACCORDION 3: PRECEDENT DATABASE ================= -->
+                    <!-- ================= ACCORDION 3: TIZZY-PREVENTION TOOL ================= -->
                     <div class="accordion">
-                        <div class="accordion-header" data-accordion="precedent">
-                            <span>⚖️ Data Request Precedent Database</span>
+                        <div class="accordion-header" data-accordion="tizzy-tool">
+                            <span>🚨 Schema Discovery & Complexity Analyzer</span>
                             <span class="accordion-icon">+</span>
                         </div>
-                        <div class="accordion-content" id="accordion-precedent">
-                            <div style="padding: 20px; text-align: center;">
-                                <h3>Coming Soon: Precedent Database</h3>
-                                <p>Historical data request decisions, approvals, and conditions.</p>
+                        <div class="accordion-content" id="accordion-tizzy-tool">
+                            <!-- TIZZY TOOL CONTAINER -->
+                            <div class="tizzy-container" style="padding: 20px; background: #f8f8f8; border: 1px solid #d4d0c8; border-radius: 3px;">
+                                
+                                <!-- HEADER -->
+                                <div style="text-align: center; margin-bottom: 25px;">
+                                    <h2 style="color: #0a3b9c; margin-bottom: 10px;">🚨 Tizzy-Prevention Tool</h2>
+                                    <p style="color: #666; max-width: 800px; margin: 0 auto;">
+                                        Analyze your data request complexity <strong>before</strong> giving it to developers.
+                                        Prevents surprises about table joins, data granularity, and result set explosions.
+                                    </p>
+                                </div>
+                                
+                                <!-- TWO-COLUMN LAYOUT -->
+                                <div style="display: flex; gap: 25px; min-height: 600px;">
+                                    
+                                    <!-- LEFT COLUMN: INPUT & ANALYSIS -->
+                                    <div style="flex: 1; background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                                        <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                            🔍 Analyze Your Request
+                                        </h3>
+                                        
+                                        <!-- STEP 1: DATA POINTS INPUT -->
+                                        <div style="margin-bottom: 25px;">
+                                            <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #0a3b9c;">
+                                                1. What data points do you need?
+                                            </label>
+                                            <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                                                Enter each data point on a new line or separated by commas
+                                            </div>
+                                            <textarea id="data-points-input" 
+                                                      style="width: 100%; height: 150px; padding: 12px; border: 2px solid #d4d0c8; border-radius: 3px; font-family: monospace; font-size: 13px;"
+                                                      placeholder="Examples:
+                    - Patient name
+                    - Date of birth
+                    - Diabetes diagnosis
+                    - HbA1c lab results
+                    - Medications prescribed
+                    - Hospital admission date
+                    - Surgeon name
+                    - Clinic location"></textarea>
+                                            
+                                            <!-- QUICK EXAMPLES -->
+                                            <div style="margin-top: 15px;">
+                                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Quick Examples:</div>
+                                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                    <button onclick="loadExample('simple')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                        Simple Patient List
+                                                    </button>
+                                                    <button onclick="loadExample('chronic')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                        Chronic Disease Analysis
+                                                    </button>
+                                                    <button onclick="loadExample('service')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                        Service Utilization
+                                                    </button>
+                                                    <button onclick="loadExample('complex')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                                        Complex Clinical Study
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- STEP 2: EMR SCHEMA SELECTION -->
+                                        <div style="margin-bottom: 25px;">
+                                            <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #0a3b9c;">
+                                                2. Select EMR Schema:
+                                            </label>
+                                            <select id="schema-select" style="width: 100%; padding: 8px; border: 2px solid #d4d0c8; border-radius: 3px; font-size: 13px;">
+                                                <option value="cerner">Cerner Millennium</option>
+                                                <option value="epic">Epic Hyperspace</option>
+                                                <option value="meditech">Meditech Expanse</option>
+                                                <option value="nwt_custom">NWT Custom EMR</option>
+                                                <option value="generic">Generic Hospital Schema</option>
+                                            </select>
+                                            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                                Different EMRs store data in different tables/columns
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- STEP 3: ANALYZE BUTTON -->
+                                        <div style="margin-bottom: 20px;">
+                                            <button onclick="analyzeComplexity()" 
+                                                    class="btn btn-primary" 
+                                                    style="width: 100%; padding: 12px; font-size: 14px; font-weight: bold;">
+                                                🚀 ANALYZE REQUEST COMPLEXITY
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- ANALYSIS STATUS -->
+                                        <div id="analysis-status" style="padding: 15px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px; display: none;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <div id="status-icon" style="font-size: 20px;">⏳</div>
+                                                <div>
+                                                    <div id="status-text" style="font-weight: bold;">Analyzing your request...</div>
+                                                    <div id="status-detail" style="font-size: 12px; color: #666;">Checking table mappings and relationships</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- RIGHT COLUMN: RESULTS & WARNINGS -->
+                                    <div style="flex: 1; background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
+                                        <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                                            📊 Complexity Analysis Results
+                                        </h3>
+                                        
+                                        <!-- RESULTS WILL APPEAR HERE -->
+                                        <div id="tizzy-results" style="min-height: 500px;">
+                                            <div style="text-align: center; padding: 40px; color: #999;">
+                                                <div style="font-size: 48px;">🔍</div>
+                                                <div style="font-size: 16px; margin: 15px 0;">No analysis yet</div>
+                                                <div style="font-size: 13px; max-width: 400px; margin: 0 auto;">
+                                                    Enter your data points on the left and click "Analyze Request Complexity"
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- BOTTOM: ACTION BUTTONS -->
+                                <div style="margin-top: 25px; padding: 20px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px;">
+                                    <h4 style="margin-top: 0; color: #0a3b9c;">⚡ Quick Actions</h4>
+                                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                        <button onclick="generateTechnicalSpec()" class="btn btn-primary">
+                                            📋 Generate Technical Specification
+                                        </button>
+                                        <button onclick="exportAnalysisReport()" class="btn btn-secondary">
+                                            📥 Export Analysis Report
+                                        </button>
+                                        <button onclick="showSQLTemplate()" class="btn btn-secondary">
+                                            💻 View SQL Template
+                                        </button>
+                                        <button onclick="clearAnalysis()" class="btn btn-secondary">
+                                            🗑️ Clear Analysis
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </div>
 
                 <!-- DASHBOARD TAB -->
@@ -4038,8 +4233,657 @@ LIMIT 50`
         // ============================================
 
 
-        // ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL WITH REAL API =================
-
+        //// ============================================================================
+            // TIZZY-PREVENTION TOOL: SCHEMA DISCOVERY & COMPLEXITY ANALYZER
+            // ============================================================================
+            
+            // Schema definitions for different EMR systems
+            const SCHEMA_DATABASES = {
+                'cerner': {
+                    name: 'Cerner Millennium',
+                    tables: {
+                        'patient': { level: 'patient', columns: ['patient_id', 'first_name', 'last_name', 'date_of_birth', 'gender', 'address', 'phone'] },
+                        'encounter': { level: 'encounter', columns: ['encounter_id', 'patient_id', 'admit_date', 'discharge_date', 'encounter_type', 'location'] },
+                        'diagnosis': { level: 'diagnosis', columns: ['diagnosis_id', 'patient_id', 'diagnosis_code', 'diagnosis_date', 'provider_id'] },
+                        'lab_result': { level: 'lab', columns: ['lab_id', 'patient_id', 'test_code', 'result_value', 'result_date', 'unit'] },
+                        'medication': { level: 'medication', columns: ['med_id', 'patient_id', 'drug_name', 'prescribe_date', 'dose', 'provider_id'] },
+                        'provider': { level: 'provider', columns: ['provider_id', 'first_name', 'last_name', 'specialty', 'clinic'] },
+                        'vital_sign': { level: 'vital', columns: ['vital_id', 'patient_id', 'measure_date', 'bp_systolic', 'bp_diastolic', 'heart_rate'] }
+                    },
+                    relationships: [
+                        { from: 'encounter', to: 'patient', on: 'patient_id' },
+                        { from: 'diagnosis', to: 'patient', on: 'patient_id' },
+                        { from: 'lab_result', to: 'patient', on: 'patient_id' },
+                        { from: 'medication', to: 'patient', on: 'patient_id' },
+                        { from: 'vital_sign', to: 'patient', on: 'patient_id' }
+                    ]
+                },
+                'epic': {
+                    name: 'Epic Hyperspace',
+                    tables: {
+                        'patients': { level: 'patient', columns: ['pat_id', 'pat_mrn', 'pat_first', 'pat_last', 'pat_dob', 'pat_sex'] },
+                        'encounters': { level: 'encounter', columns: ['enc_id', 'pat_id', 'enc_date', 'enc_type', 'department', 'provider'] },
+                        'problems': { level: 'problem', columns: ['prob_id', 'pat_id', 'prob_code', 'prob_date', 'status'] },
+                        'labs': { level: 'lab', columns: ['lab_id', 'pat_id', 'lab_code', 'lab_value', 'lab_date', 'reference_range'] },
+                        'med_orders': { level: 'medication', columns: ['order_id', 'pat_id', 'med_name', 'order_date', 'sig', 'ordering_md'] },
+                        'procedures': { level: 'procedure', columns: ['proc_id', 'pat_id', 'proc_code', 'proc_date', 'surgeon'] }
+                    },
+                    relationships: [
+                        { from: 'encounters', to: 'patients', on: 'pat_id' },
+                        { from: 'problems', to: 'patients', on: 'pat_id' },
+                        { from: 'labs', to: 'patients', on: 'pat_id' },
+                        { from: 'med_orders', to: 'patients', on: 'pat_id' },
+                        { from: 'procedures', to: 'patients', on: 'pat_id' }
+                    ]
+                },
+                'nwt_custom': {
+                    name: 'NWT Custom EMR',
+                    tables: {
+                        'patients': { level: 'patient', columns: ['patient_id', 'first_name', 'last_name', 'date_of_birth', 'community', 'indigenous_status', 'health_card'] },
+                        'encounters': { level: 'encounter', columns: ['encounter_id', 'patient_id', 'encounter_date', 'encounter_type', 'clinic', 'provider', 'interpreter_needed'] },
+                        'chronic_conditions': { level: 'chronic', columns: ['condition_id', 'patient_id', 'condition_type', 'diagnosis_date', 'last_review'] },
+                        'lab_results': { level: 'lab', columns: ['lab_id', 'patient_id', 'test_type', 'result', 'test_date', 'lab_location'] },
+                        'medications': { level: 'medication', columns: ['med_id', 'patient_id', 'drug_name', 'start_date', 'dose', 'prescribing_md'] },
+                        'immunizations': { level: 'immunization', columns: ['immun_id', 'patient_id', 'vaccine_type', 'date_administered', 'clinic', 'batch_number'] },
+                        'traditional_medicine': { level: 'traditional', columns: ['session_id', 'patient_id', 'healer_name', 'session_date', 'treatment_type', 'community_elder'] }
+                    },
+                    relationships: [
+                        { from: 'encounters', to: 'patients', on: 'patient_id' },
+                        { from: 'chronic_conditions', to: 'patients', on: 'patient_id' },
+                        { from: 'lab_results', to: 'patients', on: 'patient_id' },
+                        { from: 'medications', to: 'patients', on: 'patient_id' },
+                        { from: 'immunizations', to: 'patients', on: 'patient_id' },
+                        { from: 'traditional_medicine', to: 'patients', on: 'patient_id' }
+                    ]
+                }
+            };
+            
+            // Quick examples for testing
+            const QUICK_EXAMPLES = {
+                'simple': "Patient name, Date of birth, Health card number, Community",
+                'chronic': "Patient name, Diabetes diagnosis, HbA1c lab results, Medications, Blood pressure readings",
+                'service': "Patient name, Encounter date, Clinic location, Provider name, Interpreter needed",
+                'complex': "Patient demographics, All lab results, Medication history, Hospital admissions, Surgical procedures, Follow-up appointments"
+            };
+            
+            // Load example data
+            function loadExample(exampleKey) {
+                document.getElementById('data-points-input').value = QUICK_EXAMPLES[exampleKey];
+                
+                // Show notification
+                showNotification(`Loaded ${exampleKey.replace('_', ' ')} example`, 'info');
+            }
+            
+            // Main analysis function
+            function analyzeComplexity() {
+                const dataPointsInput = document.getElementById('data-points-input').value;
+                const schemaType = document.getElementById('schema-select').value;
+                
+                if (!dataPointsInput.trim()) {
+                    showNotification('Please enter data points to analyze', 'error');
+                    return;
+                }
+                
+                // Parse data points
+                const dataPoints = parseDataPoints(dataPointsInput);
+                
+                // Show analysis status
+                showAnalysisStatus('analyzing', `Analyzing ${dataPoints.length} data points...`);
+                
+                // Simulate analysis (in real app, this would query database schema)
+                setTimeout(() => {
+                    const analysis = performComplexityAnalysis(dataPoints, schemaType);
+                    displayAnalysisResults(analysis);
+                    showAnalysisStatus('complete', `Analysis complete: ${analysis.summary}`);
+                }, 800);
+            }
+            
+            // Parse data points from input
+            function parseDataPoints(input) {
+                // Split by newlines or commas, trim, filter empties
+                return input.split(/[\n,]/)
+                    .map(point => point.trim())
+                    .filter(point => point.length > 0)
+                    .map(point => point.replace(/^[-•*]\s*/, '')); // Remove bullet points
+            }
+            
+            // Perform complexity analysis
+            function performComplexityAnalysis(dataPoints, schemaType) {
+                const schema = SCHEMA_DATABASES[schemaType] || SCHEMA_DATABASES.cerner;
+                
+                // Map data points to tables
+                const tableMappings = mapDataPointsToTables(dataPoints, schema);
+                
+                // Analyze complexity
+                const complexity = analyzeTableRelationships(tableMappings, schema);
+                
+                // Generate warnings
+                const warnings = generateWarnings(complexity, tableMappings);
+                
+                // Generate sample SQL
+                const sampleSQL = generateSampleSQL(tableMappings, schema, complexity);
+                
+                return {
+                    dataPoints: dataPoints,
+                    schema: schema.name,
+                    tableMappings: tableMappings,
+                    complexity: complexity,
+                    warnings: warnings,
+                    sampleSQL: sampleSQL,
+                    summary: generateSummary(complexity, warnings)
+                };
+            }
+            
+            // Map data points to tables
+            function mapDataPointsToTables(dataPoints, schema) {
+                const mappings = {};
+                
+                dataPoints.forEach(point => {
+                    const pointLower = point.toLowerCase();
+                    let foundTable = null;
+                    let foundColumn = null;
+                    
+                    // Search through schema tables and columns
+                    for (const [tableName, tableInfo] of Object.entries(schema.tables)) {
+                        for (const column of tableInfo.columns) {
+                            const columnLower = column.toLowerCase();
+                            
+                            // Simple matching logic (in real app, use NLP or fuzzy matching)
+                            if (pointLower.includes(columnLower.replace(/_/g, ' ')) || 
+                                columnLower.includes(pointLower.replace(/\s+/g, '_'))) {
+                                foundTable = tableName;
+                                foundColumn = column;
+                                break;
+                            }
+                        }
+                        if (foundTable) break;
+                    }
+                    
+                    if (foundTable) {
+                        if (!mappings[foundTable]) {
+                            mappings[foundTable] = {
+                                table: foundTable,
+                                level: schema.tables[foundTable].level,
+                                columns: [],
+                                dataPoints: []
+                            };
+                        }
+                        mappings[foundTable].columns.push(foundColumn);
+                        mappings[foundTable].dataPoints.push(point);
+                    } else {
+                        // Add to unknown mappings
+                        if (!mappings['unknown']) {
+                            mappings['unknown'] = {
+                                table: 'unknown',
+                                level: 'unknown',
+                                columns: [],
+                                dataPoints: []
+                            };
+                        }
+                        mappings['unknown'].dataPoints.push(point);
+                    }
+                });
+                
+                return Object.values(mappings);
+            }
+            
+            // Analyze table relationships
+            function analyzeTableRelationships(tableMappings, schema) {
+                const knownTables = tableMappings.filter(m => m.table !== 'unknown');
+                
+                if (knownTables.length === 0) {
+                    return {
+                        level: 'unknown',
+                        tablesRequired: 0,
+                        joinsRequired: 0,
+                        dataGranularity: 'unknown',
+                        complexityScore: 0
+                    };
+                }
+                
+                // Count tables and joins
+                const tablesRequired = knownTables.length;
+                const joinsRequired = tablesRequired > 1 ? tablesRequired - 1 : 0;
+                
+                // Determine data granularity
+                const levels = new Set(knownTables.map(t => t.level));
+                let dataGranularity = 'single';
+                if (levels.has('patient') && levels.has('encounter')) {
+                    dataGranularity = 'mixed';
+                } else if (levels.has('patient') && levels.has('lab')) {
+                    dataGranularity = 'mixed';
+                } else if (levels.size > 1) {
+                    dataGranularity = 'multiple';
+                }
+                
+                // Calculate complexity score (0-100)
+                let complexityScore = 0;
+                complexityScore += tablesRequired * 10;
+                complexityScore += joinsRequired * 20;
+                if (dataGranularity === 'mixed') complexityScore += 30;
+                if (dataGranularity === 'multiple') complexityScore += 20;
+                complexityScore = Math.min(100, complexityScore);
+                
+                // Determine complexity level
+                let complexityLevel = 'simple';
+                if (complexityScore > 60) complexityLevel = 'complex';
+                else if (complexityScore > 30) complexityLevel = 'moderate';
+                
+                return {
+                    level: complexityLevel,
+                    tablesRequired: tablesRequired,
+                    joinsRequired: joinsRequired,
+                    dataGranularity: dataGranularity,
+                    complexityScore: complexityScore
+                };
+            }
+            
+            // Generate warnings
+            function generateWarnings(complexity, tableMappings) {
+                const warnings = [];
+                
+                // Table count warnings
+                if (complexity.tablesRequired > 3) {
+                    warnings.push({
+                        type: 'high_complexity',
+                        message: `High complexity: Requires ${complexity.tablesRequired} tables and ${complexity.joinsRequired} joins`,
+                        severity: 'high'
+                    });
+                } else if (complexity.tablesRequired > 1) {
+                    warnings.push({
+                        type: 'multiple_tables',
+                        message: `Multiple tables needed: ${complexity.tablesRequired} tables require ${complexity.joinsRequired} joins`,
+                        severity: 'medium'
+                    });
+                }
+                
+                // Data granularity warnings
+                if (complexity.dataGranularity === 'mixed') {
+                    warnings.push({
+                        type: 'granularity_mismatch',
+                        message: 'Warning: Mixing patient-level data with encounter-level or transactional data',
+                        detail: 'This will create duplicate rows in your results',
+                        severity: 'high'
+                    });
+                }
+                
+                // Unknown data points warning
+                const unknownData = tableMappings.find(m => m.table === 'unknown');
+                if (unknownData && unknownData.dataPoints.length > 0) {
+                    warnings.push({
+                        type: 'unknown_data',
+                        message: `${unknownData.dataPoints.length} data point(s) not found in schema`,
+                        detail: 'These may be stored differently or require special extraction',
+                        severity: 'medium'
+                    });
+                }
+                
+                // NWT-specific warnings
+                const hasTraditional = tableMappings.some(m => m.dataPoints.some(p => 
+                    p.toLowerCase().includes('traditional') || p.toLowerCase().includes('elder')));
+                if (hasTraditional) {
+                    warnings.push({
+                        type: 'nwt_specific',
+                        message: 'NWT-specific data: Traditional medicine encounters may require special handling',
+                        severity: 'info'
+                    });
+                }
+                
+                return warnings;
+            }
+            
+            // Generate sample SQL
+            function generateSampleSQL(tableMappings, schema, complexity) {
+                const knownTables = tableMappings.filter(m => m.table !== 'unknown');
+                
+                if (knownTables.length === 0) {
+                    return '-- No recognizable tables found in schema';
+                }
+                
+                let sql = '-- Sample SQL Query (Generated by Tizzy-Prevention Tool)\n';
+                sql += '-- Complexity Level: ' + complexity.level.toUpperCase() + '\n';
+                sql += '-- Tables Required: ' + complexity.tablesRequired + '\n';
+                sql += '-- Joins Required: ' + complexity.joinsRequired + '\n\n';
+                
+                // Build SELECT clause
+                sql += 'SELECT \n';
+                knownTables.forEach((table, index) => {
+                    table.columns.forEach((column, colIndex) => {
+                        const prefix = index === 0 && colIndex === 0 ? '  ' : '  ,';
+                        sql += `${prefix} ${table.table}.${column} AS "${table.table}_${column}"\n`;
+                    });
+                });
+                
+                // Build FROM clause
+                sql += '\nFROM ' + knownTables[0].table + '\n';
+                
+                // Build JOIN clauses if needed
+                if (knownTables.length > 1) {
+                    for (let i = 1; i < knownTables.length; i++) {
+                        const table = knownTables[i];
+                        const relationship = schema.relationships.find(r => 
+                            r.from === table.table || r.to === table.table);
+                        
+                        if (relationship) {
+                            sql += `LEFT JOIN ${table.table} ON ${knownTables[0].table}.patient_id = ${table.table}.patient_id\n`;
+                        } else {
+                            sql += `-- JOIN ${table.table} (relationship not defined in schema)\n`;
+                        }
+                    }
+                }
+                
+                // Add WHERE clause placeholder
+                sql += '\nWHERE 1=1\n';
+                sql += '  -- Add your filters here\n';
+                sql += '  -- AND patients.community = \'Yellowknife\'\n';
+                sql += '  -- AND lab_results.test_date >= \'2024-01-01\'\n';
+                
+                // Add limit
+                sql += '\nLIMIT 100;';
+                
+                return sql;
+            }
+            
+            // Generate summary
+            function generateSummary(complexity, warnings) {
+                if (complexity.level === 'simple') {
+                    return 'Simple single-table request';
+                } else if (complexity.level === 'moderate') {
+                    return `Moderate complexity: ${complexity.tablesRequired} tables`;
+                } else {
+                    return `Complex request: ${complexity.tablesRequired} tables, ${warnings.length} warnings`;
+                }
+            }
+            
+            // Display analysis results
+            function displayAnalysisResults(analysis) {
+                const resultsDiv = document.getElementById('tizzy-results');
+                
+                let html = '';
+                
+                // COMPLEXITY CARD
+                html += `
+                    <div class="result-card" style="background: ${getComplexityColor(analysis.complexity.level)}; border-left: 4px solid ${getComplexityBorderColor(analysis.complexity.level)}; padding: 15px; margin-bottom: 15px; border-radius: 3px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; color: #0a3b9c;">Complexity Assessment</h4>
+                                <div style="font-size: 13px; margin-top: 5px;">
+                                    <strong>Level:</strong> <span style="font-weight: bold; text-transform: uppercase; color: ${getComplexityTextColor(analysis.complexity.level)};">
+                                        ${analysis.complexity.level}
+                                    </span>
+                                    | <strong>Score:</strong> ${analysis.complexity.score}/100
+                                </div>
+                            </div>
+                            <div style="font-size: 24px;">${getComplexityIcon(analysis.complexity.level)}</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+                            <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 3px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #0a3b9c;">${analysis.complexity.tablesRequired}</div>
+                                <div style="font-size: 12px;">Tables Required</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 3px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #0a3b9c;">${analysis.complexity.joinsRequired}</div>
+                                <div style="font-size: 12px;">Joins Needed</div>
+                            </div>
+                            <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.7); border-radius: 3px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #0a3b9c;">${analysis.dataPoints.length}</div>
+                                <div style="font-size: 12px;">Data Points</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // TABLE MAPPINGS
+                html += `
+                    <div class="result-card" style="background: white; border: 1px solid #d4d0c8; padding: 15px; margin-bottom: 15px; border-radius: 3px;">
+                        <h4 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                            📊 Table Mappings (${analysis.schema})
+                        </h4>
+                `;
+                
+                analysis.tableMappings.forEach(mapping => {
+                    if (mapping.table === 'unknown') {
+                        html += `
+                            <div style="padding: 12px; background: #fff3e0; border-left: 4px solid #FF9800; margin-bottom: 10px; border-radius: 2px;">
+                                <div style="font-weight: bold; color: #f57c00;">⚠️ Unknown Mapping</div>
+                                <div style="font-size: 13px; margin-top: 5px;">
+                                    <strong>Data points not found:</strong> ${mapping.dataPoints.join(', ')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div style="padding: 12px; background: #f8f8f8; border-left: 4px solid #4CAF50; margin-bottom: 10px; border-radius: 2px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div>
+                                        <strong style="color: #0a3b9c;">${mapping.table}</strong>
+                                        <span style="font-size: 12px; color: #666; margin-left: 10px;">(${mapping.level} level)</span>
+                                    </div>
+                                    <span style="font-size: 12px; color: #666;">${mapping.columns.length} columns</span>
+                                </div>
+                                <div style="font-size: 13px; margin-top: 5px;">
+                                    <strong>Columns:</strong> ${mapping.columns.join(', ')}<br>
+                                    <strong>For:</strong> ${mapping.dataPoints.join(', ')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                html += `</div>`;
+                
+                // WARNINGS
+                if (analysis.warnings.length > 0) {
+                    html += `
+                        <div class="result-card" style="background: white; border: 1px solid #d4d0c8; padding: 15px; margin-bottom: 15px; border-radius: 3px;">
+                            <h4 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                                🚨 Important Warnings (${analysis.warnings.length})
+                            </h4>
+                    `;
+                    
+                    analysis.warnings.forEach(warning => {
+                        const severityColor = getWarningColor(warning.severity);
+                        html += `
+                            <div style="padding: 12px; background: ${severityColor.background}; border-left: 4px solid ${severityColor.border}; margin-bottom: 10px; border-radius: 2px;">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <div style="font-size: 20px;">${getWarningIcon(warning.severity)}</div>
+                                    <div style="flex-grow: 1;">
+                                        <div style="font-weight: bold; color: ${severityColor.text};">${warning.message}</div>
+                                        ${warning.detail ? `<div style="font-size: 13px; margin-top: 3px;">${warning.detail}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`;
+                }
+                
+                // SQL PREVIEW
+                html += `
+                    <div class="result-card" style="background: white; border: 1px solid #d4d0c8; padding: 15px; border-radius: 3px;">
+                        <h4 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                            💻 Generated SQL Template
+                        </h4>
+                        <div style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; padding: 15px; font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap;">
+                            ${analysis.sampleSQL}
+                        </div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button onclick="copyToClipboard('${escapeForJS(analysis.sampleSQL)}')" class="btn btn-secondary" style="font-size: 12px;">
+                                📋 Copy SQL
+                            </button>
+                            <button onclick="downloadSQL('${escapeForJS(analysis.sampleSQL)}')" class="btn btn-secondary" style="font-size: 12px;">
+                                💾 Save as .sql
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+            }
+            
+            // Helper functions
+            function getComplexityColor(level) {
+                switch(level) {
+                    case 'simple': return '#e8f5e9';
+                    case 'moderate': return '#fff3e0';
+                    case 'complex': return '#ffebee';
+                    default: return '#f5f5f5';
+                }
+            }
+            
+            function getComplexityBorderColor(level) {
+                switch(level) {
+                    case 'simple': return '#4CAF50';
+                    case 'moderate': return '#FF9800';
+                    case 'complex': return '#f44336';
+                    default: return '#9e9e9e';
+                }
+            }
+            
+            function getComplexityTextColor(level) {
+                switch(level) {
+                    case 'simple': return '#2e7d32';
+                    case 'moderate': return '#f57c00';
+                    case 'complex': return '#d32f2f';
+                    default: return '#616161';
+                }
+            }
+            
+            function getComplexityIcon(level) {
+                switch(level) {
+                    case 'simple': return '✅';
+                    case 'moderate': return '⚠️';
+                    case 'complex': return '🚨';
+                    default: return '❓';
+                }
+            }
+            
+            function getWarningColor(severity) {
+                switch(severity) {
+                    case 'high': return { background: '#ffebee', border: '#f44336', text: '#d32f2f' };
+                    case 'medium': return { background: '#fff3e0', border: '#FF9800', text: '#f57c00' };
+                    case 'low': return { background: '#fff8e1', border: '#FFC107', text: '#ff8f00' };
+                    default: return { background: '#e3f2fd', border: '#2196F3', text: '#1565c0' };
+                }
+            }
+            
+            function getWarningIcon(severity) {
+                switch(severity) {
+                    case 'high': return '🚨';
+                    case 'medium': return '⚠️';
+                    case 'low': return '💡';
+                    default: return 'ℹ️';
+                }
+            }
+            
+            function showAnalysisStatus(state, message) {
+                const statusDiv = document.getElementById('analysis-status');
+                const statusIcon = document.getElementById('status-icon');
+                const statusText = document.getElementById('status-text');
+                const statusDetail = document.getElementById('status-detail');
+                
+                if (state === 'analyzing') {
+                    statusIcon.textContent = '⏳';
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.background = '#fff3e0';
+                    statusDiv.style.borderColor = '#FF9800';
+                } else if (state === 'complete') {
+                    statusIcon.textContent = '✅';
+                    statusDiv.style.background = '#e8f5e9';
+                    statusDiv.style.borderColor = '#4CAF50';
+                }
+                
+                statusText.textContent = message;
+                statusDetail.textContent = state === 'analyzing' ? 'Checking table mappings and relationships' : 'Ready for next steps';
+            }
+            
+            function clearAnalysis() {
+                document.getElementById('data-points-input').value = '';
+                document.getElementById('tizzy-results').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <div style="font-size: 48px;">🔍</div>
+                        <div style="font-size: 16px; margin: 15px 0;">No analysis yet</div>
+                        <div style="font-size: 13px; max-width: 400px; margin: 0 auto;">
+                            Enter your data points on the left and click "Analyze Request Complexity"
+                        </div>
+                    </div>
+                `;
+                document.getElementById('analysis-status').style.display = 'none';
+                showNotification('Analysis cleared', 'info');
+            }
+            
+            function generateTechnicalSpec() {
+                const dataPoints = document.getElementById('data-points-input').value;
+                if (!dataPoints.trim()) {
+                    showNotification('Please analyze first', 'error');
+                    return;
+                }
+                
+                showNotification('Generating technical specification document...', 'info');
+                // In real implementation, this would generate a PDF or Word doc
+            }
+            
+            function exportAnalysisReport() {
+                showNotification('Exporting analysis report...', 'info');
+                // In real implementation, this would export to PDF/Excel
+            }
+            
+            function showSQLTemplate() {
+                const resultsDiv = document.getElementById('tizzy-results');
+                const sqlSection = resultsDiv.querySelector('pre');
+                if (sqlSection) {
+                    sqlSection.scrollIntoView({ behavior: 'smooth' });
+                    showNotification('SQL template highlighted', 'info');
+                }
+            }
+            
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('SQL copied to clipboard!', 'success');
+                }).catch(err => {
+                    showNotification('Failed to copy: ' + err, 'error');
+                });
+            }
+            
+            function downloadSQL(sql) {
+                const blob = new Blob([sql], { type: 'text/sql' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'nwt_data_query.sql';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showNotification('SQL file downloaded', 'success');
+            }
+            
+            function escapeForJS(str) {
+                return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+            }
+            
+            function showNotification(message, type = 'info') {
+                // Use your existing notification system or create a simple one
+                alert(`${type.toUpperCase()}: ${message}`);
+            }
+            
+            // Initialize when tab is opened
+            document.addEventListener('DOMContentLoaded', function() {
+                const tizzyAccordion = document.querySelector('[data-accordion="tizzy-tool"]');
+                if (tizzyAccordion) {
+                    tizzyAccordion.addEventListener('click', function() {
+                        setTimeout(() => {
+                            // Auto-focus the input when accordion opens
+                            const input = document.getElementById('data-points-input');
+                            if (input && document.getElementById('accordion-tizzy-tool').style.display === 'block') {
+                                input.focus();
+                            }
+                        }, 100);
+                    });
+                }
+            });
         // ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL =================
         
         // Store for terminology tree and cards
@@ -5294,6 +6138,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
