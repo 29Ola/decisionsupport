@@ -2643,30 +2643,34 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
 
         // Dashboard Data Loader - Connects to YOUR real data
         // FIXED: Dashboard Data Loader
+        // ============================================================================
+        // DASHBOARD DATA LOADER - FIXED VERSION
+        // ============================================================================
+        
+        // FIXED: Get dashboard data with proper error handling
         async function getDashboardDataFromDB(timeFilter, regionFilter, orgFilter) {
             try {
                 console.log('🔍 Querying database for dashboard data...');
                 
-                // Get YOUR database connection (adjust based on your actual setup)
-                const db = window.db || window.database;
+                // Try to get database connection - adjust based on your actual setup
+                const db = window.db || window.database || window.sqliteDB;
                 
-                if (!db || !db.query) {
+                if (!db || typeof db.query !== 'function') {
                     console.warn('Database not available, using localStorage fallback');
                     return getDashboardDataFromLocalStorage();
                 }
                 
-                // 1. Count total requests from YOUR actual table
                 let totalRequests = 0;
+                let regions = [];
+                let recent = [];
+                let approvalRate = 0;
+                
                 try {
+                    // 1. Count total requests
                     const totalResult = await db.query("SELECT COUNT(*) as count FROM data_requests");
                     totalRequests = totalResult[0]?.count || 0;
-                } catch (e) {
-                    console.warn('Could not count requests:', e.message);
-                }
-                
-                // 2. Count by region (using YOUR region field)
-                let regions = [];
-                try {
+                    
+                    // 2. Get regions
                     const regionResult = await db.query(`
                         SELECT region, COUNT(*) as count 
                         FROM data_requests 
@@ -2675,13 +2679,8 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
                         ORDER BY count DESC
                     `);
                     regions = regionResult || [];
-                } catch (e) {
-                    console.warn('Could not group by region:', e.message);
-                }
-                
-                // 3. Get recent activity (last 5 requests)
-                let recent = [];
-                try {
+                    
+                    // 3. Get recent requests
                     const recentResult = await db.query(`
                         SELECT request_number, purpose, created_at 
                         FROM data_requests 
@@ -2689,18 +2688,20 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
                         LIMIT 5
                     `);
                     recent = recentResult || [];
-                } catch (e) {
-                    console.warn('Could not get recent requests:', e.message);
-                }
-                
-                // 4. Calculate approval rate (if you have a status field)
-                let approvalRate = 0;
-                try {
-                    const approvedResult = await db.query("SELECT COUNT(*) as count FROM data_requests WHERE status = 'approved' OR status = 'Approved'");
-                    const approvedCount = approvedResult[0]?.count || 0;
-                    approvalRate = totalRequests > 0 ? Math.round((approvedCount / totalRequests) * 100) : 0;
-                } catch (e) {
-                    console.warn('Could not calculate approval rate:', e.message);
+                    
+                    // 4. Calculate approval rate (if you have status field)
+                    try {
+                        const approvedResult = await db.query("SELECT COUNT(*) as count FROM data_requests WHERE status = 'approved'");
+                        const approvedCount = approvedResult[0]?.count || 0;
+                        approvalRate = totalRequests > 0 ? Math.round((approvedCount / totalRequests) * 100) : 0;
+                    } catch (e) {
+                        console.warn('No status field for approval rate:', e.message);
+                        approvalRate = 0;
+                    }
+                    
+                } catch (dbError) {
+                    console.warn('Database query failed, using localStorage:', dbError.message);
+                    return getDashboardDataFromLocalStorage();
                 }
                 
                 return {
@@ -2717,159 +2718,308 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
             }
         }
         
-        // Fallback: Get data from localStorage if database not available
+        // Fallback to localStorage
         function getDashboardDataFromLocalStorage() {
             console.log('📁 Using localStorage fallback for dashboard data');
             
-            // Try to get saved requests from localStorage
-            const savedRequests = JSON.parse(localStorage.getItem('data_requests') || '[]');
-            
-            return {
-                totalRequests: savedRequests.length,
-                approvalRate: 0, // You'll need to add status tracking
-                regions: groupByRegion(savedRequests),
-                recent: savedRequests.slice(-5).reverse(),
-                lastUpdated: new Date().toISOString()
-            };
+            try {
+                const savedRequests = JSON.parse(localStorage.getItem('data_requests') || '[]');
+                
+                // Calculate region counts
+                const regionCounts = {};
+                savedRequests.forEach(req => {
+                    const region = req.region || 'Unknown';
+                    regionCounts[region] = (regionCounts[region] || 0) + 1;
+                });
+                
+                const regions = Object.entries(regionCounts).map(([region, count]) => ({
+                    region,
+                    count
+                }));
+                
+                // Get recent requests (last 5)
+                const recent = savedRequests
+                    .slice(-5)
+                    .reverse()
+                    .map(req => ({
+                        request_number: req.request_number || 'Unknown',
+                        purpose: req.purpose || 'No purpose',
+                        created_at: req.timestamp || new Date().toISOString()
+                    }));
+                
+                return {
+                    totalRequests: savedRequests.length,
+                    approvalRate: 0, // Default until you add status tracking
+                    regions,
+                    recent,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+            } catch (error) {
+                console.error('LocalStorage error:', error);
+                return {
+                    totalRequests: 0,
+                    approvalRate: 0,
+                    regions: [],
+                    recent: [],
+                    lastUpdated: new Date().toISOString()
+                };
+            }
         }
         
-        // Helper: Group requests by region
-        function groupByRegion(requests) {
-            const regionCounts = {};
-            requests.forEach(req => {
-                const region = req.region || 'Unknown';
-                regionCounts[region] = (regionCounts[region] || 0) + 1;
-            });
-            
-            return Object.entries(regionCounts).map(([region, count]) => ({
-                region,
-                count
-            }));
-        }
-        
-        // FIXED: Update dashboard with real data
+        // FIXED: Update dashboard with real data (NO updateTrends call)
         function updateDashboardWithRealData(data) {
-            console.log('🔄 Updating dashboard with:', data);
+            console.log('🔄 Updating dashboard with data:', data);
             
-            // Update metrics
-            document.getElementById('metric-total-requests').textContent = data.totalRequests;
-            document.getElementById('total-requests-count').textContent = data.totalRequests;
-            document.getElementById('metric-approval-rate').textContent = data.approvalRate + '%';
-            document.getElementById('storage-count').textContent = data.totalRequests;
-            
-            // Update regional breakdown
-            updateRegionalData(data.regions);
-            
-            // Update recent activity
-            updateRecentActivity(data.recent);
-            
-            // Update last updated time
-            document.getElementById('last-updated').textContent = new Date().toLocaleString();
-            
-            // Show success message
-            document.getElementById('db-status').textContent = '✅ Connected';
-            document.getElementById('db-status').style.color = '#4CAF50';
+            try {
+                // Update metrics
+                if (document.getElementById('metric-total-requests')) {
+                    document.getElementById('metric-total-requests').textContent = data.totalRequests;
+                }
+                if (document.getElementById('total-requests-count')) {
+                    document.getElementById('total-requests-count').textContent = data.totalRequests;
+                }
+                if (document.getElementById('metric-approval-rate')) {
+                    document.getElementById('metric-approval-rate').textContent = data.approvalRate + '%';
+                }
+                if (document.getElementById('storage-count')) {
+                    document.getElementById('storage-count').textContent = data.totalRequests;
+                }
+                
+                // Update regional breakdown
+                updateRegionalData(data.regions);
+                
+                // Update recent activity
+                updateRecentActivity(data.recent);
+                
+                // Update request distribution visualization
+                updateRequestDistribution(data.regions);
+                
+                // Update status
+                if (document.getElementById('last-updated')) {
+                    document.getElementById('last-updated').textContent = new Date().toLocaleString();
+                }
+                if (document.getElementById('db-status')) {
+                    document.getElementById('db-status').textContent = '✅ Connected';
+                    document.getElementById('db-status').style.color = '#4CAF50';
+                }
+                
+                console.log('✅ Dashboard updated successfully');
+                
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+            }
         }
         
-        // FIXED: Update regional data
+        // Update regional data
         function updateRegionalData(regions) {
             const regionalDiv = document.getElementById('regional-breakdown');
+            if (!regionalDiv) return;
             
-            if (!regions || regions.length === 0) {
-                regionalDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #999;">
-                        <div style="font-size: 48px;">🗺️</div>
-                        <div>No regional data yet</div>
-                        <div style="font-size: 12px; margin-top: 10px;">Submit requests with region selected</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            regions.forEach(item => {
-                const regionName = item.region || 'Unknown';
-                const count = item.count || 0;
-                
-                html += `
-                    <div class="region-item" onclick="filterByRegion('${regionName}')" style="cursor: pointer;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-                            <div>
-                                <strong style="color: #0a3b9c;">${regionName}</strong>
-                            </div>
-                            <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">${count}</span>
+            try {
+                if (!regions || regions.length === 0) {
+                    regionalDiv.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <div style="font-size: 48px;">🗺️</div>
+                            <div>No regional data yet</div>
+                            <div style="font-size: 12px; margin-top: 10px;">Submit requests with region selected</div>
                         </div>
-                    </div>
-                `;
-            });
-            
-            regionalDiv.innerHTML = html;
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                regions.forEach(item => {
+                    const regionName = item.region || 'Unknown';
+                    const count = item.count || 0;
+                    
+                    html += `
+                        <div class="region-item" onclick="filterDashboardByRegion('${regionName.replace(/'/g, "\\'")}')" 
+                             style="cursor: pointer; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f8f8; border-radius: 3px;">
+                                <div>
+                                    <strong style="color: #0a3b9c;">${regionName}</strong>
+                                </div>
+                                <span style="background: #e3f2fd; color: #0a3b9c; padding: 4px 10px; border-radius: 12px; font-weight: bold;">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                regionalDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error updating regional data:', error);
+            }
         }
         
-        // FIXED: Update recent activity
+        // Update recent activity
         function updateRecentActivity(recent) {
             const recentDiv = document.getElementById('recent-activity');
+            if (!recentDiv) return;
             
-            if (!recent || recent.length === 0) {
-                recentDiv.innerHTML = `
-                    <div style="text-align: center; color: #999;">
-                        <div style="font-size: 36px;">⏳</div>
-                        <div>No recent activity</div>
-                        <div style="font-size: 12px;">Submit requests via the Form tab</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            recent.forEach(item => {
-                const requestNum = item.request_number || 'Unknown';
-                const purpose = item.purpose ? item.purpose.substring(0, 50) + '...' : 'No purpose';
-                const date = item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Unknown date';
-                
-                html += `
-                    <div style="padding: 10px; border-bottom: 1px solid #eee;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <strong style="color: #0a3b9c;">${requestNum}</strong>
-                            <span style="font-size: 12px; color: #666;">${date}</span>
+            try {
+                if (!recent || recent.length === 0) {
+                    recentDiv.innerHTML = `
+                        <div style="text-align: center; color: #999; padding: 30px;">
+                            <div style="font-size: 36px;">⏳</div>
+                            <div>No recent activity</div>
+                            <div style="font-size: 12px;">Submit requests via the Form tab</div>
                         </div>
-                        <div style="font-size: 13px; margin-top: 5px;">${purpose}</div>
-                    </div>
-                `;
-            });
-            
-            recentDiv.innerHTML = html;
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                recent.forEach((item, index) => {
+                    const requestNum = item.request_number || `Request-${index + 1}`;
+                    const purpose = item.purpose ? (item.purpose.substring(0, 60) + (item.purpose.length > 60 ? '...' : '')) : 'No purpose specified';
+                    const date = item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent';
+                    
+                    html += `
+                        <div style="padding: 10px; border-bottom: 1px solid #eee; ${index === recent.length - 1 ? 'border-bottom: none;' : ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <strong style="color: #0a3b9c; font-size: 13px;">${requestNum}</strong>
+                                <span style="font-size: 11px; color: #666;">${date}</span>
+                            </div>
+                            <div style="font-size: 12px; margin-top: 5px; color: #333;">${purpose}</div>
+                        </div>
+                    `;
+                });
+                
+                recentDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error updating recent activity:', error);
+            }
         }
         
-        // FIXED: Remove the showError reference - replace with this:
+        // Update request distribution visualization
+        function updateRequestDistribution(regions) {
+            const distributionDiv = document.getElementById('request-distribution');
+            if (!distributionDiv) return;
+            
+            try {
+                if (!regions || regions.length === 0) {
+                    distributionDiv.innerHTML = `
+                        <div style="text-align: center; color: #999; padding: 40px;">
+                            <div style="font-size: 48px;">📊</div>
+                            <div>No request data yet</div>
+                            <div style="font-size: 12px; margin-top: 10px;">Submit requests to see distribution</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Simple bar chart
+                const maxCount = Math.max(...regions.map(r => r.count || 0));
+                let html = '<div style="padding: 10px;">';
+                
+                regions.forEach(item => {
+                    const regionName = item.region || 'Unknown';
+                    const count = item.count || 0;
+                    const widthPercent = maxCount > 0 ? (count / maxCount * 100) : 0;
+                    
+                    html += `
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 12px;">${regionName}</span>
+                                <span style="font-size: 12px; font-weight: bold; color: #0a3b9c;">${count}</span>
+                            </div>
+                            <div style="height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${widthPercent}%; height: 100%; background: #2196F3; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                distributionDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error updating distribution:', error);
+            }
+        }
+        
+        // Filter dashboard by region
+        function filterDashboardByRegion(region) {
+            if (!region || region === 'Unknown') return;
+            
+            // Set the region filter dropdown
+            const regionFilter = document.getElementById('region-filter');
+            if (regionFilter) {
+                regionFilter.value = region;
+                loadDashboardData();
+            }
+            
+            // Show notification
+            showNotification(`Filtering dashboard for ${region} region`, 'info');
+        }
+        
+        // Error handler for dashboard
         function showDashboardError(message) {
             console.error('Dashboard Error:', message);
             
-            // Update status to show error
-            const dbStatus = document.getElementById('db-status');
-            if (dbStatus) {
-                dbStatus.textContent = '❌ Error';
-                dbStatus.style.color = '#f44336';
+            try {
+                const dbStatus = document.getElementById('db-status');
+                if (dbStatus) {
+                    dbStatus.textContent = '⚠️ Using Local Data';
+                    dbStatus.style.color = '#FF9800';
+                }
+                
+                // Still show some data even in error state
+                const savedRequests = JSON.parse(localStorage.getItem('data_requests') || '[]');
+                if (savedRequests.length > 0) {
+                    document.getElementById('metric-total-requests').textContent = savedRequests.length;
+                }
+                
+            } catch (error) {
+                console.error('Error in showDashboardError:', error);
             }
-            
-            // Show error in metrics
-            document.getElementById('metric-total-requests').textContent = 'Error';
-            document.getElementById('metric-total-requests').style.color = '#f44336';
         }
         
-        // FIXED: Update the loadDashboardData function
+        // Simple notification function (if you don't have one)
+        function showNotification(message, type = 'info') {
+            console.log(`${type}: ${message}`);
+            
+            // Create a simple notification if needed
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px;
+                background: ${type === 'error' ? '#ffebee' : type === 'success' ? '#e8f5e9' : '#fff3e0'};
+                border: 1px solid ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#FF9800'};
+                border-radius: 3px;
+                z-index: 9999;
+                max-width: 300px;
+                font-size: 14px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+        
+        // FIXED: Main dashboard loading function
         async function loadDashboardData() {
+            console.log('📊 Loading dashboard data...');
+            
             try {
-                console.log('📊 Loading dashboard data...');
-                
                 // Show loading state
-                document.getElementById('db-status').textContent = '⏳ Loading...';
-                document.getElementById('db-status').style.color = '#FF9800';
+                const dbStatus = document.getElementById('db-status');
+                if (dbStatus) {
+                    dbStatus.textContent = '⏳ Loading...';
+                    dbStatus.style.color = '#FF9800';
+                }
                 
                 // Get filter values
-                const timeFilter = document.getElementById('time-period').value;
-                const regionFilter = document.getElementById('region-filter').value;
-                const orgFilter = document.getElementById('org-filter').value;
+                const timeFilter = document.getElementById('time-period')?.value || 'all';
+                const regionFilter = document.getElementById('region-filter')?.value || 'all';
+                const orgFilter = document.getElementById('org-filter')?.value || 'all';
                 
                 // Load data
                 const dashboardData = await getDashboardDataFromDB(timeFilter, regionFilter, orgFilter);
@@ -2878,58 +3028,81 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
                 updateDashboardWithRealData(dashboardData);
                 
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                showDashboardError('Could not load dashboard data. Check database connection.');
+                console.error('Error in loadDashboardData:', error);
+                showDashboardError('Could not load dashboard data: ' + error.message);
             }
         }
         
-        // FIXED: Initialize dashboard properly
+        // Export dashboard data
+        function exportDashboardData() {
+            try {
+                const savedRequests = JSON.parse(localStorage.getItem('data_requests') || '[]');
+                
+                if (savedRequests.length === 0) {
+                    showNotification('No data to export', 'info');
+                    return;
+                }
+                
+                // Convert to CSV
+                const headers = Object.keys(savedRequests[0]).join(',');
+                const rows = savedRequests.map(req => 
+                    Object.values(req).map(val => 
+                        typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val
+                    ).join(',')
+                );
+                const csv = [headers, ...rows].join('\n');
+                
+                // Download
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `nwt_dashboard_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification(`Exported ${savedRequests.length} requests to CSV`, 'success');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('Export failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Clear dashboard cache
+        function clearDashboardCache() {
+            if (confirm('Clear dashboard cache? This will reset temporary data but keep your saved requests.')) {
+                localStorage.removeItem('dashboard_cache');
+                showNotification('Dashboard cache cleared', 'success');
+                loadDashboardData();
+            }
+        }
+        
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing dashboard...');
+            
             // Load dashboard when Dashboard tab is clicked
             const dashboardTab = document.querySelector('[data-tab="dashboard-tab"]');
             if (dashboardTab) {
                 dashboardTab.addEventListener('click', function() {
-                    setTimeout(loadDashboardData, 300); // Small delay
+                    console.log('📈 Dashboard tab clicked, loading data...');
+                    setTimeout(loadDashboardData, 100);
                 });
             }
             
-            // Also load when page first loads if on dashboard tab
-            if (window.location.hash === '#dashboard' || 
-                document.getElementById('dashboard-tab').classList.contains('active')) {
-                setTimeout(loadDashboardData, 500);
-            }
-        });
-        
-        // Update dashboard with real data
-        function updateDashboardWithRealData(data) {
-            // Update metrics
-            document.getElementById('metric-total-requests').textContent = data.totalRequests;
-            document.getElementById('total-requests-count').textContent = data.totalRequests;
-            document.getElementById('metric-approval-rate').textContent = data.approvalRate + '%';
-            document.getElementById('storage-count').textContent = data.totalRequests;
+            // Load on initial page load if dashboard tab is active
+            setTimeout(() => {
+                const dashboardPane = document.getElementById('dashboard-tab');
+                if (dashboardPane && dashboardPane.classList.contains('active')) {
+                    console.log('🏠 Dashboard tab is active, loading data...');
+                    loadDashboardData();
+                }
+            }, 500);
             
-            // Update regional breakdown
-            updateRegionalData(data.regions);
-            
-            // Update recent activity
-            updateRecentActivity(data.recent);
-            
-            // Update trends if you have historical data
-            updateTrends(data);
-        }
-        
-        // Initialize dashboard when tab is clicked
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load dashboard when Dashboard tab is clicked
-            const dashboardTab = document.querySelector('[data-tab="dashboard-tab"]');
-            if (dashboardTab) {
-                dashboardTab.addEventListener('click', function() {
-                    setTimeout(loadDashboardData, 100); // Small delay to ensure tab is visible
-                });
-            }
-            
-            // Initial load
-            loadDashboardData();
+            console.log('✅ Dashboard initialization complete');
         });
 
         // Load SQLite database
@@ -6339,6 +6512,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
