@@ -774,6 +774,40 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
     border-radius: 6px;
     border: 3px solid #f0f0f0;
 }
+/* EMERGENCY FIX: Force dashboard to show content */
+#dashboard-tab {
+    background: #ece9d8 !important;  /* Your Windows XP background */
+    min-height: 600px !important;
+    display: block !important;
+}
+
+/* Force all dashboard sections to show */
+#dashboard-tab > div {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Make sure content is visible */
+.metric-card, .intelligence-section, .result-card, 
+.dashboard-card, .region-item, .requestor-item {
+    background: white !important;
+    border: 1px solid #d4d0c8 !important;
+    display: block !important;
+    margin-bottom: 15px !important;
+    padding: 15px !important;
+}
+
+/* Emergency visibility classes */
+.force-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 1px solid #d4d0c8 !important;
+    padding: 20px !important;
+    margin: 10px !important;
+}
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
@@ -1580,383 +1614,324 @@ textarea::-webkit-scrollbar-thumb, .scrollable-section::-webkit-scrollbar-thumb 
                 <!-- DASHBOARD TAB -->
                 <div id="dashboard-tab" class="tab-pane">
                     <!-- Dashboard Header -->
-                    <div class="dashboard-header" style="background: linear-gradient(to right, #0a3b9c, #1e88e5); color: white; padding: 20px; margin: -20px -20px 20px -20px;">
+                    <!-- DASHBOARD TAB - EMERGENCY WORKING VERSION -->
+                <div id="dashboard-tab" class="tab-pane" style="padding: 20px; background: #ece9d8;">
+                    
+                    <!-- Emergency Header -->
+                    <div style="background: linear-gradient(to right, #0a3b9c, #1e88e5); color: white; padding: 20px; margin: -20px -20px 20px -20px;">
                         <h1 style="margin: 0; display: flex; align-items: center; gap: 15px;">
                             <span style="font-size: 32px;">📈</span>
                             NWT Data Request Intelligence Dashboard
                         </h1>
                         <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 14px;">
-                            Analyzing <span id="total-requests-count">0</span> historical requests across NWT health regions
+                            Analyzing <span id="total-requests-count">0</span> historical requests
                         </p>
                     </div>
                     
-                    <!-- Dashboard Controls -->
-                    <div style="padding: 15px 20px; background: #f5f5f5; border: 1px solid #d4d0c8; border-radius: 3px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
-                        <div style="display: flex; gap: 15px;">
-                            <div>
-                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Time Period:</label>
-                                <select id="time-period" class="form-control" style="width: 150px;" onchange="loadDashboardData()">
-                                    <option value="all">All time</option>
-                                    <option value="12">Last 12 months</option>
-                                    <option value="36">Last 3 years</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Region:</label>
-                                <select id="region-filter" class="form-control" style="width: 180px;" onchange="loadDashboardData()">
-                                    <option value="all">All NWT Regions</option>
-                                    <option value="Beaufort Delta Region">Beaufort Delta</option>
-                                    <option value="Dehcho Region">Dehcho</option>
-                                    <option value="Sahtu Region">Sahtu</option>
-                                    <option value="South Slave Region">South Slave</option>
-                                    <option value="Yellowknife Region">Yellowknife</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; display: block; margin-bottom: 5px;">Organization:</label>
-                                <select id="org-filter" class="form-control" style="width: 120px;" onchange="loadDashboardData()">
-                                    <option value="all">All</option>
-                                    <option value="DHSS">DHSS</option>
-                                    <option value="HSSA">HSSA</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div style="flex-grow: 1; display: flex; justify-content: flex-end; gap: 10px;">
-                            <button onclick="exportDashboardData()" class="btn btn-primary">
-                                📥 Export Data
+                    <!-- Emergency Status Bar -->
+                    <div id="emergency-status" style="padding: 15px; background: #fff3e0; border: 2px solid #FF9800; border-radius: 3px; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #f57c00;">⚠️ Dashboard in Emergency Mode</h3>
+                        <p style="margin: 10px 0 0 0; font-size: 14px;">
+                            Using localStorage fallback. No database connection detected.
+                            <button onclick="addTestDataNow()" style="margin-left: 20px; padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🚀 ADD TEST DATA
                             </button>
-                            <button onclick="loadDashboardData()" class="btn btn-secondary">
-                                🔄 Refresh
-                            </button>
-                        </div>
+                        </p>
                     </div>
                     
-                    <!-- Key Metrics Row - ALL DYNAMIC -->
+                    <!-- Key Metrics - HARDCODED TO SHOW -->
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <div id="metric-total-requests" class="metric-value" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0</div>
-                            <div class="metric-label" style="font-size: 14px; color: #666;">Total Requests</div>
-                            <div id="trend-total" class="metric-trend" style="font-size: 12px; color: #666; margin-top: 5px;">No data yet</div>
+                        <div class="force-visible">
+                            <div id="metric-total-requests" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0</div>
+                            <div style="font-size: 14px; color: #666;">Total Requests</div>
                         </div>
                         
-                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <div id="metric-approval-rate" class="metric-value" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0%</div>
-                            <div class="metric-label" style="font-size: 14px; color: #666;">Approval Rate</div>
-                            <div id="trend-approval" class="metric-trend" style="font-size: 12px; color: #666; margin-top: 5px;">No approvals yet</div>
+                        <div class="force-visible">
+                            <div id="metric-approval-rate" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0%</div>
+                            <div style="font-size: 14px; color: #666;">Approval Rate</div>
                         </div>
                         
-                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <div id="metric-avg-days" class="metric-value" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">--</div>
-                            <div class="metric-label" style="font-size: 14px; color: #666;">Avg. Days to Complete</div>
-                            <div id="trend-days" class="metric-trend" style="font-size: 12px; color: #666; margin-top: 5px;">No completed requests</div>
+                        <div class="force-visible">
+                            <div id="metric-avg-days" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">--</div>
+                            <div style="font-size: 14px; color: #666;">Avg. Days</div>
                         </div>
                         
-                        <div class="metric-card" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <div id="metric-clusters" class="metric-value" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0</div>
-                            <div class="metric-label" style="font-size: 14px; color: #666;">Active Clusters</div>
-                            <div id="trend-clusters" class="metric-trend" style="font-size: 12px; color: #666; margin-top: 5px;">Analyzing patterns...</div>
+                        <div class="force-visible">
+                            <div id="metric-clusters" style="font-size: 32px; font-weight: bold; color: #0a3b9c; margin-bottom: 5px;">0</div>
+                            <div style="font-size: 14px; color: #666;">Clusters</div>
                         </div>
                     </div>
                     
-                    <!-- Main Dashboard Content -->
+                    <!-- Main Content - ALWAYS VISIBLE -->
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
                         
-                        <!-- Left Column: Request Distribution -->
-                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                                📊 Request Distribution
-                            </h3>
-                            
-                            <div id="request-distribution" style="min-height: 300px; display: flex; align-items: center; justify-content: center; color: #999;">
-                                <div style="text-align: center;">
+                        <!-- Left: Distribution -->
+                        <div class="force-visible">
+                            <h3 style="margin-top: 0; color: #0a3b9c;">📊 Request Distribution</h3>
+                            <div id="request-distribution">
+                                <div style="text-align: center; padding: 40px; color: #999;">
                                     <div style="font-size: 48px;">📁</div>
                                     <div>No request data yet</div>
-                                    <div style="font-size: 12px; margin-top: 10px;">Submit requests via the Form tab to see distribution</div>
+                                    <div style="font-size: 12px; margin-top: 10px;">
+                                        <button onclick="addTestDataNow()" style="padding: 8px 15px; margin-top: 10px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                            Click to add test data
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Right Column: Regional Breakdown -->
-                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                                🗺️ Regional Breakdown
-                            </h3>
-                            
-                            <div id="regional-breakdown" style="margin-top: 15px;">
-                                <div style="text-align: center; padding: 40px; color: #999;">
-                                    <div style="font-size: 48px;">🗺️</div>
-                                    <div>No regional data yet</div>
-                                    <div style="font-size: 12px; margin-top: 10px;">Requests will be grouped by region automatically</div>
+                        <!-- Right: Regional -->
+                        <div class="force-visible">
+                            <h3 style="margin-top: 0; color: #0a3b9c;">🗺️ Regional Breakdown</h3>
+                            <div id="regional-breakdown">
+                                <div style="text-align: center; padding: 20px; color: #999;">
+                                    <div style="font-size: 36px;">🗺️</div>
+                                    <div>No regional data</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Bottom Row -->
+                    <!-- Bottom Row - ALWAYS VISIBLE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         
                         <!-- Recent Activity -->
-                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                                📅 Recent Activity
-                            </h3>
-                            
-                            <div id="recent-activity" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: #999;">
-                                <div style="text-align: center;">
+                        <div class="force-visible">
+                            <h3 style="margin-top: 0; color: #0a3b9c;">📅 Recent Activity</h3>
+                            <div id="recent-activity">
+                                <div style="text-align: center; padding: 30px; color: #999;">
                                     <div style="font-size: 36px;">⏳</div>
                                     <div>No recent activity</div>
-                                    <div style="font-size: 12px;">New requests will appear here</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Data Status -->
-                        <div style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #0a3b9c; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                                📋 Data Status
-                            </h3>
-                            
-                            <div id="data-status" style="margin-top: 15px;">
-                                <div class="status-item">
-                                    <div style="display: flex; justify-content: space-between; padding: 10px; background: #f8f8f8; margin-bottom: 8px; border-radius: 3px;">
-                                        <span>Database Connection:</span>
-                                        <span id="db-status" style="color: #4CAF50; font-weight: bold;">✅ Ready</span>
-                                    </div>
+                        <div class="force-visible">
+                            <h3 style="margin-top: 0; color: #0a3b9c;">📋 Data Status</h3>
+                            <div id="data-status">
+                                <div style="padding: 10px; background: #f8f8f8; margin-bottom: 8px; border-radius: 3px;">
+                                    <span>Dashboard Status:</span>
+                                    <span id="db-status" style="color: #FF9800; font-weight: bold;">⚠️ Local Mode</span>
                                 </div>
-                                <div class="status-item">
-                                    <div style="display: flex; justify-content: space-between; padding: 10px; background: #f8f8f8; margin-bottom: 8px; border-radius: 3px;">
-                                        <span>Total Requests Stored:</span>
-                                        <span id="storage-count" style="color: #2196F3; font-weight: bold;">0</span>
-                                    </div>
+                                <div style="padding: 10px; background: #f8f8f8; margin-bottom: 8px; border-radius: 3px;">
+                                    <span>Requests Stored:</span>
+                                    <span id="storage-count" style="color: #2196F3; font-weight: bold;">0</span>
                                 </div>
-                                <div class="status-item">
-                                    <div style="display: flex; justify-content: space-between; padding: 10px; background: #f8f8f8; margin-bottom: 8px; border-radius: 3px;">
-                                        <span>Last Updated:</span>
-                                        <span id="last-updated" style="color: #666; font-size: 12px;">Never</span>
-                                    </div>
+                                <div style="padding: 10px; background: #f8f8f8; border-radius: 3px;">
+                                    <span>Last Updated:</span>
+                                    <span id="last-updated" style="color: #666; font-size: 12px;">Never</span>
                                 </div>
-                            </div>
-                            
-                            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 3px;">
-                                <h5 style="margin-top: 0; color: #2e7d32;">🎯 Ready for Real Data</h5>
-                                <ul style="font-size: 12px; margin: 10px 0 0 15px; padding: 0;">
-                                    <li>Submit your first data request via the Form tab</li>
-                                    <li>Dashboard updates automatically</li>
-                                    <li>All analytics are real-time</li>
-                                </ul>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Quick Actions -->
-                    <div style="margin-top: 20px; padding: 20px; background: #f8f8f8; border: 1px solid #d4d0c8; border-radius: 3px;">
-                        <h4 style="margin-top: 0; color: #0a3b9c;">⚡ Quick Actions</h4>
+                    <!-- Emergency Controls -->
+                    <div class="force-visible" style="margin-top: 20px;">
+                        <h4 style="margin-top: 0; color: #0a3b9c;">🔧 Emergency Controls</h4>
                         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                            <button onclick="loadDashboardData()" class="btn btn-primary">
-                                🔄 Refresh Dashboard
+                            <button onclick="addTestDataNow()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🚀 ADD TEST DATA
                             </button>
-                            <button onclick="clearDashboardCache()" class="btn btn-secondary">
-                                🗑️ Clear Cache
+                            <button onclick="loadDashboardData()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🔄 REFRESH
                             </button>
-                            <button onclick="showDataHealth()" class="btn btn-secondary">
-                                🏥 Data Health Check
+                            <button onclick="clearDashboard()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🗑️ CLEAR DATA
+                            </button>
+                            <button onclick="forceShowData()" style="padding: 10px 20px; background: #FF9800; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                👁️ FORCE VISIBLE
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Emergency JavaScript -->
+                    <script>
+                        // EMERGENCY FUNCTIONS
+                        function addTestDataNow() {
+                            const testData = [
+                                {request_number: 'DHSS-24001', purpose: 'Diabetes analysis', region: 'Yellowknife Region', timestamp: new Date().toISOString()},
+                                {request_number: 'IM-703546', purpose: 'Flu vaccine coverage', region: 'South Slave Region', timestamp: new Date().toISOString()},
+                                {request_number: 'HSSA-23089', purpose: 'Hospital admissions', region: 'Beaufort Delta Region', timestamp: new Date().toISOString()},
+                                {request_number: 'DHSS-24015', purpose: 'Traditional medicine study', region: 'Sahtu Region', timestamp: new Date().toISOString()},
+                                {request_number: 'IM-703601', purpose: 'Mental health medications', region: 'Dehcho Region', timestamp: new Date().toISOString()}
+                            ];
+                            
+                            localStorage.setItem('data_requests', JSON.stringify(testData));
+                            alert('✅ Added 5 test requests!');
+                            loadDashboardData();
+                        }
+                        
+                        function loadDashboardData() {
+                            console.log('EMERGENCY: Loading dashboard data...');
+                            
+                            try {
+                                // Get data from localStorage
+                                const savedRequests = JSON.parse(localStorage.getItem('data_requests') || '[]');
+                                
+                                // Update metrics
+                                document.getElementById('metric-total-requests').textContent = savedRequests.length;
+                                document.getElementById('total-requests-count').textContent = savedRequests.length;
+                                document.getElementById('storage-count').textContent = savedRequests.length;
+                                
+                                // Update regional breakdown
+                                const regionalDiv = document.getElementById('regional-breakdown');
+                                if (savedRequests.length === 0) {
+                                    regionalDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No data</div>';
+                                } else {
+                                    // Group by region
+                                    const regions = {};
+                                    savedRequests.forEach(req => {
+                                        const region = req.region || 'Unknown';
+                                        regions[region] = (regions[region] || 0) + 1;
+                                    });
+                                    
+                                    let html = '';
+                                    for (const [region, count] of Object.entries(regions)) {
+                                        html += `<div style="padding: 8px; border-bottom: 1px solid #eee;">${region}: <strong>${count}</strong></div>`;
+                                    }
+                                    regionalDiv.innerHTML = html;
+                                }
+                                
+                                // Update recent activity
+                                const recentDiv = document.getElementById('recent-activity');
+                                if (savedRequests.length === 0) {
+                                    recentDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No activity</div>';
+                                } else {
+                                    const recent = savedRequests.slice(-3).reverse();
+                                    let html = '';
+                                    recent.forEach(req => {
+                                        html += `<div style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${req.request_number}</strong><br>${req.purpose}</div>`;
+                                    });
+                                    recentDiv.innerHTML = html;
+                                }
+                                
+                                // Update status
+                                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+                                document.getElementById('db-status').textContent = savedRequests.length > 0 ? '✅ Has Data' : '⚠️ No Data';
+                                document.getElementById('db-status').style.color = savedRequests.length > 0 ? '#4CAF50' : '#FF9800';
+                                
+                                console.log('✅ Emergency dashboard update complete:', savedRequests.length, 'requests');
+                                
+                            } catch (error) {
+                                console.error('EMERGENCY ERROR:', error);
+                                document.getElementById('db-status').textContent = '❌ Error';
+                                document.getElementById('db-status').style.color = '#f44336';
+                            }
+                        }
+                        
+                        function clearDashboard() {
+                            if (confirm('Clear all dashboard data?')) {
+                                localStorage.removeItem('data_requests');
+                                alert('Data cleared');
+                                loadDashboardData();
+                            }
+                        }
+                        
+                        function forceShowData() {
+                            // Force all elements to be visible
+                            document.querySelectorAll('#dashboard-tab *').forEach(el => {
+                                el.style.display = 'block';
+                                el.style.visibility = 'visible';
+                                el.style.opacity = '1';
+                            });
+                            alert('Forced visibility mode ON');
+                        }
+                        
+                        // Auto-load on page load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('EMERGENCY DASHBOARD LOADING...');
+                            setTimeout(loadDashboardData, 1000);
+                        });
+                    </script>
                 </div>
 
                 <!-- NEW: EMR DATA EXPLORER TAB -->
                 <!-- NEW: EMR DATA EXPLORER TAB -->
-                <div id="emr-tab" class="tab-pane">
-                    <!-- Database Status Bar -->
-                    <div id="database-status" style="padding: 10px; margin-bottom: 10px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px;">
-                        Loading database...
+                <<!-- EMR TAB - EMERGENCY WORKING VERSION -->
+                <div id="emr-tab" class="tab-pane" style="padding: 20px; background: #ece9d8;">
+                    
+                    <!-- Emergency Header -->
+                    <div style="background: linear-gradient(to right, #0a3b9c, #1e88e5); color: white; padding: 15px; margin: -20px -20px 20px -20px;">
+                        <h2 style="margin: 0;">🏥 EMR Data Explorer - Emergency Mode</h2>
                     </div>
                     
-                    <!-- DEBUG PANEL (optional) -->
-                    <div style="margin: 10px 0; padding: 10px; border: 2px solid orange; background: #fff8e1; display: none;" id="debug-panel">
-                        <h4>🔧 DEBUG PANEL</h4>
-                        <button onclick="testDisplayArea()" style="padding: 5px 10px; margin: 2px;">Test Display</button>
-                        <button onclick="testFirstTable()" style="padding: 5px 10px; margin: 2px;">Test First Table</button>
-                        <button onclick="reloadDatabase()" style="padding: 5px 10px; margin: 2px;">Reload DB</button>
-                    </div>
-                    
-                    <!-- ================= ACCORDION 1: SCHEMA & TABLES ================= -->
-                    <div class="accordion">
-                        <div class="accordion-header active" data-accordion="schema">
-                            <span>📊 Schema Visualization & Table Explorer</span>
-                            <span class="accordion-icon">+</span>
-                        </div>
-                        <div class="accordion-content active" id="accordion-schema">
-                            <div class="compact-grid">
-                                <!-- Left: Schema Diagram -->
-                                <div class="compact-section">
-                                    <div class="emr-section-header">
-                                        <h3>Database Schema</h3>
-                                    </div>
-                                    <div class="scrollable-section">
-                                        <div class="schema-diagram" id="schema-diagram">
-                                            <!-- Schema will be rendered here -->
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Right: Table List -->
-                                <div class="compact-section">
-                                    <div class="emr-section-header">
-                                        <h3>Table Explorer</h3>
-                                    </div>
-                                    <div class="scrollable-section">
-                                        <div class="table-list" id="table-list">
-                                            Click table names to preview data...
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Schema Explorer - ALWAYS VISIBLE -->
+                    <div class="force-visible" style="margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; color: #0a3b9c;">📊 Database Schema</h3>
+                        <div id="table-list" style="background: white; border: 1px solid #d4d0c8; padding: 15px; height: 300px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 40px; color: #999;">
+                                <div style="font-size: 48px;">💾</div>
+                                <div>No database connected</div>
+                                <button onclick="addTestEMRData()" style="padding: 10px 20px; margin-top: 20px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                    🚀 ADD TEST EMR DATA
+                                </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- ================= ACCORDION 2: CLIENT REQUEST TRANSLATOR ================= -->
-                    <div class="accordion">
-                        <div class="accordion-header active" data-accordion="translator">
-                            <span>🔍 Client Request Translator</span>
-                            <span class="accordion-icon">+</span>
+                    <!-- SQL Query Tool - ALWAYS VISIBLE -->
+                    <div class="force-visible" style="margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; color: #0a3b9c;">💻 SQL Practice</h3>
+                        <textarea style="width: 100%; height: 150px; padding: 10px; border: 1px solid #d4d0c8; font-family: monospace;" 
+                                  placeholder="SELECT * FROM patients LIMIT 10"></textarea>
+                        <div style="margin-top: 10px;">
+                            <button style="padding: 8px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                ▶️ RUN QUERY
+                            </button>
                         </div>
-                        <div class="accordion-content active" id="accordion-translator">
-                            <div class="form-group">
-                                <label for="client-request">Enter Client Request:</label>
-                                <textarea id="client-request" class="form-control textarea-large" 
-                                          placeholder="Example: 'I need all diabetic patients aged 50+ from Yellowknife with HbA1c > 7% in 2024'"
-                                          rows="3"></textarea>
-                            </div>
+                    </div>
+                    
+                    <!-- Emergency Controls -->
+                    <div class="force-visible">
+                        <h4 style="margin-top: 0; color: #0a3b9c;">🔧 EMR Emergency Controls</h4>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="addTestEMRData()" style="padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🏥 ADD EMR DATA
+                            </button>
+                            <button onclick="testDatabaseConnection()" style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                🔌 TEST CONNECTION
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        // EMR Emergency Functions
+                        function addTestEMRData() {
+                            const testTables = [
+                                {name: 'patients', description: 'Patient demographics', row_count: 12547},
+                                {name: 'encounters', description: 'Clinical visits', row_count: 89234},
+                                {name: 'lab_results', description: 'Lab tests', row_count: 456123},
+                                {name: 'medications', description: 'Prescriptions', row_count: 178945},
+                                {name: 'diagnoses', description: 'Conditions', row_count: 234567}
+                            ];
                             
-                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                <button id="analyze-request" class="btn btn-primary">Analyze Request</button>
-                                <button onclick="clearAnalysis()" class="btn btn-secondary">Clear</button>
-                            </div>
+                            let html = '<h4>Sample Database Tables:</h4>';
+                            testTables.forEach(table => {
+                                html += `
+                                    <div style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;" onclick="alert('Clicked ${table.name}')">
+                                        <strong>${table.name}</strong> - ${table.description}
+                                        <span style="float: right; color: #666;">${table.row_count.toLocaleString()} rows</span>
+                                    </div>
+                                `;
+                            });
                             
-                            <div id="analysis-results" style="display: none; background: #f8f8f8; padding: 15px; border: 1px solid #d4d0c8;">
-                                <h4>Analysis Results:</h4>
-                                <div class="form-group">
-                                    <label>Tables Required:</label>
-                                    <div id="tables-required" class="highlight"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label>SQL Conditions:</label>
-                                    <div id="sql-conditions" class="highlight"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Sample SQL Query:</label>
-                                    <div id="sample-sql" class="sql-preview"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Quick Scenarios -->
-                            <div style="margin-top: 15px;">
-                                <h4>Quick Scenarios:</h4>
-                                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                    <button onclick="loadScenario('diabetes')" class="btn btn-secondary" style="font-size: 12px;">
-                                        🩺 Diabetes Patients
-                                    </button>
-                                    <button onclick="loadScenario('appointments')" class="btn btn-secondary" style="font-size: 12px;">
-                                        📅 Appointments
-                                    </button>
-                                    <button onclick="loadScenario('medications')" class="btn btn-secondary" style="font-size: 12px;">
-                                        💊 Medications
-                                    </button>
-                                    <button onclick="loadScenario('admissions')" class="btn btn-secondary" style="font-size: 12px;">
-                                        🏥 Admissions
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- ================= ACCORDION 3: SQL PRACTICE ================= -->
-                    <div class="accordion">
-                        <div class="accordion-header active" data-accordion="sql">
-                            <span>💻 SQL Practice & Query Builder</span>
-                            <span class="accordion-icon">+</span>
-                        </div>
-                        <div class="accordion-content active" id="accordion-sql">
-                            <div class="compact-grid">
-                                <!-- Left: Query Input -->
-                                <div class="compact-section">
-                                    <div class="form-group">
-                                        <label>SQL Query:</label>
-                                        <textarea id="sql-query" class="form-control textarea-large" 
-                                                  placeholder="Write your SQL query here...
-                Example: SELECT first_name, last_name FROM patients WHERE city = 'Yellowknife' LIMIT 10"
-                                                  rows="6"></textarea>
-                                    </div>
-                                    
-                                    <div class="form-buttons">
-                                        <button id="run-query" class="btn btn-primary">Run Query</button>
-                                        <button id="clear-query" class="btn btn-secondary">Clear</button>
-                                        <button id="save-query" class="btn btn-secondary">Save</button>
-                                        <button id="export-results" class="btn btn-secondary">Export CSV</button>
-                                    </div>
-                                    
-                                    <div class="form-group" style="margin-top: 15px;">
-                                        <label>Saved Queries:</label>
-                                        <select id="saved-queries" class="form-control">
-                                            <option value="">Select a saved query...</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <!-- Right: Table Selector -->
-                                <div class="compact-section">
-                                    <div class="form-group">
-                                        <label>Available Tables:</label>
-                                        <div class="scrollable-section" style="height: 200px;">
-                                            <div id="table-selector" class="checkbox-group">
-                                                <!-- Tables will be populated here -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Quick Templates:</label>
-                                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                                            <button onclick="loadTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                                SELECT * FROM [table]
-                                            </button>
-                                            <button onclick="loadTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                                SELECT COUNT(*) FROM [table]
-                                            </button>
-                                            <button onclick="loadTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                                Simple JOIN template
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- ================= ACCORDION 4: QUERY RESULTS ================= -->
-                    <div class="accordion">
-                        <div class="accordion-header" data-accordion="results">
-                            <span>📋 Query Results</span>
-                            <span class="accordion-icon">+</span>
-                        </div>
-                        <div class="accordion-content" id="accordion-results">
-                            <div id="query-results" class="fixed-height-results">
-                                Results will appear here when you run a query or click a table...
-                            </div>
-                            
-                            <!-- Results Info -->
-                            <div id="results-info" style="margin-top: 10px; padding: 10px; background: #f0f8ff; border: 1px solid #a0c0ff; display: none;">
-                                <strong>Query Info:</strong> <span id="row-count">0</span> rows returned
-                            </div>
-                        </div>
-                    </div>
+                            document.getElementById('table-list').innerHTML = html;
+                            alert('✅ Added test EMR schema');
+                        }
+                        
+                        function testDatabaseConnection() {
+                            alert('Checking database connection...\n\nCurrent mode: localStorage fallback\nTo connect to real database, implement SQLite connection.');
+                        }
+                        
+                        // Auto-add test data if empty
+                        if (!localStorage.getItem('emr_data_added')) {
+                            setTimeout(addTestEMRData, 1000);
+                            localStorage.setItem('emr_data_added', 'true');
+                        }
+                    </script>
                 </div>
-            </div>
-        </div>
-
         <footer class="footer">
             <p>NWT Government Data Request Tool • Windows XP/2000 Theme</p>
         </footer>
@@ -6512,6 +6487,7 @@ LIMIT 50`
 </body>
 
 </html>
+
 
 
 
