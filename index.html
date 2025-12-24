@@ -1364,6 +1364,13 @@
                                             API Settings
                                         </button>
                                     </div>
+
+                                    <button onclick="testAPIconnection('ONTOSERVER')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                        🔗 Test Ontoserver Connection
+                                    </button>
+                                    <button onclick="testAPIconnection('SNOWSTORM')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
+                                        ❄️ Test Snowstorm Connection
+                                    </button>
                                     
                                     <!-- QUICK SEARCH BUTTONS -->
                                     <div style="margin-bottom: 15px;">
@@ -3349,545 +3356,819 @@
 
         // ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL =================
 
-		/// ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL WITH REAL API =================
+        /// ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL WITH REAL API =================
 
-		// ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL =================
+        // ================= KNOWLEDGE MANAGEMENT: SPECIFICATION TOOL =================
 
-		// Store for terminology tree and cards
-		let specCards = JSON.parse(localStorage.getItem('nwtSpecCards')) || [];
-		let terminologyTree = null;
+        // Store for terminology tree and cards
+        let specCards = JSON.parse(localStorage.getItem('nwtSpecCards')) || [];
+        let terminologyTree = null;
 
-		// Initialize spec tool
-		function initSpecTool() {
-		    console.log('Initializing Specification Tool...');
-		    
-		    // Load saved cards
-		    loadSavedCards();
-		    
-		    // Setup event listeners
-		    const treeSearch = document.getElementById('treeSearch');
-		    if (treeSearch) {
-		        treeSearch.addEventListener('input', searchTerminologyTree);
-		    }
-		    
-		    // Load demo terminology if no cards exist
-		    if (specCards.length === 0) {
-		        // Don't auto-load - let user click button
-		    }
-		    
-		    updateStats();
-		}
+        // Initialize spec tool
+        function initSpecTool() {
+            console.log('Initializing Specification Tool...');
+            
+            // Load saved cards
+            loadSavedCards();
+            
+            // Setup event listeners
+            const treeSearch = document.getElementById('treeSearch');
+            if (treeSearch) {
+                treeSearch.addEventListener('input', searchTerminologyTree);
+            }
+            
+            // Load demo terminology if no cards exist
+            if (specCards.length === 0) {
+                // Don't auto-load - let user click button
+            }
+            
+            updateStats();
+        }
 
-		// Load demo terminology tree
-		function loadDemoTerminology() {
-		    console.log('Loading demo terminology...');
-		    
-		    // Sample FHIR/SNOMED terminology tree
-		    const demoTree = [
-		        {
-		            name: "Clinical Parameters",
-		            type: "category",
-		            children: [
-		                {
-		                    name: "Diabetes Mellitus",
-		                    code: "SNOMED:73211009",
-		                    description: "Diabetes mellitus (disorder)",
-		                    type: "parameter",
-		                    children: [
-		                        {
-		                            name: "Type 1 Diabetes",
-		                            code: "SNOMED:46635009",
-		                            description: "Insulin dependent diabetes mellitus",
-		                            type: "parameter"
-		                        },
-		                        {
-		                            name: "Type 2 Diabetes",
-		                            code: "SNOMED:44054006",
-		                            description: "Diabetes mellitus type 2",
-		                            type: "parameter"
-		                        }
-		                    ]
-		                },
-		                {
-		                    name: "Hypertension",
-		                    code: "SNOMED:38341003",
-		                    description: "Hypertensive disorder",
-		                    type: "parameter",
-		                    children: [
-		                        {
-		                            name: "Essential Hypertension",
-		                            code: "SNOMED:59621000",
-		                            description: "Essential hypertension",
-		                            type: "parameter"
-		                        }
-		                    ]
-		                },
-		                {
-		                    name: "Body Mass Index",
-		                    code: "LOINC:39156-5",
-		                    description: "Body mass index (BMI)",
-		                    type: "parameter"
-		                }
-		            ]
-		        },
-		        {
-		            name: "Demographics",
-		            type: "category",
-		            children: [
-		                {
-		                    name: "Age at Visit",
-		                    code: "ISO:Age",
-		                    description: "Patient age at encounter date",
-		                    type: "parameter"
-		                },
-		                {
-		                    name: "Administrative Gender",
-		                    code: "HL7:Gender",
-		                    description: "Administrative gender",
-		                    type: "parameter",
-		                    children: [
-		                        { name: "Male", code: "M", type: "value" },
-		                        { name: "Female", code: "F", type: "value" },
-		                        { name: "Other", code: "O", type: "value" }
-		                    ]
-		                }
-		            ]
-		        },
-		        {
-		            name: "Laboratory Results",
-		            type: "category",
-		            children: [
-		                {
-		                    name: "Hemoglobin A1c",
-		                    code: "LOINC:4548-4",
-		                    description: "Hemoglobin A1c/Hemoglobin.total in Blood",
-		                    type: "parameter"
-		                },
-		                {
-		                    name: "Cholesterol",
-		                    code: "LOINC:2093-3",
-		                    description: "Cholesterol in Serum or Plasma",
-		                    type: "parameter",
-		                    children: [
-		                        { name: "HDL Cholesterol", code: "LOINC:2085-9", type: "parameter" },
-		                        { name: "LDL Cholesterol", code: "LOINC:13457-7", type: "parameter" }
-		                    ]
-		                }
-		            ]
-		        }
-		    ];
-		    
-		    terminologyTree = demoTree;
-		    renderTerminologyTree(demoTree);
-		}
+        // Load demo terminology tree
+        function loadDemoTerminology() {
+            console.log('Loading demo terminology...');
+            
+            // Sample FHIR/SNOMED terminology tree
+            const demoTree = [
+                {
+                    name: "Clinical Parameters",
+                    type: "category",
+                    children: [
+                        {
+                            name: "Diabetes Mellitus",
+                            code: "SNOMED:73211009",
+                            description: "Diabetes mellitus (disorder)",
+                            type: "parameter",
+                            children: [
+                                {
+                                    name: "Type 1 Diabetes",
+                                    code: "SNOMED:46635009",
+                                    description: "Insulin dependent diabetes mellitus",
+                                    type: "parameter"
+                                },
+                                {
+                                    name: "Type 2 Diabetes",
+                                    code: "SNOMED:44054006",
+                                    description: "Diabetes mellitus type 2",
+                                    type: "parameter"
+                                }
+                            ]
+                        },
+                        {
+                            name: "Hypertension",
+                            code: "SNOMED:38341003",
+                            description: "Hypertensive disorder",
+                            type: "parameter",
+                            children: [
+                                {
+                                    name: "Essential Hypertension",
+                                    code: "SNOMED:59621000",
+                                    description: "Essential hypertension",
+                                    type: "parameter"
+                                }
+                            ]
+                        },
+                        {
+                            name: "Body Mass Index",
+                            code: "LOINC:39156-5",
+                            description: "Body mass index (BMI)",
+                            type: "parameter"
+                        }
+                    ]
+                },
+                {
+                    name: "Demographics",
+                    type: "category",
+                    children: [
+                        {
+                            name: "Age at Visit",
+                            code: "ISO:Age",
+                            description: "Patient age at encounter date",
+                            type: "parameter"
+                        },
+                        {
+                            name: "Administrative Gender",
+                            code: "HL7:Gender",
+                            description: "Administrative gender",
+                            type: "parameter",
+                            children: [
+                                { name: "Male", code: "M", type: "value" },
+                                { name: "Female", code: "F", type: "value" },
+                                { name: "Other", code: "O", type: "value" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Laboratory Results",
+                    type: "category",
+                    children: [
+                        {
+                            name: "Hemoglobin A1c",
+                            code: "LOINC:4548-4",
+                            description: "Hemoglobin A1c/Hemoglobin.total in Blood",
+                            type: "parameter"
+                        },
+                        {
+                            name: "Cholesterol",
+                            code: "LOINC:2093-3",
+                            description: "Cholesterol in Serum or Plasma",
+                            type: "parameter",
+                            children: [
+                                { name: "HDL Cholesterol", code: "LOINC:2085-9", type: "parameter" },
+                                { name: "LDL Cholesterol", code: "LOINC:13457-7", type: "parameter" }
+                            ]
+                        }
+                    ]
+                }
+            ];
+            
+            terminologyTree = demoTree;
+            renderTerminologyTree(demoTree);
+        }
 
-		// Render terminology tree recursively
-		function renderTerminologyTree(data, container = null) {
-		    const targetContainer = container || document.getElementById('treeContainer');
-		    if (!targetContainer) {
-		        console.error('treeContainer not found!');
-		        return;
-		    }
-		    
-		    targetContainer.innerHTML = '';
-		    
-		    const ul = document.createElement('ul');
-		    ul.style.listStyleType = 'none';
-		    ul.style.paddingLeft = '10px';
-		    
-		    if (!data || data.length === 0) {
-		        const li = document.createElement('li');
-		        li.innerHTML = '<div style="color: #666; padding: 10px;">No data available</div>';
-		        ul.appendChild(li);
-		        targetContainer.appendChild(ul);
-		        return;
-		    }
-		    
-		    data.forEach(item => {
-		        const li = document.createElement('li');
-		        li.style.marginBottom = '5px';
-		        
-		        if (item.children && item.children.length > 0) {
-		            // It's a category/folder - use details/summary
-		            const details = document.createElement('details');
-		            details.open = true;
-		            
-		            const summary = document.createElement('summary');
-		            summary.style.cursor = 'pointer';
-		            summary.style.padding = '5px';
-		            summary.style.backgroundColor = '#e0e8ff';
-		            summary.style.borderRadius = '3px';
-		            summary.style.fontWeight = 'bold';
-		            summary.style.color = '#0a3b9c';
-		            summary.textContent = item.name;
-		            
-		            const childContainer = document.createElement('div');
-		            childContainer.style.marginLeft = '15px';
-		            childContainer.style.marginTop = '5px';
-		            
-		            details.appendChild(summary);
-		            details.appendChild(childContainer);
-		            li.appendChild(details);
-		            
-		            // Recursively render children
-		            renderTerminologyTree(item.children, childContainer);
-		            
-		        } else {
-		            // It's a leaf node (parameter)
-		            const span = document.createElement('span');
-		            span.className = 'leaf-node';
-		            span.style.display = 'block';
-		            span.style.padding = '8px';
-		            span.style.margin = '2px 0';
-		            span.style.cursor = 'pointer';
-		            span.style.backgroundColor = '#f0f0f0';
-		            span.style.borderRadius = '3px';
-		            span.style.borderLeft = '3px solid #4CAF50';
-		            span.style.fontSize = '14px';
-		            
-		            span.innerHTML = `
-		                <strong>${item.name}</strong>
-		                ${item.code ? `<br><small style="color: #666;">${item.code}</small>` : ''}
-		                ${item.description ? `<br><small style="color: #888;">${item.description}</small>` : ''}
-		            `;
-		            
-		            // Add click handler to add parameter to board
-		            span.addEventListener('click', function(e) {
-		                e.stopPropagation();
-		                addParameterCard(item);
-		            });
-		            
-		            li.appendChild(span);
-		        }
-		        
-		        ul.appendChild(li);
-		    });
-		    
-		    targetContainer.appendChild(ul);
-		}
+        // Render terminology tree recursively
+        function renderTerminologyTree(data, container = null) {
+            const targetContainer = container || document.getElementById('treeContainer');
+            if (!targetContainer) {
+                console.error('treeContainer not found!');
+                return;
+            }
+            
+            targetContainer.innerHTML = '';
+            
+            const ul = document.createElement('ul');
+            ul.style.listStyleType = 'none';
+            ul.style.paddingLeft = '10px';
+            
+            if (!data || data.length === 0) {
+                const li = document.createElement('li');
+                li.innerHTML = '<div style="color: #666; padding: 10px;">No data available</div>';
+                ul.appendChild(li);
+                targetContainer.appendChild(ul);
+                return;
+            }
+            
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.style.marginBottom = '5px';
+                
+                if (item.children && item.children.length > 0) {
+                    // It's a category/folder - use details/summary
+                    const details = document.createElement('details');
+                    details.open = true;
+                    
+                    const summary = document.createElement('summary');
+                    summary.style.cursor = 'pointer';
+                    summary.style.padding = '5px';
+                    summary.style.backgroundColor = '#e0e8ff';
+                    summary.style.borderRadius = '3px';
+                    summary.style.fontWeight = 'bold';
+                    summary.style.color = '#0a3b9c';
+                    summary.textContent = item.name;
+                    
+                    const childContainer = document.createElement('div');
+                    childContainer.style.marginLeft = '15px';
+                    childContainer.style.marginTop = '5px';
+                    
+                    details.appendChild(summary);
+                    details.appendChild(childContainer);
+                    li.appendChild(details);
+                    
+                    // Recursively render children
+                    renderTerminologyTree(item.children, childContainer);
+                    
+                } else {
+                    // It's a leaf node (parameter)
+                    const span = document.createElement('span');
+                    span.className = 'leaf-node';
+                    span.style.display = 'block';
+                    span.style.padding = '8px';
+                    span.style.margin = '2px 0';
+                    span.style.cursor = 'pointer';
+                    span.style.backgroundColor = '#f0f0f0';
+                    span.style.borderRadius = '3px';
+                    span.style.borderLeft = '3px solid #4CAF50';
+                    span.style.fontSize = '14px';
+                    
+                    span.innerHTML = `
+                        <strong>${item.name}</strong>
+                        ${item.code ? `<br><small style="color: #666;">${item.code}</small>` : ''}
+                        ${item.description ? `<br><small style="color: #888;">${item.description}</small>` : ''}
+                    `;
+                    
+                    // Add click handler to add parameter to board
+                    span.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        addParameterCard(item);
+                    });
+                    
+                    li.appendChild(span);
+                }
+                
+                ul.appendChild(li);
+            });
+            
+            targetContainer.appendChild(ul);
+        }
 
-		// Search terminology tree
-		function searchTerminologyTree(event) {
-		    const term = event.target.value.toLowerCase().trim();
-		    const allLeaves = document.querySelectorAll('.leaf-node');
-		    
-		    if (!term) {
-		        // Show all
-		        allLeaves.forEach(leaf => {
-		            leaf.style.display = 'block';
-		        });
-		        return;
-		    }
-		    
-		    allLeaves.forEach(leaf => {
-		        const text = leaf.textContent.toLowerCase();
-		        leaf.style.display = text.includes(term) ? 'block' : 'none';
-		    });
-		}
+        // Search terminology tree
+        function searchTerminologyTree(event) {
+            const term = event.target.value.toLowerCase().trim();
+            const allLeaves = document.querySelectorAll('.leaf-node');
+            
+            if (!term) {
+                // Show all
+                allLeaves.forEach(leaf => {
+                    leaf.style.display = 'block';
+                });
+                return;
+            }
+            
+            allLeaves.forEach(leaf => {
+                const text = leaf.textContent.toLowerCase();
+                leaf.style.display = text.includes(term) ? 'block' : 'none';
+            });
+        }
 
-		// Add parameter card to board
-		function addParameterCard(item) {
-		    // Check if already added
-		    const existingCard = specCards.find(card => card.code === item.code);
-		    if (existingCard) {
-		        alert(`Parameter "${item.name}" is already on the board.`);
-		        return;
-		    }
-		    
-		    // Create card object
-		    const cardId = `card-${Date.now()}`;
-		    const card = {
-		        id: cardId,
-		        name: item.name,
-		        code: item.code || '',
-		        description: item.description || '',
-		        source: '',
-		        logic: '',
-		        timestamp: new Date().toISOString()
-		    };
-		    
-		    specCards.push(card);
-		    
-		    // Update UI
-		    renderCard(card);
-		    updateStats();
-		    saveCardsToStorage();
-		    
-		    // Hide empty message
-		    const emptyMsg = document.getElementById('empty-board-message');
-		    if (emptyMsg) emptyMsg.style.display = 'none';
-		}
+        // Add parameter card to board
+        function addParameterCard(item) {
+            // Check if already added
+            const existingCard = specCards.find(card => card.code === item.code);
+            if (existingCard) {
+                alert(`Parameter "${item.name}" is already on the board.`);
+                return;
+            }
+            
+            // Create card object
+            const cardId = `card-${Date.now()}`;
+            const card = {
+                id: cardId,
+                name: item.name,
+                code: item.code || '',
+                description: item.description || '',
+                source: '',
+                logic: '',
+                timestamp: new Date().toISOString()
+            };
+            
+            specCards.push(card);
+            
+            // Update UI
+            renderCard(card);
+            updateStats();
+            saveCardsToStorage();
+            
+            // Hide empty message
+            const emptyMsg = document.getElementById('empty-board-message');
+            if (emptyMsg) emptyMsg.style.display = 'none';
+        }
 
-		// Render a single card
-		function renderCard(card) {
-		    const board = document.getElementById('spec-board');
-		    if (!board) {
-		        console.error('spec-board element not found!');
-		        return;
-		    }
-		    
-		    const cardHTML = `
-		        <div class="spec-card" id="${card.id}" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-		            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-		                <div>
-		                    <h4 style="margin: 0; color: #0a3b9c;">${card.name}</h4>
-		                    <small style="color: #666; font-family: 'Courier New', monospace;">${card.code}</small>
-		                </div>
-		                <button onclick="removeCard('${card.id}')" 
-		                        style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 20px; padding: 0 5px; line-height: 1;">×</button>
-		            </div>
-		            
-		            ${card.description ? `<p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">${card.description}</p>` : ''}
-		            
-		            <div style="margin-bottom: 10px;">
-		                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">
-		                    📍 Source Table/Column:
-		                </label>
-		                <input type="text" 
-		                       class="card-source" 
-		                       placeholder="e.g. DBO.PATIENTS.DOB or patients.date_of_birth"
-		                       value="${card.source}"
-		                       style="width: 100%; padding: 6px; border: 1px solid #808080; border-radius: 3px; font-size: 13px;"
-		                       onchange="updateCardField('${card.id}', 'source', this.value)">
-		            </div>
-		            
-		            <div>
-		                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">
-		                    ⚙️ ETL Transformation Logic:
-		                </label>
-		                <textarea class="card-logic" 
-		                          placeholder="Describe calculation, filter, or transformation..."
-		                          style="width: 100%; min-height: 80px; padding: 6px; border: 1px solid #808080; border-radius: 3px; font-size: 13px; resize: vertical;"
-		                          onchange="updateCardField('${card.id}', 'logic', this.value)">${card.logic}</textarea>
-		            </div>
-		            
-		            <div style="margin-top: 10px; font-size: 11px; color: #888; text-align: right;">
-		                Added: ${new Date(card.timestamp).toLocaleDateString()}
-		            </div>
-		        </div>
-		    `;
-		    
-		    // Insert at the top
-		    const emptyMsg = document.getElementById('empty-board-message');
-		    if (emptyMsg && emptyMsg.style.display !== 'none') {
-		        board.innerHTML = cardHTML;
-		    } else {
-		        board.insertAdjacentHTML('afterbegin', cardHTML);
-		    }
-		}
+        // Render a single card
+        function renderCard(card) {
+            const board = document.getElementById('spec-board');
+            if (!board) {
+                console.error('spec-board element not found!');
+                return;
+            }
+            
+            const cardHTML = `
+                <div class="spec-card" id="${card.id}" style="background: white; border: 1px solid #d4d0c8; border-radius: 3px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                        <div>
+                            <h4 style="margin: 0; color: #0a3b9c;">${card.name}</h4>
+                            <small style="color: #666; font-family: 'Courier New', monospace;">${card.code}</small>
+                        </div>
+                        <button onclick="removeCard('${card.id}')" 
+                                style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 20px; padding: 0 5px; line-height: 1;">×</button>
+                    </div>
+                    
+                    ${card.description ? `<p style="margin: 0 0 10px 0; color: #666; font-size: 13px;">${card.description}</p>` : ''}
+                    
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">
+                            📍 Source Table/Column:
+                        </label>
+                        <input type="text" 
+                               class="card-source" 
+                               placeholder="e.g. DBO.PATIENTS.DOB or patients.date_of_birth"
+                               value="${card.source}"
+                               style="width: 100%; padding: 6px; border: 1px solid #808080; border-radius: 3px; font-size: 13px;"
+                               onchange="updateCardField('${card.id}', 'source', this.value)">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">
+                            ⚙️ ETL Transformation Logic:
+                        </label>
+                        <textarea class="card-logic" 
+                                  placeholder="Describe calculation, filter, or transformation..."
+                                  style="width: 100%; min-height: 80px; padding: 6px; border: 1px solid #808080; border-radius: 3px; font-size: 13px; resize: vertical;"
+                                  onchange="updateCardField('${card.id}', 'logic', this.value)">${card.logic}</textarea>
+                    </div>
+                    
+                    <div style="margin-top: 10px; font-size: 11px; color: #888; text-align: right;">
+                        Added: ${new Date(card.timestamp).toLocaleDateString()}
+                    </div>
+                </div>
+            `;
+            
+            // Insert at the top
+            const emptyMsg = document.getElementById('empty-board-message');
+            if (emptyMsg && emptyMsg.style.display !== 'none') {
+                board.innerHTML = cardHTML;
+            } else {
+                board.insertAdjacentHTML('afterbegin', cardHTML);
+            }
+        }
 
-		// Update card field
-		function updateCardField(cardId, field, value) {
-		    const card = specCards.find(c => c.id === cardId);
-		    if (card) {
-		        card[field] = value;
-		        saveCardsToStorage();
-		        updateStats();
-		    }
-		}
+        // Update card field
+        function updateCardField(cardId, field, value) {
+            const card = specCards.find(c => c.id === cardId);
+            if (card) {
+                card[field] = value;
+                saveCardsToStorage();
+                updateStats();
+            }
+        }
 
-		// Remove card - FIXED FUNCTION
-		function removeCard(cardId) {
-		    console.log('Removing card:', cardId);
-		    
-		    // Remove from array
-		    specCards = specCards.filter(card => card.id !== cardId);
-		    
-		    // Remove from DOM
-		    const cardElement = document.getElementById(cardId);
-		    if (cardElement) {
-		        cardElement.remove();
-		    }
-		    
-		    // Show empty message if no cards left
-		    if (specCards.length === 0) {
-		        const emptyMsg = document.getElementById('empty-board-message');
-		        if (emptyMsg) {
-		            emptyMsg.style.display = 'block';
-		            emptyMsg.innerHTML = `
-		                <h3>No Parameters Added</h3>
-		                <p>Click on any item in the terminology tree to add it to the board.</p>
-		                <p>Each card represents a data element that needs to be mapped for ETL development.</p>
-		            `;
-		        }
-		    }
-		    
-		    updateStats();
-		    saveCardsToStorage();
-		}
+        // Remove card - FIXED FUNCTION
+        function removeCard(cardId) {
+            console.log('Removing card:', cardId);
+            
+            // Remove from array
+            specCards = specCards.filter(card => card.id !== cardId);
+            
+            // Remove from DOM
+            const cardElement = document.getElementById(cardId);
+            if (cardElement) {
+                cardElement.remove();
+            }
+            
+            // Show empty message if no cards left
+            if (specCards.length === 0) {
+                const emptyMsg = document.getElementById('empty-board-message');
+                if (emptyMsg) {
+                    emptyMsg.style.display = 'block';
+                    emptyMsg.innerHTML = `
+                        <h3>No Parameters Added</h3>
+                        <p>Click on any item in the terminology tree to add it to the board.</p>
+                        <p>Each card represents a data element that needs to be mapped for ETL development.</p>
+                    `;
+                }
+            }
+            
+            updateStats();
+            saveCardsToStorage();
+        }
 
-		// Load saved cards
-		function loadSavedCards() {
-		    const board = document.getElementById('spec-board');
-		    if (!board) {
-		        console.error('spec-board element not found!');
-		        return;
-		    }
-		    
-		    if (specCards.length === 0) {
-		        const emptyMsg = document.getElementById('empty-board-message');
-		        if (emptyMsg) {
-		            emptyMsg.style.display = 'block';
-		            emptyMsg.innerHTML = `
-		                <h3>No Parameters Added</h3>
-		                <p>Click on any item in the terminology tree to add it to the board.</p>
-		                <p>Each card represents a data element that needs to be mapped for ETL development.</p>
-		            `;
-		        }
-		        return;
-		    }
-		    
-		    // Hide empty message
-		    const emptyMsg = document.getElementById('empty-board-message');
-		    if (emptyMsg) emptyMsg.style.display = 'none';
-		    
-		    // Clear and re-render all cards
-		    board.innerHTML = '';
-		    specCards.forEach(card => {
-		        renderCard(card);
-		    });
-		}
+        // Load saved cards
+        function loadSavedCards() {
+            const board = document.getElementById('spec-board');
+            if (!board) {
+                console.error('spec-board element not found!');
+                return;
+            }
+            
+            if (specCards.length === 0) {
+                const emptyMsg = document.getElementById('empty-board-message');
+                if (emptyMsg) {
+                    emptyMsg.style.display = 'block';
+                    emptyMsg.innerHTML = `
+                        <h3>No Parameters Added</h3>
+                        <p>Click on any item in the terminology tree to add it to the board.</p>
+                        <p>Each card represents a data element that needs to be mapped for ETL development.</p>
+                    `;
+                }
+                return;
+            }
+            
+            // Hide empty message
+            const emptyMsg = document.getElementById('empty-board-message');
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            
+            // Clear and re-render all cards
+            board.innerHTML = '';
+            specCards.forEach(card => {
+                renderCard(card);
+            });
+        }
 
-		// Save cards to localStorage
-		function saveCardsToStorage() {
-		    localStorage.setItem('nwtSpecCards', JSON.stringify(specCards));
-		}
+        // Save cards to localStorage
+        function saveCardsToStorage() {
+            localStorage.setItem('nwtSpecCards', JSON.stringify(specCards));
+        }
 
-		// Update statistics
-		function updateStats() {
-		    const totalCards = specCards.length;
-		    const mappedCards = specCards.filter(card => card.source.trim() !== '').length;
-		    
-		    const countElement = document.getElementById('card-count');
-		    const mappedElement = document.getElementById('mapped-count');
-		    
-		    if (countElement) {
-		        countElement.textContent = `${totalCards} parameter${totalCards !== 1 ? 's' : ''} mapped`;
-		    }
-		    
-		    if (mappedElement) {
-		        mappedElement.textContent = `${mappedCards} with source mapping`;
-		    }
-		}
+        // Update statistics
+        function updateStats() {
+            const totalCards = specCards.length;
+            const mappedCards = specCards.filter(card => card.source.trim() !== '').length;
+            
+            const countElement = document.getElementById('card-count');
+            const mappedElement = document.getElementById('mapped-count');
+            
+            if (countElement) {
+                countElement.textContent = `${totalCards} parameter${totalCards !== 1 ? 's' : ''} mapped`;
+            }
+            
+            if (mappedElement) {
+                mappedElement.textContent = `${mappedCards} with source mapping`;
+            }
+        }
 
-		// Export to CSV
-		function exportSpecToCSV() {
-		    if (specCards.length === 0) {
-		        alert('No parameters to export. Add some parameters first.');
-		        return;
-		    }
-		    
-		    // Create CSV content
-		    let csvContent = 'data:text/csv;charset=utf-8,';
-		    
-		    // Headers
-		    csvContent += 'Parameter Name,Standard Code,Description,Source Column,ETL Logic\n';
-		    
-		    // Data rows
-		    specCards.forEach(card => {
-		        const row = [
-		            `"${card.name}"`,
-		            `"${card.code}"`,
-		            `"${card.description || ''}"`,
-		            `"${card.source || ''}"`,
-		            `"${card.logic.replace(/"/g, '""')}"`
-		        ].join(',');
-		        csvContent += row + '\n';
-		    });
-		    
-		    // Create download link
-		    const encodedUri = encodeURI(csvContent);
-		    const link = document.createElement('a');
-		    link.setAttribute('href', encodedUri);
-		    link.setAttribute('download', `nwt_etl_specification_${new Date().toISOString().slice(0,10)}.csv`);
-		    document.body.appendChild(link);
-		    link.click();
-		    document.body.removeChild(link);
-		    
-		    // Show confirmation
-		    alert(`Exported ${specCards.length} parameters to CSV.`);
-		}
+        // Export to CSV
+        function exportSpecToCSV() {
+            if (specCards.length === 0) {
+                alert('No parameters to export. Add some parameters first.');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            
+            // Headers
+            csvContent += 'Parameter Name,Standard Code,Description,Source Column,ETL Logic\n';
+            
+            // Data rows
+            specCards.forEach(card => {
+                const row = [
+                    `"${card.name}"`,
+                    `"${card.code}"`,
+                    `"${card.description || ''}"`,
+                    `"${card.source || ''}"`,
+                    `"${card.logic.replace(/"/g, '""')}"`
+                ].join(',');
+                csvContent += row + '\n';
+            });
+            
+            // Create download link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `nwt_etl_specification_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show confirmation
+            alert(`Exported ${specCards.length} parameters to CSV.`);
+        }
 
-		// Clear all cards - FIXED FUNCTION
-		function clearAllCards() {
-		    if (specCards.length === 0) {
-		        alert('No cards to clear.');
-		        return;
-		    }
-		    
-		    if (confirm(`Are you sure you want to remove all ${specCards.length} parameters from the board?`)) {
-		        specCards = [];
-		        saveCardsToStorage();
-		        
-		        const board = document.getElementById('spec-board');
-		        if (board) board.innerHTML = '';
-		        
-		        const emptyMsg = document.getElementById('empty-board-message');
-		        if (emptyMsg) {
-		            emptyMsg.style.display = 'block';
-		            emptyMsg.innerHTML = `
-		                <h3>No Parameters Added</h3>
-		                <p>Click on any item in the terminology tree to add it to the board.</p>
-		                <p>Each card represents a data element that needs to be mapped for ETL development.</p>
-		            `;
-		        }
-		        
-		        updateStats();
-		    }
-		}
+        // Clear all cards - FIXED FUNCTION
+        function clearAllCards() {
+            if (specCards.length === 0) {
+                alert('No cards to clear.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to remove all ${specCards.length} parameters from the board?`)) {
+                specCards = [];
+                saveCardsToStorage();
+                
+                const board = document.getElementById('spec-board');
+                if (board) board.innerHTML = '';
+                
+                const emptyMsg = document.getElementById('empty-board-message');
+                if (emptyMsg) {
+                    emptyMsg.style.display = 'block';
+                    emptyMsg.innerHTML = `
+                        <h3>No Parameters Added</h3>
+                        <p>Click on any item in the terminology tree to add it to the board.</p>
+                        <p>Each card represents a data element that needs to be mapped for ETL development.</p>
+                    `;
+                }
+                
+                updateStats();
+            }
+        }
 
-		// Clear tree - FIXED FUNCTION
-		function clearTree() {
-		    const treeContainer = document.getElementById('treeContainer');
-		    if (treeContainer) {
-		        if (confirm('Clear the terminology tree? This will not affect your board.')) {
-		            treeContainer.innerHTML = `
-		                <div style="color: #666; text-align: center; padding: 20px;">
-		                    <p>Click "Load Demo Tree" for example terminology.</p>
-		                    <p>Or enter a search term to query real terminology servers.</p>
-		                </div>
-		            `;
-		        }
-		    }
-		}
+        // Clear tree - FIXED FUNCTION
+        function clearTree() {
+            const treeContainer = document.getElementById('treeContainer');
+            if (treeContainer) {
+                if (confirm('Clear the terminology tree? This will not affect your board.')) {
+                    treeContainer.innerHTML = `
+                        <div style="color: #666; text-align: center; padding: 20px;">
+                            <p>Click "Load Demo Tree" for example terminology.</p>
+                            <p>Or enter a search term to query real terminology servers.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
 
-		// Add a simple test function to check if buttons work
-		function testSpecTool() {
-		    console.log('Testing Spec Tool...');
-		    console.log('specCards:', specCards);
-		    console.log('spec-board element:', document.getElementById('spec-board'));
-		    console.log('treeContainer element:', document.getElementById('treeContainer'));
-		}
+        // Add a simple test function to check if buttons work
+        function testSpecTool() {
+            console.log('Testing Spec Tool...');
+            console.log('specCards:', specCards);
+            console.log('spec-board element:', document.getElementById('spec-board'));
+            console.log('treeContainer element:', document.getElementById('treeContainer'));
+        }
 
-		// Make sure functions are available globally
-		window.loadDemoTerminology = loadDemoTerminology;
-		window.addParameterCard = addParameterCard;
-		window.removeCard = removeCard;
-		window.clearAllCards = clearAllCards;
-		window.clearTree = clearTree;
-		window.exportSpecToCSV = exportSpecToCSV;
-		window.updateCardField = updateCardField;
+        // Make sure functions are available globally
+        window.loadDemoTerminology = loadDemoTerminology;
+        window.addParameterCard = addParameterCard;
+        window.removeCard = removeCard;
+        window.clearAllCards = clearAllCards;
+        window.clearTree = clearTree;
+        window.exportSpecToCSV = exportSpecToCSV;
+        window.updateCardField = updateCardField;
 
-		// Initialize when Knowledge tab is clicked
-		document.addEventListener('DOMContentLoaded', function() {
-		    // ... existing code ...
-		    
-		    // Initialize spec tool when knowledge tab is activated
-		    const knowledgeTabButton = document.querySelector('[data-tab="knowledge-tab"]');
-		    if (knowledgeTabButton) {
-		        knowledgeTabButton.addEventListener('click', function() {
-		            console.log('Knowledge tab clicked, initializing spec tool...');
-		            setTimeout(initSpecTool, 100);
-		        });
-		    }
-		    
-		    // Also initialize when page loads if on knowledge tab
-		    const currentTab = document.querySelector('.tab-button.active');
-		    if (currentTab && currentTab.dataset.tab === 'knowledge-tab') {
-		        console.log('Starting on knowledge tab, initializing...');
-		        setTimeout(initSpecTool, 1000);
-		    }
-		});
+        // Initialize when Knowledge tab is clicked
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+            
+            // Initialize spec tool when knowledge tab is activated
+            const knowledgeTabButton = document.querySelector('[data-tab="knowledge-tab"]');
+            if (knowledgeTabButton) {
+                knowledgeTabButton.addEventListener('click', function() {
+                    console.log('Knowledge tab clicked, initializing spec tool...');
+                    setTimeout(initSpecTool, 100);
+                });
+            }
+            
+            // Also initialize when page loads if on knowledge tab
+            const currentTab = document.querySelector('.tab-button.active');
+            if (currentTab && currentTab.dataset.tab === 'knowledge-tab') {
+                console.log('Starting on knowledge tab, initializing...');
+                setTimeout(initSpecTool, 1000);
+            }
+        });
+
+
+        // FREE Ontoserver API Search Function
+        async function searchOntoserverFree(searchTerm) {
+            try {
+                console.log(`🔍 Searching Ontoserver for: ${searchTerm}`);
+                
+                // CSIRO Ontoserver (FREE, no auth required)
+                const url = `https://ontoserver.csiro.au/stu3-latest/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs&filter=${encodeURIComponent(searchTerm)}&count=20`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/fhir+json',
+                        'Content-Type': 'application/fhir+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                return processOntoserverResults(data);
+                
+            } catch (error) {
+                console.error('Ontoserver search failed:', error);
+                throw error;
+            }
+        }
+
+        // Process FHIR response
+        function processOntoserverResults(fhirData) {
+            const results = [];
+            
+            if (fhirData.expansion && fhirData.expansion.contains) {
+                fhirData.expansion.contains.forEach(item => {
+                    results.push({
+                        code: item.code,
+                        system: item.system,
+                        display: item.display,
+                        fhirType: 'Concept',
+                        source: 'Ontoserver',
+                        description: `SNOMED CT: ${item.display}`,
+                        url: `http://snomed.info/id/${item.code}`
+                    });
+                });
+            }
+            
+            return results;
+        }
+
+        // FREE Snowstorm Demo API
+        async function searchSnowstormFree(searchTerm) {
+            try {
+                console.log(`🔍 Searching Snowstorm for: ${searchTerm}`);
+                
+                // Snowstorm demo instance (FREE)
+                const url = `https://snowstorm.ihtsdotools.org/snowstorm/snomed-ct/browser/MAIN/SNOMEDCT-US/2023-09-01/concepts?term=${encodeURIComponent(searchTerm)}&limit=20`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                return processSnowstormResults(data);
+                
+            } catch (error) {
+                console.error('Snowstorm search failed:', error);
+                throw error;
+            }
+        }
+
+        function processSnowstormResults(data) {
+            const results = [];
+            
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    results.push({
+                        code: item.conceptId,
+                        system: 'http://snomed.info/sct',
+                        display: item.fsn.term,
+                        fhirType: 'Concept',
+                        source: 'Snowstorm',
+                        description: item.fsn.term,
+                        url: `http://snomed.info/id/${item.conceptId}`
+                    });
+                });
+            }
+            
+            return results;
+        }
+
+        // Updated search function with FREE APIs
+        async function searchTerminology() {
+            const searchInput = document.getElementById('treeSearch');
+            const searchTerm = searchInput.value.trim();
+            const provider = document.getElementById('api-provider').value;
+            
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            const treeContainer = document.getElementById('treeContainer');
+            const statusText = document.getElementById('search-status') || 
+                              (() => {
+                                  const div = document.createElement('div');
+                                  div.id = 'search-status';
+                                  div.style.padding = '10px';
+                                  treeContainer.parentElement.insertBefore(div, treeContainer);
+                                  return div;
+                              })();
+            
+            // Show loading
+            statusText.innerHTML = `<div style="color: #666; text-align: center; padding: 20px;">
+                <div style="font-size: 24px;">⏳</div>
+                <div>Searching ${provider} for "${searchTerm}"...</div>
+            </div>`;
+            treeContainer.innerHTML = '';
+            
+            try {
+                let results;
+                
+                switch(provider) {
+                    case 'DEMO':
+                        // Use your existing demo search
+                        searchTerminologyTree({ target: { value: searchTerm } });
+                        statusText.innerHTML = '';
+                        return;
+                        
+                    case 'ONTOSERVER':
+                        results = await searchOntoserverFree(searchTerm);
+                        break;
+                        
+                    case 'SNOWSTORM':
+                        results = await searchSnowstormFree(searchTerm);
+                        break;
+                        
+                    default:
+                        throw new Error(`Unknown provider: ${provider}`);
+                }
+                
+                // Display results
+                displayAPISearchResults(results, provider, searchTerm);
+                statusText.innerHTML = '';
+                
+            } catch (error) {
+                console.error('Search failed:', error);
+                statusText.innerHTML = `<div style="color: #f44336; text-align: center; padding: 20px;">
+                    <div style="font-size: 24px;">❌</div>
+                    <div>Search failed: ${error.message}</div>
+                    <div style="font-size: 12px; margin-top: 10px;">
+                        <button onclick="searchTerminologyTree({target: {value: '${searchTerm}'}})" 
+                                style="padding: 5px 10px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                            Use Demo Data Instead
+                        </button>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // Display API search results
+        function displayAPISearchResults(results, provider, searchTerm) {
+            const treeContainer = document.getElementById('treeContainer');
+            
+            if (!results || results.length === 0) {
+                treeContainer.innerHTML = `<div style="color: #666; text-align: center; padding: 40px;">
+                    <div style="font-size: 36px;">🔍</div>
+                    <div>No results found for "${searchTerm}"</div>
+                    <div style="font-size: 12px; margin-top: 10px;">
+                        Source: ${provider}<br>
+                        Try different search terms
+                    </div>
+                </div>`;
+                return;
+            }
+            
+            let html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f0f8ff; border-radius: 3px;">
+                    <strong>Live Results from ${provider}:</strong> ${results.length} concepts found for "${searchTerm}"
+                </div>
+                <div style="max-height: 400px; overflow-y: auto;">
+            `;
+            
+            results.forEach((item, index) => {
+                html += `
+                    <div class="api-result-item" 
+                         style="margin-bottom: 8px; padding: 10px; border: 1px solid #d4d0c8; border-radius: 3px; cursor: pointer;"
+                         onclick="addAPIParameterCard(${JSON.stringify(item).replace(/"/g, '&quot;')})"
+                         onmouseover="this.style.background='#f0f8ff'" 
+                         onmouseout="this.style.background='white'">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>${item.display || item.description}</strong>
+                                <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                                    Code: ${item.code} | Source: ${item.source}
+                                </div>
+                            </div>
+                            <button style="padding: 2px 8px; font-size: 11px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                Add +
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            treeContainer.innerHTML = html;
+        }
+
+        // Add API result to specification board
+        function addAPIParameterCard(item) {
+            // Check if already added
+            const existingCard = specCards.find(card => card.code === item.code);
+            if (existingCard) {
+                alert(`"${item.display}" is already on the board.`);
+                return;
+            }
+            
+            // Create card object
+            const cardId = `card-${Date.now()}`;
+            const card = {
+                id: cardId,
+                name: item.display || item.description,
+                code: item.code || '',
+                description: item.description || '',
+                source: item.source || 'API',
+                system: item.system || '',
+                logic: '',
+                timestamp: new Date().toISOString()
+            };
+            
+            specCards.push(card);
+            renderCard(card);
+            updateStats();
+            saveCardsToStorage();
+            
+            // Hide empty message
+            const emptyMsg = document.getElementById('empty-board-message');
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            
+            // Show success message
+            const notification = document.createElement('div');
+            notification.innerHTML = `
+                <div style="position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #4CAF50; color: white; border-radius: 3px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                    ✓ Added "${item.display.substring(0, 30)}${item.display.length > 30 ? '...' : ''}"
+                </div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Quick search examples
+        function quickSearch(term) {
+            document.getElementById('treeSearch').value = term;
+            searchTerminology();
+        }
+
+        // Test the API connection
+        function testAPIconnection(provider = 'ONTOSERVER') {
+            const testTerms = ['diabetes', 'hypertension', 'vaccine'];
+            const term = testTerms[Math.floor(Math.random() * testTerms.length)];
+            
+            document.getElementById('treeSearch').value = term;
+            document.getElementById('api-provider').value = provider;
+            
+            searchTerminology();
+        }
         
         // ================= UPDATE EXISTING FUNCTIONS =================
         
@@ -4312,18 +4593,18 @@ LIMIT 50`
             }
 
             // NEW: Request Number Validation
-		    const requestNumber = document.getElementById('request-number')?.value.trim();
+            const requestNumber = document.getElementById('request-number')?.value.trim();
     
-		    if (requestNumber && isDuplicateRequestNumber(requestNumber)) {
-		        showValidationError('reqnum-error', 'This Request Number already exists. Use a unique number.');
-		        document.getElementById('request-number')?.classList.add('validation-error');
-		        hasErrors = true;
-		    }
-		     else if (!isValidRequestNumber(requestNumber)) {
-		        showValidationError('reqnum-error', 'Invalid format. Must be like: IM-703546 (letters, dash, numbers)');
-		        document.getElementById('request-number')?.classList.add('validation-error');
-		        hasErrors = true;
-		    }
+            if (requestNumber && isDuplicateRequestNumber(requestNumber)) {
+                showValidationError('reqnum-error', 'This Request Number already exists. Use a unique number.');
+                document.getElementById('request-number')?.classList.add('validation-error');
+                hasErrors = true;
+            }
+             else if (!isValidRequestNumber(requestNumber)) {
+                showValidationError('reqnum-error', 'Invalid format. Must be like: IM-703546 (letters, dash, numbers)');
+                document.getElementById('request-number')?.classList.add('validation-error');
+                hasErrors = true;
+            }
 
             // Request history
             const requestHistory = document.querySelector('input[name="request-history"]:checked');
@@ -4417,11 +4698,11 @@ LIMIT 50`
         }
 
         // NEW: Request Number Format Validation
-		function isValidRequestNumber(requestNum) {
-		    // Pattern: letters (2-4), dash, numbers (4-6)
-		    // Examples: IM-703546, DHSS-24001, HSSA-98765
-		    const pattern = /^[A-Z]{2,4}-\d{4,6}$/;
-		    return pattern.test(requestNum);
+        function isValidRequestNumber(requestNum) {
+            // Pattern: letters (2-4), dash, numbers (4-6)
+            // Examples: IM-703546, DHSS-24001, HSSA-98765
+            const pattern = /^[A-Z]{2,4}-\d{4,6}$/;
+            return pattern.test(requestNum);
 
         // Get form data
         return {
@@ -4462,77 +4743,77 @@ LIMIT 50`
 
         // Save request
        function saveRequest() {
-		    if (!validateForm()) {
-		        alert("Cannot save: Please fix all validation errors.");
-		        return;
-		    }
-		    
-		    const formData = getFormData();
-		    
-		    // Double-check request number is saved
-		    if (!formData.request_number) {
-		        alert("Error: Request Number is required!");
-		        return;
-		    }
-		    
-		    // Check for duplicate
-		    if (isDuplicateRequestNumber(formData.request_number)) {
-		        alert("Error: Request Number already exists!");
-		        return;
-		    }
-		    
-		    // Add to storage
-		    requestsData.push(formData);
-		    localStorage.setItem('dataRequests', JSON.stringify(requestsData));
-		    
-		    // Clear and refresh
-		    clearForm();
-		    loadTableData();
-		    
-		    alert(`Data request saved successfully!\nRequest Number: ${formData.request_number}`);
-		}
+            if (!validateForm()) {
+                alert("Cannot save: Please fix all validation errors.");
+                return;
+            }
+            
+            const formData = getFormData();
+            
+            // Double-check request number is saved
+            if (!formData.request_number) {
+                alert("Error: Request Number is required!");
+                return;
+            }
+            
+            // Check for duplicate
+            if (isDuplicateRequestNumber(formData.request_number)) {
+                alert("Error: Request Number already exists!");
+                return;
+            }
+            
+            // Add to storage
+            requestsData.push(formData);
+            localStorage.setItem('dataRequests', JSON.stringify(requestsData));
+            
+            // Clear and refresh
+            clearForm();
+            loadTableData();
+            
+            alert(`Data request saved successfully!\nRequest Number: ${formData.request_number}`);
+        }
 
         // Load table data for form tab
         function loadTableData() {
-		    const tbody = document.getElementById('table-body');
-		    if (!tbody) return;
-		    
-		    tbody.innerHTML = '';
-		    
-		    if (requestsData.length === 0) {
-		        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No requests saved yet.</td></tr>';
-		        return;
-		    }
-		    
-		    const sortedData = [...requestsData].sort((a, b) => 
-		        new Date(b.timestamp) - new Date(a.timestamp)
-		    );
-		    
-		    sortedData.forEach(data => {
-		        const row = document.createElement('tr');
-		        
-		        const legislativeAuth = data.legislative_authority === 'yes' ? 
-		            `Yes: ${data.legislative_description.substring(0, 100)}...` : 'No';
-		        
-		        const definedPurpose = data.defined_purpose.length > 50 ? 
-		            data.defined_purpose.substring(0, 50) + '...' : data.defined_purpose;
-		        
-		        const location = `${data.region} / ${data.district}`;
-		        
-		        // UPDATED: Added request_number column
-		        row.innerHTML = `
-		            <td>${data.id}</td>
-		            <td><strong style="color: #0a3b9c; font-family: 'Courier New', monospace;">${data.request_number}</strong></td>
-		            <td>${data.organization}</td>
-		            <td>${legislativeAuth}</td>
-		            <td>${definedPurpose}</td>
-		            <td>${data.timestamp}</td>
-		            <td>${location}</td>
-		        `;
-		        
-		        tbody.appendChild(row);
-		    });
-		}
+            const tbody = document.getElementById('table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (requestsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No requests saved yet.</td></tr>';
+                return;
+            }
+            
+            const sortedData = [...requestsData].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedData.forEach(data => {
+                const row = document.createElement('tr');
+                
+                const legislativeAuth = data.legislative_authority === 'yes' ? 
+                    `Yes: ${data.legislative_description.substring(0, 100)}...` : 'No';
+                
+                const definedPurpose = data.defined_purpose.length > 50 ? 
+                    data.defined_purpose.substring(0, 50) + '...' : data.defined_purpose;
+                
+                const location = `${data.region} / ${data.district}`;
+                
+                // UPDATED: Added request_number column
+                row.innerHTML = `
+                    <td>${data.id}</td>
+                    <td><strong style="color: #0a3b9c; font-family: 'Courier New', monospace;">${data.request_number}</strong></td>
+                    <td>${data.organization}</td>
+                    <td>${legislativeAuth}</td>
+                    <td>${definedPurpose}</td>
+                    <td>${data.timestamp}</td>
+                    <td>${location}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
         // Clear form
         function clearForm() {
             clearValidationErrors();
@@ -4600,11 +4881,11 @@ LIMIT 50`
             }
 
             // NEW FIELDS - ADD THESE:
-		    const dataTypeSpecs = document.getElementById('data-type-specs');
-		    const frequencyFeasibility = document.getElementById('frequency-feasibility');
-		    
-		    if (dataTypeSpecs) dataTypeSpecs.value = '';
-		    if (frequencyFeasibility) frequencyFeasibility.value = '';
+            const dataTypeSpecs = document.getElementById('data-type-specs');
+            const frequencyFeasibility = document.getElementById('frequency-feasibility');
+            
+            if (dataTypeSpecs) dataTypeSpecs.value = '';
+            if (frequencyFeasibility) frequencyFeasibility.value = '';
             
             // Other
             const definedPurpose = document.getElementById('defined-purpose');
