@@ -1360,8 +1360,512 @@ document.addEventListener('DOMContentLoaded', function() {
         window.openApiSettings = openApiSettings;
         window.testAPIconnection = testAPIconnection;
 
-</script>
-        </script>
+// ================= TEMPLATE LOADER FUNCTIONS =================
+
+    // Main template loader function
+    function loadTemplate(templateName) {
+        console.log('Loading template:', templateName);
+        
+        // Show loading state
+        const contentArea = document.getElementById('template-content-area') || 
+                           document.getElementById('main-content') ||
+                           document.body;
+        
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'template-loading';
+        loadingDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 24px;">⏳</div>
+                <div>Loading ${templateName} template...</div>
+            </div>
+        `;
+        
+        // Clear previous content and show loading
+        if (contentArea.id === 'template-content-area') {
+            contentArea.innerHTML = '';
+            contentArea.appendChild(loadingDiv);
+        } else {
+            // Create a dedicated area if it doesn't exist
+            let templateArea = document.getElementById('template-content-area');
+            if (!templateArea) {
+                templateArea = document.createElement('div');
+                templateArea.id = 'template-content-area';
+                contentArea.appendChild(templateArea);
+            }
+            templateArea.innerHTML = '';
+            templateArea.appendChild(loadingDiv);
+        }
+        
+        // Load the template based on name
+        setTimeout(() => {
+            loadTemplateContent(templateName);
+        }, 300);
+    }
+
+    // Load specific template content
+    function loadTemplateContent(templateName) {
+        console.log('Loading content for:', templateName);
+        
+        const templateArea = document.getElementById('template-content-area');
+        if (!templateArea) {
+            console.error('Template area not found');
+            return;
+        }
+        
+        // Define template content
+        const templates = {
+            'diabetes': {
+                title: 'Diabetes Management Template',
+                content: `
+                    <div style="padding: 20px;">
+                        <h2>📋 Diabetes Management Plan</h2>
+                        
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <h3>🎯 Management Goals</h3>
+                            <ul>
+                                <li><strong>A1C Target:</strong> < 7.0% for most adults</li>
+                                <li><strong>Blood Pressure:</strong> < 130/80 mmHg</li>
+                                <li><strong>LDL Cholesterol:</strong> < 100 mg/dL</li>
+                                <li><strong>Annual Eye Exam</strong></li>
+                                <li><strong>Annual Foot Exam</strong></li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h3>💊 Common Medications</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>Metformin</strong><br>
+                                    <small>First-line therapy</small>
+                                </div>
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>Insulin</strong><br>
+                                    <small>Various formulations</small>
+                                </div>
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>GLP-1 RAs</strong><br>
+                                    <small>e.g., Semaglutide</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="saveTemplate('diabetes')" 
+                                style="padding: 10px 20px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                            💾 Save This Template
+                        </button>
+                    </div>
+                `
+            },
+            'hypertension': {
+                title: 'Hypertension Management Template',
+                content: `
+                    <div style="padding: 20px;">
+                        <h2>📋 Hypertension Management Plan</h2>
+                        
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <h3>🎯 Blood Pressure Targets</h3>
+                            <ul>
+                                <li><strong>General Target:</strong> < 130/80 mmHg</li>
+                                <li><strong>Diabetes/CRD:</strong> < 130/80 mmHg</li>
+                                <li><strong>Elderly:</strong> < 130/80 mmHg (if tolerated)</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h3>💊 First-line Medications</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>ACE Inhibitors</strong><br>
+                                    <small>e.g., Lisinopril</small>
+                                </div>
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>ARBs</strong><br>
+                                    <small>e.g., Losartan</small>
+                                </div>
+                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
+                                    <strong>CCBs</strong><br>
+                                    <small>e.g., Amlodipine</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'medication-review': {
+                title: 'Medication Review Template',
+                content: `
+                    <div style="padding: 20px;">
+                        <h2>📋 Comprehensive Medication Review</h2>
+                        
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <h3>🔍 Review Checklist</h3>
+                            <ul>
+                                <li>✅ Indication for each medication</li>
+                                <li>✅ Effectiveness monitoring</li>
+                                <li>✅ Safety (side effects, interactions)</li>
+                                <li>✅ Adherence assessment</li>
+                                <li>✅ Cost considerations</li>
+                                <li>✅ Deprescribing opportunities</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h3>📝 Assessment Form</h3>
+                            <textarea id="med-review-notes" 
+                                      style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 3px;"
+                                      placeholder="Enter medication review notes..."></textarea>
+                        </div>
+                    </div>
+                `
+            },
+            'default': {
+                title: 'Clinical Template',
+                content: `
+                    <div style="padding: 20px; text-align: center;">
+                        <h2>📋 Clinical Decision Support</h2>
+                        <p>Select a template from the buttons above.</p>
+                        <div style="color: #666; margin-top: 20px;">
+                            💡 Tip: Templates help standardize clinical documentation and decision-making.
+                        </div>
+                    </div>
+                `
+            }
+        };
+        
+        // Get template or use default
+        const template = templates[templateName] || templates['default'];
+        
+        // Display the template
+        templateArea.innerHTML = `
+            <div style="background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <div style="background: #0a3b9c; color: white; padding: 15px; border-radius: 5px 5px 0 0;">
+                    <h3 style="margin: 0;">${template.title}</h3>
+                </div>
+                ${template.content}
+            </div>
+        `;
+        
+        // Log action
+        console.log(`Template "${templateName}" loaded successfully`);
+    }
+
+    // Save template function
+    function saveTemplate(templateName) {
+        console.log('Saving template:', templateName);
+        
+        // Get the current template content
+        const templateArea = document.getElementById('template-content-area');
+        if (!templateArea) return;
+        
+        const content = templateArea.innerHTML;
+        
+        // Save to localStorage
+        localStorage.setItem(`template_${templateName}_${Date.now()}`, content);
+        
+        alert(`✅ Template "${templateName}" saved locally!`);
+        
+        // Update saved templates list if it exists
+        updateSavedTemplatesList();
+    }
+
+    // Update saved templates list
+    function updateSavedTemplatesList() {
+        const savedList = document.getElementById('saved-templates-list');
+        if (!savedList) return;
+        
+        // Clear current list
+        savedList.innerHTML = '';
+        
+        // Get all saved templates from localStorage
+        const savedTemplates = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('template_')) {
+                savedTemplates.push({
+                    key: key,
+                    name: key.replace('template_', '').split('_')[0],
+                    timestamp: parseInt(key.split('_').pop()) || 0
+                });
+            }
+        }
+        
+        // Sort by timestamp (newest first)
+        savedTemplates.sort((a, b) => b.timestamp - a.timestamp);
+        
+        // Display list
+        if (savedTemplates.length === 0) {
+            savedList.innerHTML = '<div style="color: #666; padding: 10px;">No saved templates yet.</div>';
+            return;
+        }
+        
+        savedTemplates.forEach(template => {
+            const date = new Date(template.timestamp).toLocaleString();
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 8px; margin: 5px 0; background: #f9f9f9; border: 1px solid #ddd; border-radius: 3px;';
+            item.innerHTML = `
+                <strong>${template.name}</strong>
+                <div style="font-size: 11px; color: #666;">Saved: ${date}</div>
+                <div style="margin-top: 5px;">
+                    <button onclick="loadSavedTemplate('${template.key}')" 
+                            style="padding: 3px 8px; font-size: 11px; background: #0a3b9c; color: white; border: none; border-radius: 2px; margin-right: 5px;">
+                        Load
+                    </button>
+                    <button onclick="deleteTemplate('${template.key}')" 
+                            style="padding: 3px 8px; font-size: 11px; background: #f44336; color: white; border: none; border-radius: 2px;">
+                        Delete
+                    </button>
+                </div>
+            `;
+            savedList.appendChild(item);
+        });
+    }
+
+    // Load saved template
+    function loadSavedTemplate(templateKey) {
+        const content = localStorage.getItem(templateKey);
+        if (!content) {
+            alert('Template not found');
+            return;
+        }
+        
+        const templateArea = document.getElementById('template-content-area');
+        if (!templateArea) return;
+        
+        templateArea.innerHTML = content;
+        console.log('Loaded saved template:', templateKey);
+    }
+
+    // Delete template
+    function deleteTemplate(templateKey) {
+        if (confirm('Are you sure you want to delete this template?')) {
+            localStorage.removeItem(templateKey);
+            updateSavedTemplatesList();
+            alert('Template deleted.');
+        }
+    }
+
+    // Initialize templates on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Template system initialized');
+        
+        // Update saved templates list if it exists
+        setTimeout(updateSavedTemplatesList, 1000);
+    });
+
+    // Make functions available globally
+    window.loadTemplate = loadTemplate;
+    window.saveTemplate = saveTemplate;
+    window.loadSavedTemplate = loadSavedTemplate;
+    window.deleteTemplate = deleteTemplate;
+    
+// ================= SQL TEMPLATE LOADER =================
+
+function loadTemplate(templateName) {
+    console.log('Loading SQL template:', templateName);
+    
+    // Find the SQL input/textarea - adjust this selector based on your actual HTML
+    const sqlInput = document.getElementById('sqlQuery') || 
+                     document.getElementById('queryInput') ||
+                     document.querySelector('textarea[name="sql"]') ||
+                     document.querySelector('textarea[placeholder*="SQL"]') ||
+                     document.querySelector('.sql-editor');
+    
+    if (!sqlInput) {
+        console.error('Could not find SQL input field');
+        alert('Error: Could not find SQL editor. Please check the page structure.');
+        return;
+    }
+    
+    // Define SQL templates
+    const templates = {
+        'select_all': {
+            name: 'Select All',
+            sql: `SELECT * FROM patients\nWHERE discharge_date IS NULL\nORDER BY admission_date DESC\nLIMIT 100;`,
+            description: 'Select all records from a table with basic filtering'
+        },
+        'count': {
+            name: 'Count Records',
+            sql: `SELECT COUNT(*) as total_count,\n       COUNT(DISTINCT patient_id) as unique_patients\nFROM encounters\nWHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);`,
+            description: 'Count records with date filtering'
+        },
+        'join': {
+            name: 'Basic JOIN',
+            sql: `SELECT \n    p.patient_id,\n    p.first_name,\n    p.last_name,\n    e.encounter_date,\n    e.diagnosis_code,\n    d.description\nFROM patients p\nJOIN encounters e ON p.patient_id = e.patient_id\nLEFT JOIN diagnoses d ON e.diagnosis_code = d.code\nWHERE e.encounter_date >= '2024-01-01'\nORDER BY e.encounter_date DESC;`,
+            description: 'Join patients with encounters and diagnoses'
+        },
+        'insert': {
+            name: 'INSERT Template',
+            sql: `INSERT INTO medications (\n    patient_id,\n    medication_name,\n    dosage,\n    frequency,\n    start_date,\n    prescribed_by\n) VALUES (\n    :patient_id,\n    :medication_name,\n    :dosage,\n    :frequency,\n    CURDATE(),\n    :prescriber\n);`,
+            description: 'Insert new medication record'
+        },
+        'update': {
+            name: 'UPDATE Template',
+            sql: `UPDATE patients\nSET \n    last_visit = CURDATE(),\n    insurance_status = :new_status,\n    updated_at = NOW()\nWHERE patient_id = :patient_id\nAND active = 1;`,
+            description: 'Update patient information'
+        },
+        'aggregate': {
+            name: 'Aggregate Query',
+            sql: `SELECT \n    diagnosis_code,\n    COUNT(*) as case_count,\n    AVG(length_of_stay) as avg_stay,\n    MIN(admission_date) as first_case,\n    MAX(admission_date) as last_case\nFROM encounters\nWHERE discharge_date IS NOT NULL\nGROUP BY diagnosis_code\nHAVING COUNT(*) > 5\nORDER BY case_count DESC;`,
+            description: 'Aggregate statistics with grouping'
+        },
+        'subquery': {
+            name: 'Subquery Example',
+            sql: `SELECT \n    p.first_name,\n    p.last_name,\n    p.date_of_birth,\n    (\n        SELECT COUNT(*)\n        FROM encounters e\n        WHERE e.patient_id = p.patient_id\n        AND YEAR(e.encounter_date) = YEAR(CURDATE())\n    ) as visits_this_year\nFROM patients p\nWHERE p.active = 1\nORDER BY visits_this_year DESC;`,
+            description: 'Use subquery to count related records'
+        }
+    };
+    
+    // Get the template
+    const template = templates[templateName];
+    
+    if (!template) {
+        console.error('Template not found:', templateName);
+        alert(`Template "${templateName}" not found. Available templates: ${Object.keys(templates).join(', ')}`);
+        return;
+    }
+    
+    // Set the SQL value
+    if (sqlInput.tagName === 'TEXTAREA' || sqlInput.tagName === 'INPUT') {
+        sqlInput.value = template.sql;
+        
+        // Trigger change event if needed
+        sqlInput.dispatchEvent(new Event('input', { bubbles: true }));
+        sqlInput.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        // For contenteditable or other elements
+        sqlInput.textContent = template.sql;
+    }
+    
+    // Focus the input
+    sqlInput.focus();
+    
+    // Show success notification
+    showTemplateNotification(template);
+    
+    console.log(`SQL template "${templateName}" loaded successfully`);
+}
+
+function showTemplateNotification(template) {
+    // Remove any existing notification
+    const existingNote = document.getElementById('template-notification');
+    if (existingNote) existingNote.remove();
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.id = 'template-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 400px;
+        animation: slideIn 0.3s ease-out;
+        font-family: monospace;
+    `;
+    
+    notification.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">
+            ✅ Loaded: ${template.name}
+        </div>
+        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 10px;">
+            ${template.description}
+        </div>
+        <div style="font-size: 11px; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 3px; margin-top: 5px; overflow: auto; max-height: 100px;">
+            <pre style="margin: 0; white-space: pre-wrap;">${template.sql}</pre>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// ================= ADD MORE TEMPLATE BUTTONS =================
+
+// Optional: Function to add template buttons dynamically
+function addTemplateButtons() {
+    const templateContainer = document.querySelector('.form-group label:contains("Quick Templates")')?.parentElement;
+    
+    if (!templateContainer) return;
+    
+    const templates = [
+        { id: 'insert', label: 'INSERT template' },
+        { id: 'update', label: 'UPDATE template' },
+        { id: 'aggregate', label: 'Aggregate query' },
+        { id: 'subquery', label: 'Subquery example' }
+    ];
+    
+    templates.forEach(template => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-secondary';
+        button.style.cssText = 'font-size: 12px; text-align: left; margin-top: 5px;';
+        button.textContent = template.label;
+        button.onclick = () => loadTemplate(template.id);
+        
+        // Find the button container
+        const buttonContainer = templateContainer.querySelector('div[style*="flex-direction: column"]');
+        if (buttonContainer) {
+            buttonContainer.appendChild(button);
+        }
+    });
+}
+
+// ================= INITIALIZE =================
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('SQL Template system initialized');
+    
+    // Optional: Add more template buttons
+    setTimeout(addTemplateButtons, 1000);
+    
+    // Add keyboard shortcuts for templates
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+1 for select_all, Ctrl+2 for count, etc.
+        if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+            const templates = {
+                '1': 'select_all',
+                '2': 'count',
+                '3': 'join',
+                '4': 'insert',
+                '5': 'update',
+                '6': 'aggregate',
+                '7': 'subquery'
+            };
+            
+            if (templates[e.key]) {
+                e.preventDefault();
+                loadTemplate(templates[e.key]);
+            }
+        }
+    });
+});
+
+// Make function globally available
+window.loadTemplate = loadTemplate;
+
+
+    </script>
 </head>
 <body>
     <div class="container">
@@ -1961,70 +2465,72 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <!-- API SELECTOR -->
                                     <!-- API SELECTOR -->
                                     <!-- API SELECTOR SECTION -->
-                                    <div style="margin-bottom: 15px;">
-                                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px;">Data Source:</label>
-                                        <select id="api-provider" class="form-control" style="font-size: 12px; padding: 5px;">
-                                            <option value="DEMO">Demo Mode (Sample Data)</option>
-                                            <option value="INFOWAY">Infoway Canada (Live SNOMED CA) 🇨🇦</option>
-                                            <option value="SNOWSTORM">Snowstorm (Live SNOMED)</option>
-                                        </select>
-                                        
-                                        <!-- Changed: Use ID instead of inline onclick -->
-                                        <button id="api-settings-btn"
-                                                style="margin-top: 5px; font-size: 11px; padding: 3px 8px;" 
-                                                class="btn btn-secondary">
-                                            API Settings
-                                        </button>
-                                    </div>
-
                                     <!-- API SETTINGS PANEL -->
-                                    <div id="api-setup-panel" style="display: none; padding: 15px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px; margin: 10px 0;">
-                                        <h4>🔐 Infoway API Setup</h4>
-                                        <p style="font-size: 12px; color: #666;">Enter your Infoway API Key (you received this via email):</p>
+                                    <div id="api-setup-panel" style="display: none; padding: 20px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; margin: 15px 0;">
+                                        <h4 style="color: #0a3b9c; margin-bottom: 20px;">
+                                            🔐 Infoway Terminology Server Setup
+                                        </h4>
                                         
-                                        <!-- Changed: Use ID for the input -->
-                                        <input type="password" 
-                                               id="infoway-api-key-input" 
-                                               placeholder="ihc_abc123..." 
-                                               style="width: 300px; padding: 5px; margin-right: 10px;">
+                                        <div style="margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 4px;">
+                                            <strong>ℹ️ You will need:</strong>
+                                            <ul style="margin: 8px 0 0 20px; font-size: 12px;">
+                                                <li>Client ID (from email)</li>
+                                                <li>Client Secret (from encrypted zip)</li>
+                                                <li>Phone number (password for zip file)</li>
+                                            </ul>
+                                        </div>
                                         
-                                        <!-- Changed: Use ID instead of inline onclick -->
-                                        <button id="save-api-key-btn"
-                                                style="padding: 5px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                                            Save & Test Connection
-                                        </button>
+                                        <div style="margin-bottom: 20px;">
+                                            <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">
+                                                Client ID:
+                                            </label>
+                                            <input type="text" 
+                                                   id="infoway-client-id" 
+                                                   placeholder="e.g., ihc_client_12345"
+                                                   style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px;">
+                                            
+                                            <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px;">
+                                                Client Secret:
+                                            </label>
+                                            <input type="password" 
+                                                   id="infoway-client-secret" 
+                                                   placeholder="Enter your Client Secret"
+                                                   style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                            
+                                            <div style="font-size: 11px; color: #666; margin-top: 8px;">
+                                                💡 Check your email for Client ID and encrypted zip with Client Secret
+                                            </div>
+                                        </div>
                                         
-                                        <div id="api-test-result" style="margin-top: 10px; font-size: 12px;"></div>
+                                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                            <button id="save-infoway-btn"
+                                                    style="padding: 10px 20px; background: #0a3b9c; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+                                                💾 Save Credentials
+                                            </button>
+                                            
+                                            <button id="test-infoway-btn"
+                                                    style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+                                                🔗 Test Connection
+                                            </button>
+                                            
+                                            <button id="clear-infoway-btn"
+                                                    style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+                                                🗑️ Clear
+                                            </button>
+                                        </div>
+                                        
+                                        <div id="api-test-result" style="margin-top: 15px;"></div>
+                                        
+                                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 4px; border: 1px solid #ffecb5;">
+                                            <strong>📌 Important Notes:</strong>
+                                            <ul style="margin: 8px 0 0 20px; font-size: 11px;">
+                                                <li>Credentials are stored only in your browser</li>
+                                                <li>Access tokens auto-refresh when expired</li>
+                                                <li>First setup may take a moment for OAuth2 authentication</li>
+                                                <li>Need help? Contact: terminology@infoway-inforoute.ca</li>
+                                            </ul>
+                                        </div>
                                     </div>
-
-                                    <!-- Add this script after the panel to set up event listeners -->
-                                    <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        // Set up event listeners
-                                        const apiSettingsBtn = document.getElementById('api-settings-btn');
-                                        if (apiSettingsBtn) {
-                                            apiSettingsBtn.addEventListener('click', openApiSettings);
-                                        }
-                                        
-                                        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-                                        if (saveApiKeyBtn) {
-                                            saveApiKeyBtn.addEventListener('click', function(e) {
-                                                e.preventDefault();
-                                                setupInfowayAPI();
-                                            });
-                                        }
-                                        
-                                        // Also add Enter key support for the input field
-                                        const apiKeyInput = document.getElementById('infoway-api-key-input');
-                                        if (apiKeyInput) {
-                                            apiKeyInput.addEventListener('keypress', function(e) {
-                                                if (e.key === 'Enter') {
-                                                    setupInfowayAPI();
-                                                }
-                                            });
-                                        }
-                                    });
-                                    </script>
 
                                     
                                     <!-- QUICK SEARCH BUTTONS -->
@@ -2422,67 +2928,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <!-- ================= ACCORDION 3: SQL PRACTICE ================= -->
-                <div class="accordion">
-                    <div class="accordion-header active" data-accordion="sql">
-                        <span>💻 SQL Practice & Query Builder</span>
-                        <span class="accordion-icon">+</span>
-                    </div>
-                    <div class="accordion-content active" id="accordion-sql">
-                        <div class="compact-grid">
-                            <!-- Left: Query Input -->
-                            <div class="compact-section">
-                                <div class="form-group">
-                                    <label>SQL Query:</label>
-                                    <textarea id="sql-query" class="form-control textarea-large" 
-                                              placeholder="Write your SQL query here...
-                    Example: SELECT first_name, last_name FROM patients WHERE city = 'Yellowknife' LIMIT 10"
-                                              rows="6"></textarea>
-                                </div>
-                                
-                                <div class="form-buttons">
-                                    <button id="run-query" class="btn btn-primary">Run Query</button>
-                                    <button id="clear-query" class="btn btn-secondary">Clear</button>
-                                    <button id="save-query" class="btn btn-secondary">Save</button>
-                                    <button id="export-results" class="btn btn-secondary">Export CSV</button>
-                                </div>
-                                
-                                <div class="form-group" style="margin-top: 15px;">
-                                    <label>Saved Queries:</label>
-                                    <select id="saved-queries" class="form-control">
-                                        <option value="">Select a saved query...</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <!-- Right: Table Selector -->
-                            <div class="compact-section">
-                                <div class="form-group">
-                                    <label>Available Tables:</label>
-                                    <div class="scrollable-section" style="height: 200px;">
-                                        <div id="table-selector" class="checkbox-group">
-                                            <!-- Tables will be populated here -->
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Quick Templates:</label>
-                                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                                        <button onclick="loadTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                            SELECT * FROM [table]
-                                        </button>
-                                        <button onclick="loadTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                            SELECT COUNT(*) FROM [table]
-                                        </button>
-                                        <button onclick="loadTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-                                            Simple JOIN template
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Example SQL Editor Area -->
+<div class="form-group">
+    <label for="sqlQuery">SQL Query:</label>
+    <textarea id="sqlQuery" 
+              class="form-control" 
+              rows="6" 
+              placeholder="Enter your SQL query here..."
+              style="font-family: 'Courier New', monospace; font-size: 14px;">
+    </textarea>
+</div>
+
+<!-- Quick Templates Section -->
+<div class="form-group">
+    <label>Quick Templates:</label>
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+        <button onclick="loadTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            SELECT * FROM [table]
+        </button>
+        <button onclick="loadTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            SELECT COUNT(*) FROM [table]
+        </button>
+        <button onclick="loadTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            Simple JOIN template
+        </button>
+        <!-- Add more buttons -->
+        <button onclick="loadTemplate('insert')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            INSERT template
+        </button>
+        <button onclick="loadTemplate('update')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            UPDATE template
+        </button>
+        <button onclick="loadTemplate('aggregate')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            Aggregate query
+        </button>
+        <button onclick="loadTemplate('subquery')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+            Subquery example
+        </button>
+    </div>
+</div>
                 
                 <!-- ================= ACCORDION 4: QUERY RESULTS ================= -->
                 <div class="accordion">
@@ -4062,6 +4546,410 @@ document.addEventListener('DOMContentLoaded', function() {
             
             updateStats();
         }
+
+                // ================= INFOWAY TERMINOLOGY SERVER API =================
+
+                const InfowayAPI = {
+                    // Configuration
+                    config: {
+                        authUrl: 'https://auth.infoway-inforoute.ca/oauth2/token',
+                        apiBaseUrl: 'https://api.infoway-inforoute.ca/terminology',
+                        redirectUri: window.location.origin,
+                        scope: 'terminology.read'
+                    },
+                    
+                    // Check if credentials are saved
+                    hasCredentials: function() {
+                        return !!localStorage.getItem('infoway_client_id') && 
+                               !!localStorage.getItem('infoway_client_secret');
+                    },
+                    
+                    // Save credentials
+                    saveCredentials: function(clientId, clientSecret) {
+                        if (!clientId || !clientSecret) {
+                            alert('Both Client ID and Client Secret are required');
+                            return false;
+                        }
+                        
+                        localStorage.setItem('infoway_client_id', clientId.trim());
+                        localStorage.setItem('infoway_client_secret', clientSecret.trim());
+                        
+                        console.log('Infoway credentials saved');
+                        this.updateUI();
+                        
+                        // Test the connection
+                        this.testConnection();
+                        
+                        return true;
+                    },
+                    
+                    // Clear credentials
+                    clearCredentials: function() {
+                        if (confirm('Are you sure you want to remove Infoway credentials?')) {
+                            localStorage.removeItem('infoway_client_id');
+                            localStorage.removeItem('infoway_client_secret');
+                            localStorage.removeItem('infoway_access_token');
+                            localStorage.removeItem('infoway_token_expiry');
+                            this.updateUI();
+                            alert('Infoway credentials cleared.');
+                        }
+                    },
+                    
+                    // Get OAuth2 access token
+                    async getAccessToken() {
+                        const clientId = localStorage.getItem('infoway_client_id');
+                        const clientSecret = localStorage.getItem('infoway_client_secret');
+                        
+                        if (!clientId || !clientSecret) {
+                            throw new Error('Infoway credentials not configured');
+                        }
+                        
+                        // Check if we have a valid token
+                        const savedToken = localStorage.getItem('infoway_access_token');
+                        const tokenExpiry = localStorage.getItem('infoway_token_expiry');
+                        
+                        if (savedToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
+                            console.log('Using cached access token');
+                            return savedToken;
+                        }
+                        
+                        console.log('Requesting new access token from Infoway...');
+                        
+                        // OAuth2 client credentials grant
+                        const authHeader = 'Basic ' + btoa(clientId + ':' + clientSecret);
+                        
+                        const response = await fetch(this.config.authUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Authorization': authHeader
+                            },
+                            body: new URLSearchParams({
+                                'grant_type': 'client_credentials',
+                                'scope': this.config.scope
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`OAuth2 error: ${response.status} - ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (!data.access_token) {
+                            throw new Error('No access token in response');
+                        }
+                        
+                        // Save token with expiry (typically expires in 1 hour = 3600 seconds)
+                        const expiryTime = Date.now() + ((data.expires_in || 3600) * 1000);
+                        
+                        localStorage.setItem('infoway_access_token', data.access_token);
+                        localStorage.setItem('infoway_token_expiry', expiryTime.toString());
+                        
+                        console.log('New access token obtained, expires:', new Date(expiryTime).toLocaleTimeString());
+                        
+                        return data.access_token;
+                    },
+                    
+                    // Search Infoway Terminology Server
+                    async search(searchTerm, maxResults = 10) {
+                        console.log(`Searching Infoway for: "${searchTerm}"`);
+                        
+                        try {
+                            // Get access token
+                            const accessToken = await this.getAccessToken();
+                            
+                            // FHIR CodeSystem search endpoint
+                            const url = `${this.config.apiBaseUrl}/fhir/CodeSystem/$lookup`;
+                            
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${accessToken}`,
+                                    'Content-Type': 'application/fhir+json',
+                                    'Accept': 'application/fhir+json'
+                                },
+                                body: JSON.stringify({
+                                    resourceType: 'Parameters',
+                                    parameter: [
+                                        {
+                                            name: 'system',
+                                            valueUri: 'http://snomed.info/sct'
+                                        },
+                                        {
+                                            name: 'code',
+                                            valueString: searchTerm
+                                        },
+                                        {
+                                            name: '_count',
+                                            valueInteger: maxResults
+                                        }
+                                    ]
+                                })
+                            });
+                            
+                            if (!response.ok) {
+                                if (response.status === 401) {
+                                    // Token expired, clear it and retry
+                                    localStorage.removeItem('infoway_access_token');
+                                    localStorage.removeItem('infoway_token_expiry');
+                                    return await this.search(searchTerm, maxResults);
+                                }
+                                throw new Error(`API error: ${response.status} ${response.statusText}`);
+                            }
+                            
+                            const data = await response.json();
+                            console.log('Infoway search results:', data);
+                            
+                            return this.parseSearchResults(data, searchTerm);
+                            
+                        } catch (error) {
+                            console.error('Infoway search failed:', error);
+                            throw error;
+                        }
+                    },
+                    
+                    // Parse FHIR response
+                    parseSearchResults(fhirData, searchTerm) {
+                        const results = {
+                            provider: 'INFOWAY',
+                            searchTerm: searchTerm,
+                            timestamp: new Date().toISOString(),
+                            total: 0,
+                            concepts: []
+                        };
+                        
+                        if (fhirData.parameter) {
+                            results.concepts = fhirData.parameter
+                                .filter(param => param.name === 'display' || param.name === 'name')
+                                .map((param, index) => ({
+                                    id: `infoway-${Date.now()}-${index}`,
+                                    text: param.valueString || param.valueCode || searchTerm,
+                                    type: param.name === 'display' ? 'Display Name' : 'Code',
+                                    data: param
+                                }));
+                            
+                            results.total = results.concepts.length;
+                        }
+                        
+                        return results;
+                    },
+                    
+                    // Test connection
+                    async testConnection() {
+                        const resultDiv = document.getElementById('api-test-result');
+                        if (!resultDiv) return;
+                        
+                        resultDiv.innerHTML = `
+                            <div style="color: #666; padding: 10px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; margin-top: 10px;">
+                                ⏳ Testing Infoway connection...
+                            </div>
+                        `;
+                        
+                        try {
+                            // Try to get an access token (this tests credentials)
+                            const token = await this.getAccessToken();
+                            
+                            // If successful, try a simple search
+                            const testResults = await this.search('diabetes', 1);
+                            
+                            resultDiv.innerHTML = `
+                                <div style="color: green; padding: 10px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 3px; margin-top: 10px;">
+                                    ✅ INFOWAY: Connection Successful!
+                                    <div style="font-size: 11px; margin-top: 5px;">
+                                        • OAuth2 authentication: ✓<br>
+                                        • Terminology API: ✓<br>
+                                        • Search test: Found ${testResults.total} result(s)<br>
+                                        • Token valid until: ${new Date(parseInt(localStorage.getItem('infoway_token_expiry'))).toLocaleTimeString()}
+                                    </div>
+                                </div>
+                            `;
+                            
+                        } catch (error) {
+                            resultDiv.innerHTML = `
+                                <div style="color: #d32f2f; padding: 10px; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 3px; margin-top: 10px;">
+                                    ❌ INFOWAY Connection Failed
+                                    <div style="font-size: 11px; margin-top: 5px;">
+                                        Error: ${error.message || 'Unknown error'}<br>
+                                        <small>Check your Client ID and Client Secret</small>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Clear invalid token if any
+                            localStorage.removeItem('infoway_access_token');
+                            localStorage.removeItem('infoway_token_expiry');
+                        }
+                    },
+                    
+                    // Update UI based on credentials status
+                    updateUI: function() {
+                        const hasCreds = this.hasCredentials();
+                        
+                        // Update Infoway dropdown option
+                        const infowayOption = document.querySelector('option[value="INFOWAY"]');
+                        if (infowayOption) {
+                            if (hasCreds) {
+                                infowayOption.disabled = false;
+                                infowayOption.style.color = '';
+                                infowayOption.textContent = 'Infoway Canada (Live SNOMED CT) 🇨🇦';
+                            } else {
+                                infowayOption.disabled = true;
+                                infowayOption.style.color = '#999';
+                                infowayOption.textContent = 'Infoway Canada (Credentials Required) 🇨🇦';
+                            }
+                        }
+                        
+                        // Update API Settings button
+                        const apiSettingsBtn = document.querySelector('button[onclick*="openApiSettings"], #api-settings-btn');
+                        if (apiSettingsBtn) {
+                            if (hasCreds) {
+                                apiSettingsBtn.innerHTML = '🔐 API Settings (Configured)';
+                                apiSettingsBtn.style.background = '#4CAF50';
+                                apiSettingsBtn.style.color = 'white';
+                            } else {
+                                apiSettingsBtn.innerHTML = '🔓 API Settings';
+                                apiSettingsBtn.style.background = '';
+                                apiSettingsBtn.style.color = '';
+                            }
+                        }
+                        
+                        // Update input fields in settings panel
+                        const clientIdInput = document.getElementById('infoway-client-id');
+                        const clientSecretInput = document.getElementById('infoway-client-secret');
+                        
+                        if (hasCreds) {
+                            if (clientIdInput) {
+                                const savedId = localStorage.getItem('infoway_client_id');
+                                clientIdInput.value = savedId.substring(0, 8) + '••••••';
+                                clientIdInput.type = 'text';
+                                clientIdInput.disabled = true;
+                            }
+                            if (clientSecretInput) {
+                                clientSecretInput.value = '••••••••••••••••••••';
+                                clientSecretInput.type = 'text';
+                                clientSecretInput.disabled = true;
+                            }
+                        } else {
+                            if (clientIdInput) {
+                                clientIdInput.value = '';
+                                clientIdInput.type = 'text';
+                                clientIdInput.disabled = false;
+                                clientIdInput.placeholder = 'Enter Client ID';
+                            }
+                            if (clientSecretInput) {
+                                clientSecretInput.value = '';
+                                clientSecretInput.type = 'password';
+                                clientSecretInput.disabled = false;
+                                clientSecretInput.placeholder = 'Enter Client Secret';
+                            }
+                        }
+                    },
+                    
+                    // Initialize
+                    init: function() {
+                        console.log('InfowayAPI initialized');
+                        this.updateUI();
+                        
+                        // Add dropdown change listener
+                        const providerSelect = document.getElementById('api-provider');
+                        if (providerSelect) {
+                            providerSelect.addEventListener('change', (e) => {
+                                if (e.target.value === 'INFOWAY' && !this.hasCredentials()) {
+                                    setTimeout(() => {
+                                        alert('⚠️ Infoway credentials required!\n\nPlease configure your Client ID and Client Secret in API Settings.');
+                                        e.target.value = 'DEMO';
+                                        openApiSettings();
+                                    }, 100);
+                                }
+                            });
+                        }
+                    }
+                };
+
+                // ================= SETUP FUNCTIONS =================
+
+                function setupInfowayAPI() {
+                    console.log('Setting up Infoway API...');
+                    
+                    const clientId = document.getElementById('infoway-client-id')?.value.trim();
+                    const clientSecret = document.getElementById('infoway-client-secret')?.value.trim();
+                    
+                    if (!clientId || !clientSecret) {
+                        alert('Both Client ID and Client Secret are required');
+                        return;
+                    }
+                    
+                    // Validate format
+                    if (clientId.includes('••••')) {
+                        alert('Please enter a new Client ID (current appears masked)');
+                        return;
+                    }
+                    
+                    if (clientSecret.includes('••••')) {
+                        alert('Please enter a new Client Secret (current appears masked)');
+                        return;
+                    }
+                    
+                    // Save credentials
+                    const success = InfowayAPI.saveCredentials(clientId, clientSecret);
+                    
+                    if (success) {
+                        // Clear input fields
+                        document.getElementById('infoway-client-id').value = '';
+                        document.getElementById('infoway-client-secret').value = '';
+                    }
+                }
+
+                function openApiSettings() {
+                    const panel = document.getElementById('api-setup-panel');
+                    if (!panel) {
+                        alert('API settings panel not found');
+                        return;
+                    }
+                    
+                    // Toggle visibility
+                    const isVisible = panel.style.display === 'block';
+                    panel.style.display = isVisible ? 'none' : 'block';
+                    
+                    // Update UI when panel opens
+                    if (!isVisible) {
+                        InfowayAPI.updateUI();
+                    }
+                }
+
+                function testInfowayConnection() {
+                    InfowayAPI.testConnection();
+                }
+
+                function clearInfowayCredentials() {
+                    InfowayAPI.clearCredentials();
+                }
+
+                // ================= SEARCH FUNCTION INTEGRATION =================
+
+                // Update your searchInfowayAPI function to use the new system
+                async function searchInfowayAPI(searchTerm) {
+                    return await InfowayAPI.search(searchTerm);
+                }
+
+                // ================= INITIALIZE =================
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    InfowayAPI.init();
+                    
+                    // Add event listeners for buttons
+                    document.getElementById('save-infoway-btn')?.addEventListener('click', setupInfowayAPI);
+                    document.getElementById('test-infoway-btn')?.addEventListener('click', testInfowayConnection);
+                    document.getElementById('clear-infoway-btn')?.addEventListener('click', clearInfowayCredentials);
+                });
+
+                // Make functions globally available
+                window.setupInfowayAPI = setupInfowayAPI;
+                window.openApiSettings = openApiSettings;
+                window.testInfowayConnection = testInfowayConnection;
+                window.searchInfowayAPI = searchInfowayAPI;
 
         // Load demo terminology tree
         function loadDemoTerminology() {
