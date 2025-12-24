@@ -1103,6 +1103,263 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
+
+        // ================= INFOWAY API KEY MANAGER =================
+        const InfowayKeyManager = {
+            // Check if key is saved
+            hasKey: function() {
+                const key = localStorage.getItem('infoway_api_key');
+                return key && key.trim().length > 0;
+            },
+            
+            // Save key from input
+            saveKey: function() {
+                const keyInput = document.getElementById('infoway-api-key-input');
+                if (!keyInput) {
+                    console.error('Key input not found');
+                    alert('Error: API key input field not found');
+                    return false;
+                }
+                
+                const key = keyInput.value.trim();
+                
+                // Validate key
+                if (!key) {
+                    alert('Please enter your Infoway API key');
+                    keyInput.focus();
+                    return false;
+                }
+                
+                if (key.length < 10) {
+                    alert('API key appears too short. Please check and try again.');
+                    keyInput.focus();
+                    return false;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('infoway_api_key', key);
+                console.log('API key saved to localStorage');
+                
+                // Update UI
+                this.updateUI();
+                
+                // Show success message
+                const maskedKey = key.substring(0, 6) + '••••••' + key.substring(key.length - 4);
+                const resultDiv = document.getElementById('api-test-result');
+                if (resultDiv) {
+                    resultDiv.innerHTML = `
+                        <div style="color: green; padding: 10px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 3px; margin-top: 10px;">
+                            ✅ API Key Saved Successfully! (${maskedKey})
+                            <div style="font-size: 11px; margin-top: 5px;">
+                                Key stored in browser's localStorage. You can now use Infoway.
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Clear input field for security
+                keyInput.value = '';
+                keyInput.type = 'password';
+                
+                alert('✅ API key saved successfully! Infoway option is now enabled.');
+                return true;
+            },
+            
+            // Clear key
+            clearKey: function() {
+                if (confirm('Are you sure you want to remove your Infoway API key?')) {
+                    localStorage.removeItem('infoway_api_key');
+                    this.updateUI();
+                    alert('API key removed.');
+                }
+            },
+            
+            // Update UI based on key status
+            updateUI: function() {
+                const hasKey = this.hasKey();
+                
+                // 1. Update Infoway dropdown option
+                const infowayOption = document.querySelector('option[value="INFOWAY"]');
+                if (infowayOption) {
+                    if (hasKey) {
+                        infowayOption.disabled = false;
+                        infowayOption.style.color = '';
+                        infowayOption.style.backgroundColor = '';
+                        infowayOption.textContent = 'Infoway Canada (Live SNOMED CA) 🇨🇦';
+                    } else {
+                        infowayOption.disabled = true;
+                        infowayOption.style.color = '#999';
+                        infowayOption.style.backgroundColor = '#f5f5f5';
+                        infowayOption.textContent = 'Infoway Canada (API Key Required) 🇨🇦';
+                    }
+                }
+                
+                // 2. Update API Settings button text
+                const apiSettingsBtn = document.querySelector('button[onclick*="openApiSettings"], #api-settings-btn');
+                if (apiSettingsBtn) {
+                    if (hasKey) {
+                        apiSettingsBtn.innerHTML = '🔐 API Settings (Configured)';
+                        apiSettingsBtn.style.background = '#4CAF50';
+                        apiSettingsBtn.style.color = 'white';
+                    } else {
+                        apiSettingsBtn.innerHTML = '🔓 API Settings';
+                        apiSettingsBtn.style.background = '';
+                        apiSettingsBtn.style.color = '';
+                    }
+                }
+                
+                // 3. Update input field in settings panel
+                const keyInput = document.getElementById('infoway-api-key-input');
+                if (keyInput) {
+                    if (hasKey) {
+                        const savedKey = localStorage.getItem('infoway_api_key');
+                        const maskedKey = '••••••••••••••••••••' + savedKey.substring(savedKey.length - 4);
+                        keyInput.value = maskedKey;
+                        keyInput.type = 'text';
+                        keyInput.disabled = true;
+                        keyInput.placeholder = 'API key already saved';
+                    } else {
+                        keyInput.value = '';
+                        keyInput.type = 'password';
+                        keyInput.disabled = false;
+                        keyInput.placeholder = 'Enter your Infoway API key';
+                    }
+                }
+            },
+            
+            // Initialize on page load
+            init: function() {
+                console.log('InfowayKeyManager initialized');
+                this.updateUI();
+                
+                // Add event listener to dropdown
+                const providerSelect = document.getElementById('api-provider');
+                if (providerSelect) {
+                    providerSelect.addEventListener('change', (e) => {
+                        if (e.target.value === 'INFOWAY' && !this.hasKey()) {
+                            setTimeout(() => {
+                                alert('⚠️ Infoway API key required!\n\nPlease click "API Settings" to enter your key.');
+                                e.target.value = 'DEMO'; // Revert to DEMO
+                                openApiSettings(); // Open settings panel
+                            }, 100);
+                        }
+                    });
+                }
+                
+                // Add click handler to Save button
+                const saveBtn = document.querySelector('button[onclick*="setupInfowayAPI"]');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.saveKey();
+                    });
+                }
+                
+                // Also add direct event listener
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('button[onclick*="setupInfowayAPI"]')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.saveKey();
+                    }
+                });
+            }
+        };
+
+        // ================= SETUP INFOWAY API FUNCTION =================
+        function setupInfowayAPI() {
+            console.log('setupInfowayAPI called');
+            return InfowayKeyManager.saveKey();
+        }
+
+        // ================= OPEN API SETTINGS FUNCTION =================
+        function openApiSettings() {
+            console.log('openApiSettings called');
+            
+            const panel = document.getElementById('api-setup-panel');
+            if (!panel) {
+                alert('API settings panel not found');
+                return;
+            }
+            
+            // Toggle visibility
+            const isVisible = panel.style.display === 'block';
+            panel.style.display = isVisible ? 'none' : 'block';
+            
+            // Update UI when panel opens
+            if (!isVisible) {
+                InfowayKeyManager.updateUI();
+            }
+        }
+
+        // ================= TEST API CONNECTION =================
+        function testAPIconnection(provider) {
+            console.log(`Testing ${provider} connection...`);
+            
+            const resultDiv = document.getElementById('api-test-result');
+            if (!resultDiv) {
+                alert('Result display not found');
+                return;
+            }
+            
+            resultDiv.innerHTML = `
+                <div style="color: #666; padding: 10px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; margin-top: 10px;">
+                    ⏳ Testing ${provider} connection...
+                </div>
+            `;
+            
+            setTimeout(() => {
+                if (provider === 'INFOWAY') {
+                    if (!InfowayKeyManager.hasKey()) {
+                        resultDiv.innerHTML = `
+                            <div style="color: #d32f2f; padding: 10px; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 3px; margin-top: 10px;">
+                                ❌ No API key found. Please save your Infoway API key first.
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div style="color: green; padding: 10px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 3px; margin-top: 10px;">
+                                ✅ INFOWAY: API key configured
+                                <div style="font-size: 11px; margin-top: 5px;">
+                                    Note: Actual API calls will test connectivity when searching.
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color: green; padding: 10px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 3px; margin-top: 10px;">
+                            ✅ ${provider}: Ready to use
+                        </div>
+                    `;
+                }
+            }, 1000);
+        }
+
+        // ================= INITIALIZE ON PAGE LOAD =================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing Infoway key manager...');
+            InfowayKeyManager.init();
+            
+            // Also add manual event listener for the save button
+            setTimeout(() => {
+                const saveBtn = document.querySelector('button[onclick*="setupInfowayAPI"]');
+                if (saveBtn) {
+                    console.log('Found save button, adding click listener');
+                    saveBtn.addEventListener('click', function(e) {
+                        console.log('Save button clicked via event listener');
+                        e.preventDefault();
+                        InfowayKeyManager.saveKey();
+                    });
+                }
+            }, 500);
+        });
+
+        // Expose functions globally
+        window.setupInfowayAPI = setupInfowayAPI;
+        window.openApiSettings = openApiSettings;
+        window.testAPIconnection = testAPIconnection;
+
 </script>
         </script>
 </head>
@@ -1703,6 +1960,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     <!-- API SELECTOR -->
                                     <!-- API SELECTOR -->
+                                    <!-- API SELECTOR SECTION -->
                                     <div style="margin-bottom: 15px;">
                                         <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px;">Data Source:</label>
                                         <select id="api-provider" class="form-control" style="font-size: 12px; padding: 5px;">
@@ -1711,51 +1969,62 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <option value="SNOWSTORM">Snowstorm (Live SNOMED)</option>
                                         </select>
                                         
-                                        <button id="api-settings-btn" 
+                                        <!-- Changed: Use ID instead of inline onclick -->
+                                        <button id="api-settings-btn"
                                                 style="margin-top: 5px; font-size: 11px; padding: 3px 8px;" 
                                                 class="btn btn-secondary">
                                             API Settings
                                         </button>
-                                        
-                                        <!-- Add this script after the button -->
-                                        <script>
-                                            document.getElementById('api-settings-btn').addEventListener('click', openApiSettings);
-                                        </script>
                                     </div>
 
                                     <!-- API SETTINGS PANEL -->
                                     <div id="api-setup-panel" style="display: none; padding: 15px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px; margin: 10px 0;">
-                                        <h4>🔐 API Configuration</h4>
+                                        <h4>🔐 Infoway API Setup</h4>
+                                        <p style="font-size: 12px; color: #666;">Enter your Infoway API Key (you received this via email):</p>
                                         
-                                        <div style="margin-bottom: 15px;">
-                                            <label style="display: block; margin-bottom: 5px; font-size: 12px; font-weight: bold;">
-                                                Infoway API Key:
-                                            </label>
-                                            <input type="password" 
-                                                   id="infoway-api-key-input" 
-                                                   placeholder="Enter your API key"
-                                                   style="width: 300px; padding: 5px; margin-right: 10px;">
-                                            <button id="save-api-key-btn" 
-                                                    style="padding: 5px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                                                Save & Test
-                                            </button>
-                                        </div>
+                                        <!-- Changed: Use ID for the input -->
+                                        <input type="password" 
+                                               id="infoway-api-key-input" 
+                                               placeholder="ihc_abc123..." 
+                                               style="width: 300px; padding: 5px; margin-right: 10px;">
                                         
-                                        <div style="margin-bottom: 15px;">
-                                            <label style="display: block; margin-bottom: 5px; font-size: 12px; font-weight: bold;">
-                                                Test Connections:
-                                            </label>
-                                            <button id="test-infoway-btn" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
-                                                🔗 Test Infoway
-                                            </button>
-                                            <button id="test-snowstorm-btn" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
-                                                ❄️ Test Snowstorm
-                                            </button>
-                                        </div>
+                                        <!-- Changed: Use ID instead of inline onclick -->
+                                        <button id="save-api-key-btn"
+                                                style="padding: 5px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                            Save & Test Connection
+                                        </button>
                                         
                                         <div id="api-test-result" style="margin-top: 10px; font-size: 12px;"></div>
                                     </div>
 
+                                    <!-- Add this script after the panel to set up event listeners -->
+                                    <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Set up event listeners
+                                        const apiSettingsBtn = document.getElementById('api-settings-btn');
+                                        if (apiSettingsBtn) {
+                                            apiSettingsBtn.addEventListener('click', openApiSettings);
+                                        }
+                                        
+                                        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+                                        if (saveApiKeyBtn) {
+                                            saveApiKeyBtn.addEventListener('click', function(e) {
+                                                e.preventDefault();
+                                                setupInfowayAPI();
+                                            });
+                                        }
+                                        
+                                        // Also add Enter key support for the input field
+                                        const apiKeyInput = document.getElementById('infoway-api-key-input');
+                                        if (apiKeyInput) {
+                                            apiKeyInput.addEventListener('keypress', function(e) {
+                                                if (e.key === 'Enter') {
+                                                    setupInfowayAPI();
+                                                }
+                                            });
+                                        }
+                                    });
+                                    </script>
 
                                     
                                     <!-- QUICK SEARCH BUTTONS -->
@@ -2360,6 +2629,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Pre-load database when page loads
             setTimeout(() => loadDatabase(), 1000);
         });
+
+        // Debug script - add this anywhere
+        console.log('=== DEBUG INFO ===');
+        console.log('Infoway option element:', document.querySelector('option[value="INFOWAY"]'));
+        console.log('Has API key in localStorage?', !!localStorage.getItem('infoway_api_key'));
+        console.log('API key value:', localStorage.getItem('infoway_api_key') || 'NOT SET');
+
+        // Check if functions are defined
+        console.log('setupInfowayAPI defined?', typeof setupInfowayAPI);
+        console.log('openApiSettings defined?', typeof openApiSettings);
+
+// Force enable Infoway option for testing (temporary)
+// document.querySelector('option[value="INFOWAY"]').disabled = false;
 
             function showDataTypeHelp() {
                 alert("Data Type Specification Help:\n\n" +
