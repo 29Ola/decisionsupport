@@ -1355,7 +1355,8 @@
                                         <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px;">Data Source:</label>
                                         <select id="api-provider" class="form-control" style="font-size: 12px; padding: 5px;">
                                             <option value="DEMO">Demo Mode (Sample Data)</option>
-                                            <option value="ONTOSERVER">Ontoserver (Live FHIR)</option>
+                                            <!--<option value="ONTOSERVER">Ontoserver (Live FHIR)</option>-->
+                                            <option value="INFOWAY">Infoway Canada (Live SNOMED CA) 🇨🇦</option>
                                             <option value="SNOWSTORM">Snowstorm (Live SNOMED)</option>
                                         </select>
                                         <button onclick="openApiSettings()" 
@@ -1363,6 +1364,16 @@
                                                 class="btn btn-secondary">
                                             API Settings
                                         </button>
+                                    </div>
+
+                                    <div id="api-setup-panel" style="display: none; padding: 15px; background: #f0f8ff; border: 1px solid #a0c0ff; border-radius: 3px; margin: 10px 0;">
+                                        <h4>🔐 Infoway API Setup</h4>
+                                        <p style="font-size: 12px; color: #666;">Enter your Infoway API Key (you received this via email):</p>
+                                        <input type="password" id="infoway-api-key-input" placeholder="ihc_abc123..." style="width: 300px; padding: 5px;">
+                                        <button onclick="setupInfowayAPI()" style="padding: 5px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                            Save & Test Connection
+                                        </button>
+                                        <div id="api-test-result" style="margin-top: 10px; font-size: 12px;"></div>
                                     </div>
 
                                     <button onclick="testAPIconnection('ONTOSERVER')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">
@@ -3574,23 +3585,368 @@
         }
 
         // Search terminology tree
-        function searchTerminologyTree(event) {
-            const term = event.target.value.toLowerCase().trim();
-            const allLeaves = document.querySelectorAll('.leaf-node');
+        async function searchTerminology() {
+        const searchTerm = document.getElementById('treeSearch').value.trim();
+        const provider = document.getElementById('api-provider').value;
+        
+        // Get UI elements
+        const treeContainer = document.getElementById('treeContainer');
+        const statusText = document.getElementById('search-status') || (() => {
+            const div = document.createElement('div');
+            div.id = 'search-status';
+            div.style.padding = '10px';
+            treeContainer.parentElement.insertBefore(div, treeContainer);
+            return div;
+        })();
+        
+        // Validate input
+        if (!searchTerm) {
+            alert('Please enter a search term');
+            return;
+        }
+        
+        // Show loading state
+        statusText.innerHTML = `<div style="color: #666; text-align: center; padding: 20px;">
+            <div style="font-size: 24px;">⏳</div>
+            <div>Searching ${provider} for "${searchTerm}"...</div>
+        </div>`;
+        treeContainer.innerHTML = '';
+        
+        try {
+            let results;
+            let usedProvider = provider; // Track which provider actually worked
             
-            if (!term) {
-                // Show all
-                allLeaves.forEach(leaf => {
-                    leaf.style.display = 'block';
-                });
-                return;
+            switch(provider) {
+                case 'DEMO':
+                    // Use the existing demo tree search
+                    searchTerminologyTree({ target: { value: searchTerm } });
+                    statusText.innerHTML = '';
+                    return;
+                    
+                case 'SNOWSTORM':
+                    results = await searchSnowstormFree(searchTerm);
+                    usedProvider = 'SNOWSTORM';
+                    break;
+                    
+                case 'INFOWAY':
+                    try {
+                        results = await searchInfowayAPI(searchTerm);
+                        usedProvider = 'INFOWAY';
+                    } catch (infowayError) {
+                        console.warn('Infoway failed, falling back to Snowstorm:', infowayError);
+                        // Auto-fallback to Snowstorm
+                        results = await searchSnowstormFree(searchTerm);
+                        usedProvider = 'SNOWSTORM (fallback)';
+                        
+                        // Update UI to show we're using fallback
+                        const fallbackNote = document.createElement('div');
+                        fallbackNote.style.cssText = 'background: #fff3cd; border: 1px solid #ffecb5; color: #856404; padding: 8px; margin-bottom: 10px; border-radius: 3px; font-size: 12px;';
+                        fallbackNote.innerHTML = '⚠️ Infoway unavailable. Showing Snowstorm results instead.';
+                        setTimeout(() => {
+                            if (treeContainer.firstChild) {
+                                treeContainer.insertBefore(fallbackNote, treeContainer.firstChild);
+                            }
+                        }, 100);
+                    }
+                    break;
+                    
+                case 'ONTOSERVER':
+                    // Keep for backward compatibility but force fallback
+                    console.warn('Ontoserver selected but CORS blocked. Using Snowstorm.');
+                    results = await searchSnowstormFree(searchTerm);
+                    usedProvider = 'SNOWSTORM (CORS fallback)';
+                    break;
+                    
+                default:
+                    // Ultimate fallback to Snowstorm
+                    results = await searchSnowstormFree(searchTerm);
+                    usedProvider = 'SNOWSTORM (default)';
             }
             
-            allLeaves.forEach(leaf => {
-                const text = leaf.textContent.toLowerCase();
-                leaf.style.display = text.includes(term) ? 'block' : 'none';
-            });
+            // Display the results
+            displayAPISearchResults(results, usedProvider, searchTerm);
+            statusText.innerHTML = '';
+            
+        } catch (error) {
+            console.error(`${provider} search completely failed:`, error);
+            
+            // Final fallback to demo data
+            statusText.innerHTML = `<div style="color: #f44336; text-align: center; padding: 20px;">
+                <div style="font-size: 24px;">❌</div>
+                <div>All API searches failed for "${searchTerm}"</div>
+                <div style="font-size: 12px; margin-top: 10px; color: #666;">
+                    Error: ${error.message || 'Network or API issue'}
+                </div>
+                <div style="margin-top: 15px;">
+                    <button onclick="forceDemoSearch('${searchTerm.replace(/'/g, "\\'")}')" 
+                            style="padding: 8px 15px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">
+                        Use Demo Data Instead
+                    </button>
+                </div>
+            </div>`;
         }
+    }
+
+    // Helper function for demo fallback button
+    function forceDemoSearch(term) {
+        document.getElementById('treeSearch').value = term;
+        document.getElementById('api-provider').value = 'DEMO';
+        searchTerminology();
+    }
+
+    // Display function for API results
+    function displayAPISearchResults(results, provider, searchTerm) {
+        const treeContainer = document.getElementById('treeContainer');
+        
+        if (!results || results.length === 0) {
+            treeContainer.innerHTML = `<div style="color: #666; text-align: center; padding: 40px;">
+                <div style="font-size: 36px;">🔍</div>
+                <div>No results found for "${searchTerm}"</div>
+                <div style="font-size: 12px; margin-top: 10px; color: #999;">
+                    Provider: ${provider}<br>
+                    Try different search terms or switch to DEMO mode
+                </div>
+            </div>`;
+            return;
+        }
+        
+        // Build results HTML
+        let html = `
+            <div style="margin-bottom: 15px; padding: 10px; background: #f0f8ff; border-radius: 3px; font-size: 13px;">
+                <strong>${provider} Results:</strong> Found ${results.length} concept(s) for "${searchTerm}"
+                ${provider.includes('fallback') ? '<span style="color: #856404; margin-left: 10px;">(Using fallback provider)</span>' : ''}
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+        `;
+        
+        results.forEach((item, index) => {
+            const isCanadian = provider === 'INFOWAY' || item.description?.includes('CA') || item.source?.includes('Canada');
+            const flag = isCanadian ? ' 🇨🇦' : '';
+            
+            html += `
+                <div class="api-result-item" 
+                     style="margin-bottom: 8px; padding: 10px; border: 1px solid #d4d0c8; border-radius: 3px; cursor: pointer; background: white;"
+                     onclick="addAPIParameterCard(${JSON.stringify(item).replace(/"/g, '&quot;').replace(/'/g, "\\'")})"
+                     onmouseover="this.style.background='#f0f8ff'; this.style.borderColor='#0a3b9c'" 
+                     onmouseout="this.style.background='white'; this.style.borderColor='#d4d0c8'">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex-grow: 1;">
+                            <div style="font-weight: bold; color: #0a3b9c; margin-bottom: 3px;">
+                                ${item.display || item.description}${flag}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-bottom: 2px;">
+                                <span style="background: #e8e8e8; padding: 1px 4px; border-radius: 2px; margin-right: 5px;">
+                                    ${item.code || 'No code'}
+                                </span>
+                                <span>Source: ${item.source || provider}</span>
+                                ${item.system ? `<span style="margin-left: 10px;">System: ${item.system.split('/').pop()}</span>` : ''}
+                            </div>
+                            ${item.description && item.description !== item.display ? 
+                                `<div style="font-size: 11px; color: #888; margin-top: 3px; font-style: italic;">${item.description}</div>` : ''}
+                        </div>
+                        <button style="padding: 4px 10px; font-size: 11px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap;"
+                                onclick="event.stopPropagation(); addAPIParameterCard(${JSON.stringify(item).replace(/"/g, '&quot;').replace(/'/g, "\\'")})">
+                            Add +
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        treeContainer.innerHTML = html;
+    }
+
+    // Add API result to board (ensure this function exists)
+    function addAPIParameterCard(item) {
+        // Implementation depends on your existing specCards array
+        // This should match your current addParameterCard function logic
+        const cardId = `card-${Date.now()}`;
+        const card = {
+            id: cardId,
+            name: item.display || item.description,
+            code: item.code || '',
+            description: item.description || '',
+            source: item.source || 'API',
+            system: item.system || '',
+            logic: '',
+            timestamp: new Date().toISOString()
+        };
+        
+        // Assuming specCards is a global array
+        if (window.specCards) {
+            const existingCard = window.specCards.find(c => c.code === card.code);
+            if (existingCard) {
+                alert(`"${card.name}" is already on the board.`);
+                return;
+            }
+            window.specCards.push(card);
+            
+            // Update UI
+            if (window.renderCard) window.renderCard(card);
+            if (window.updateStats) window.updateStats();
+            if (window.saveCardsToStorage) window.saveCardsToStorage();
+            
+            // Hide empty message
+            const emptyMsg = document.getElementById('empty-board-message');
+            if (emptyMsg) emptyMsg.style.display = 'none';
+        } else {
+            console.error('specCards array not found');
+            alert('Could not add card: Board not initialized');
+        }
+    }
+
+    // Snowstorm search function (must exist)
+    async function searchSnowstormFree(searchTerm) {
+        const url = `https://snowstorm.ihtsdotools.org/snowstorm/snomed-ct/browser/MAIN/SNOMEDCT-US/2023-09-01/concepts?term=${encodeURIComponent(searchTerm)}&limit=20`;
+        
+        const response = await fetch(url, {
+            headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Snowstorm: HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        return data.items.map(item => ({
+            code: item.conceptId,
+            system: 'http://snomed.info/sct',
+            display: item.fsn?.term || item.pt?.term || 'No term',
+            source: 'Snowstorm',
+            description: item.fsn?.term || '',
+            url: `http://snomed.info/id/${item.conceptId}`
+        }));
+    }
+
+    // Infoway search function (placeholder - add your API key when you get it)
+    async function searchInfowayAPI(searchTerm) {
+        const INFOWAY_API_KEY = 'YOUR_API_KEY_HERE'; // ← REPLACE WHEN YOU GET IT
+        const INFOWAY_BASE_URL = 'https://terminology.infoway-inforoute.ca/api';
+        
+        if (!INFOWAY_API_KEY || INFOWAY_API_KEY === 'YOUR_API_KEY_HERE') {
+            throw new Error('Infoway API key not configured');
+        }
+        
+        const url = `${INFOWAY_BASE_URL}/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs&filter=${encodeURIComponent(searchTerm)}&count=20`;
+        
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/fhir+json',
+                'Content-Type': 'application/fhir+json',
+                'Authorization': `Bearer ${INFOWAY_API_KEY}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Infoway: HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.expansion?.contains) {
+            return data.expansion.contains.map(item => ({
+                code: item.code,
+                system: item.system,
+                display: item.display,
+                source: 'Infoway Canada',
+                description: `${item.display} 🇨🇦`,
+                url: item.system ? `${item.system}/${item.code}` : ''
+            }));
+        }
+        
+        return [];
+    }
+
+    // Optional: Search Canadian-specific code systems
+    async function searchCanadianExtensions(searchTerm) {
+        // Canadian-specific code systems in Infoway:
+        const canadianSystems = {
+            'pCLOCD': 'Pan-Canadian Localization of Care Dataset',
+            'CCP': 'Canadian Classification of Health Interventions',
+            'C-HI': 'Canadian Health Information',
+            'SNOMED CT CA': 'SNOMED CT Canadian Edition'
+        };
+        
+        const results = [];
+        
+        // Search across multiple Canadian systems
+        for (const [system, description] of Object.entries(canadianSystems)) {
+            try {
+                const url = `https://terminology.infoway-inforoute.ca/api/CodeSystem/$lookup?system=${system}&code=${searchTerm}`;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${INFOWAY_API_KEY}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.parameter && data.parameter.length > 0) {
+                        results.push({
+                            system: system,
+                            display: data.parameter.find(p => p.name === 'display').valueString,
+                            description: description
+                        });
+                    }
+                }
+            } catch (err) {
+                console.log(`No match in ${system}`);
+            }
+        }
+        
+        return results;
+    }
+
+
+    // Test function for NWT health terms
+        async function testCanadianRelevance() {
+            const nwtRelevantTerms = [
+                'tuberculosis',      // Higher incidence in Northern Canada
+                'frostbite',         // Climate-relevant
+                'vitamin D deficiency', // Northern latitude issue
+                'hepatitis',         // Public health concern
+                'mental health',     // Broad but important
+                'prenatal care',     // Maternal health
+                'traditional medicine' // Indigenous health
+            ];
+            
+            console.log('Testing Canadian terminology relevance...');
+            
+            for (const term of nwtRelevantTerms.slice(0, 3)) { // Test first 3
+                try {
+                    const results = await searchInfowayAPI(term);
+                    console.log(`"${term}": ${results.length} Canadian results`);
+                    
+                    // Look for Canadian-specific codes
+                    const canadianResults = results.filter(r => 
+                        r.description.includes('CA') || 
+                        r.system.includes('canadian')
+                    );
+                    
+                    if (canadianResults.length > 0) {
+                        console.log(`  → ${canadianResults.length} Canada-specific codes`);
+                    }
+                } catch (error) {
+                    console.log(`"${term}": Failed - ${error.message}`);
+                }
+            }
+        }
+
+    // Your existing demo search function
+    function searchTerminologyTree(event) {
+        const term = event.target.value.toLowerCase().trim();
+        const allLeaves = document.querySelectorAll('.leaf-node');
+        
+        if (!term) {
+            allLeaves.forEach(leaf => leaf.style.display = 'block');
+            return;
+        }
+        
+        allLeaves.forEach(leaf => {
+            const text = leaf.textContent.toLowerCase();
+            leaf.style.display = text.includes(term) ? 'block' : 'none';
+        });
+    }
 
         // Add parameter card to board
         function addParameterCard(item) {
@@ -3898,31 +4254,72 @@
 
 
         // FREE Ontoserver API Search Function
-        async function searchOntoserverFree(searchTerm) {
+        // Infoway Terminology Server Function
+        async function searchInfowayAPI(searchTerm) {
             try {
-                console.log(`🔍 Searching Ontoserver for: ${searchTerm}`);
+                console.log(`🔍 Searching Infoway for: ${searchTerm}`);
                 
-                // CSIRO Ontoserver (FREE, no auth required)
-                const url = `https://ontoserver.csiro.au/stu3-latest/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs&filter=${encodeURIComponent(searchTerm)}&count=20`;
+                // YOUR INFOWAY CREDENTIALS GO HERE
+                const INFOWAY_API_KEY = 'khyglWECx54x2iXBFxRXf3clrTydo3WU'; // ← REPLACE THIS
+                const INFOWAY_BASE_URL = 'https://terminology.infoway-inforoute.ca/api';
+                
+                // FHIR ValueSet expansion query for SNOMED CT Canadian Edition
+                const url = `${INFOWAY_BASE_URL}/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs=refset&filter=${encodeURIComponent(searchTerm)}&count=20`;
                 
                 const response = await fetch(url, {
                     headers: {
                         'Accept': 'application/fhir+json',
-                        'Content-Type': 'application/fhir+json'
+                        'Content-Type': 'application/fhir+json',
+                        'Authorization': `Bearer ${INFOWAY_API_KEY}`, // Most likely
+                        // OR if they use API key header:
+                        // 'x-api-key': INFOWAY_API_KEY
                     }
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`Infoway API error: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                return processOntoserverResults(data);
+                return processInfowayResults(data, searchTerm);
                 
             } catch (error) {
-                console.error('Ontoserver search failed:', error);
+                console.error('Infoway search failed:', error);
                 throw error;
             }
+        }
+
+        // Process Canadian terminology results
+        function processInfowayResults(fhirData, searchTerm) {
+            const results = [];
+            
+            if (fhirData.expansion && fhirData.expansion.contains) {
+                fhirData.expansion.contains.forEach(item => {
+                    // Canadian-specific metadata
+                    const isCanadianEdition = item.system && item.system.includes('snomed.info/sct');
+                    const canadianTag = isCanadianEdition ? ' 🇨🇦 CA Edition' : '';
+                    
+                    results.push({
+                        code: item.code,
+                        system: item.system,
+                        display: item.display,
+                        fhirType: 'Concept',
+                        source: 'Infoway Canada',
+                        description: `${item.display}${canadianTag}`,
+                        url: item.system ? `${item.system}/${item.code}` : '',
+                        // Canadian-specific extensions might be in item.extension
+                        extensions: item.extension || []
+                    });
+                });
+            }
+            
+            // If no results in primary search, try broader search
+            if (results.length === 0) {
+                console.log('No direct matches, trying broader Canadian search...');
+                // Could implement fallback search here
+            }
+            
+            return results;
         }
 
         // Process FHIR response
