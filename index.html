@@ -799,6 +799,7 @@
     </style>
     <!-- SQL.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script>
         // Define rebuildApiDropdown BEFORE it's used in onclick
         function rebuildApiDropdown() {
@@ -1360,194 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.openApiSettings = openApiSettings;
         window.testAPIconnection = testAPIconnection;
 
-// ================= TEMPLATE LOADER FUNCTIONS =================
 
-    // Main template loader function
-    function loadTemplate(templateName) {
-        console.log('Loading template:', templateName);
-        
-        // Show loading state
-        const contentArea = document.getElementById('template-content-area') || 
-                           document.getElementById('main-content') ||
-                           document.body;
-        
-        const loadingDiv = document.createElement('div');
-        loadingDiv.id = 'template-loading';
-        loadingDiv.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 24px;">⏳</div>
-                <div>Loading ${templateName} template...</div>
-            </div>
-        `;
-        
-        // Clear previous content and show loading
-        if (contentArea.id === 'template-content-area') {
-            contentArea.innerHTML = '';
-            contentArea.appendChild(loadingDiv);
-        } else {
-            // Create a dedicated area if it doesn't exist
-            let templateArea = document.getElementById('template-content-area');
-            if (!templateArea) {
-                templateArea = document.createElement('div');
-                templateArea.id = 'template-content-area';
-                contentArea.appendChild(templateArea);
-            }
-            templateArea.innerHTML = '';
-            templateArea.appendChild(loadingDiv);
-        }
-        
-        // Load the template based on name
-        setTimeout(() => {
-            loadTemplateContent(templateName);
-        }, 300);
-    }
-
-    // Load specific template content
-    function loadTemplateContent(templateName) {
-        console.log('Loading content for:', templateName);
-        
-        const templateArea = document.getElementById('template-content-area');
-        if (!templateArea) {
-            console.error('Template area not found');
-            return;
-        }
-        
-        // Define template content
-        const templates = {
-            'diabetes': {
-                title: 'Diabetes Management Template',
-                content: `
-                    <div style="padding: 20px;">
-                        <h2>📋 Diabetes Management Plan</h2>
-                        
-                        <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                            <h3>🎯 Management Goals</h3>
-                            <ul>
-                                <li><strong>A1C Target:</strong> < 7.0% for most adults</li>
-                                <li><strong>Blood Pressure:</strong> < 130/80 mmHg</li>
-                                <li><strong>LDL Cholesterol:</strong> < 100 mg/dL</li>
-                                <li><strong>Annual Eye Exam</strong></li>
-                                <li><strong>Annual Foot Exam</strong></li>
-                            </ul>
-                        </div>
-                        
-                        <div style="margin: 20px 0;">
-                            <h3>💊 Common Medications</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>Metformin</strong><br>
-                                    <small>First-line therapy</small>
-                                </div>
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>Insulin</strong><br>
-                                    <small>Various formulations</small>
-                                </div>
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>GLP-1 RAs</strong><br>
-                                    <small>e.g., Semaglutide</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button onclick="saveTemplate('diabetes')" 
-                                style="padding: 10px 20px; background: #0a3b9c; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                            💾 Save This Template
-                        </button>
-                    </div>
-                `
-            },
-            'hypertension': {
-                title: 'Hypertension Management Template',
-                content: `
-                    <div style="padding: 20px;">
-                        <h2>📋 Hypertension Management Plan</h2>
-                        
-                        <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                            <h3>🎯 Blood Pressure Targets</h3>
-                            <ul>
-                                <li><strong>General Target:</strong> < 130/80 mmHg</li>
-                                <li><strong>Diabetes/CRD:</strong> < 130/80 mmHg</li>
-                                <li><strong>Elderly:</strong> < 130/80 mmHg (if tolerated)</li>
-                            </ul>
-                        </div>
-                        
-                        <div style="margin: 20px 0;">
-                            <h3>💊 First-line Medications</h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>ACE Inhibitors</strong><br>
-                                    <small>e.g., Lisinopril</small>
-                                </div>
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>ARBs</strong><br>
-                                    <small>e.g., Losartan</small>
-                                </div>
-                                <div style="padding: 10px; background: white; border: 1px solid #ddd; border-radius: 3px;">
-                                    <strong>CCBs</strong><br>
-                                    <small>e.g., Amlodipine</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `
-            },
-            'medication-review': {
-                title: 'Medication Review Template',
-                content: `
-                    <div style="padding: 20px;">
-                        <h2>📋 Comprehensive Medication Review</h2>
-                        
-                        <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                            <h3>🔍 Review Checklist</h3>
-                            <ul>
-                                <li>✅ Indication for each medication</li>
-                                <li>✅ Effectiveness monitoring</li>
-                                <li>✅ Safety (side effects, interactions)</li>
-                                <li>✅ Adherence assessment</li>
-                                <li>✅ Cost considerations</li>
-                                <li>✅ Deprescribing opportunities</li>
-                            </ul>
-                        </div>
-                        
-                        <div style="margin: 20px 0;">
-                            <h3>📝 Assessment Form</h3>
-                            <textarea id="med-review-notes" 
-                                      style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 3px;"
-                                      placeholder="Enter medication review notes..."></textarea>
-                        </div>
-                    </div>
-                `
-            },
-            'default': {
-                title: 'Clinical Template',
-                content: `
-                    <div style="padding: 20px; text-align: center;">
-                        <h2>📋 Clinical Decision Support</h2>
-                        <p>Select a template from the buttons above.</p>
-                        <div style="color: #666; margin-top: 20px;">
-                            💡 Tip: Templates help standardize clinical documentation and decision-making.
-                        </div>
-                    </div>
-                `
-            }
-        };
-        
-        // Get template or use default
-        const template = templates[templateName] || templates['default'];
-        
-        // Display the template
-        templateArea.innerHTML = `
-            <div style="background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                <div style="background: #0a3b9c; color: white; padding: 15px; border-radius: 5px 5px 0 0;">
-                    <h3 style="margin: 0;">${template.title}</h3>
-                </div>
-                ${template.content}
-            </div>
-        `;
-        
-        // Log action
-        console.log(`Template "${templateName}" loaded successfully`);
-    }
 
     // Save template function
     function saveTemplate(templateName) {
@@ -1657,92 +1471,54 @@ document.addEventListener('DOMContentLoaded', function() {
     window.saveTemplate = saveTemplate;
     window.loadSavedTemplate = loadSavedTemplate;
     window.deleteTemplate = deleteTemplate;
-    
+
 // ================= SQL TEMPLATE LOADER =================
 
 function loadTemplate(templateName) {
     console.log('Loading SQL template:', templateName);
     
-    // Find the SQL input/textarea - adjust this selector based on your actual HTML
-    const sqlInput = document.getElementById('sqlQuery') || 
-                     document.getElementById('queryInput') ||
-                     document.querySelector('textarea[name="sql"]') ||
-                     document.querySelector('textarea[placeholder*="SQL"]') ||
-                     document.querySelector('.sql-editor');
-    
+    const sqlInput = document.getElementById('sqlQuery');
     if (!sqlInput) {
-        console.error('Could not find SQL input field');
-        alert('Error: Could not find SQL editor. Please check the page structure.');
+        alert('Error: SQL editor not found');
         return;
     }
     
-    // Define SQL templates
+    // Templates that match YOUR database tables
     const templates = {
-        'select_all': {
-            name: 'Select All',
-            sql: `SELECT * FROM patients\nWHERE discharge_date IS NULL\nORDER BY admission_date DESC\nLIMIT 100;`,
-            description: 'Select all records from a table with basic filtering'
-        },
-        'count': {
-            name: 'Count Records',
-            sql: `SELECT COUNT(*) as total_count,\n       COUNT(DISTINCT patient_id) as unique_patients\nFROM encounters\nWHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);`,
-            description: 'Count records with date filtering'
-        },
-        'join': {
-            name: 'Basic JOIN',
-            sql: `SELECT \n    p.patient_id,\n    p.first_name,\n    p.last_name,\n    e.encounter_date,\n    e.diagnosis_code,\n    d.description\nFROM patients p\nJOIN encounters e ON p.patient_id = e.patient_id\nLEFT JOIN diagnoses d ON e.diagnosis_code = d.code\nWHERE e.encounter_date >= '2024-01-01'\nORDER BY e.encounter_date DESC;`,
-            description: 'Join patients with encounters and diagnoses'
-        },
-        'insert': {
-            name: 'INSERT Template',
-            sql: `INSERT INTO medications (\n    patient_id,\n    medication_name,\n    dosage,\n    frequency,\n    start_date,\n    prescribed_by\n) VALUES (\n    :patient_id,\n    :medication_name,\n    :dosage,\n    :frequency,\n    CURDATE(),\n    :prescriber\n);`,
-            description: 'Insert new medication record'
-        },
-        'update': {
-            name: 'UPDATE Template',
-            sql: `UPDATE patients\nSET \n    last_visit = CURDATE(),\n    insurance_status = :new_status,\n    updated_at = NOW()\nWHERE patient_id = :patient_id\nAND active = 1;`,
-            description: 'Update patient information'
-        },
-        'aggregate': {
-            name: 'Aggregate Query',
-            sql: `SELECT \n    diagnosis_code,\n    COUNT(*) as case_count,\n    AVG(length_of_stay) as avg_stay,\n    MIN(admission_date) as first_case,\n    MAX(admission_date) as last_case\nFROM encounters\nWHERE discharge_date IS NOT NULL\nGROUP BY diagnosis_code\nHAVING COUNT(*) > 5\nORDER BY case_count DESC;`,
-            description: 'Aggregate statistics with grouping'
-        },
-        'subquery': {
-            name: 'Subquery Example',
-            sql: `SELECT \n    p.first_name,\n    p.last_name,\n    p.date_of_birth,\n    (\n        SELECT COUNT(*)\n        FROM encounters e\n        WHERE e.patient_id = p.patient_id\n        AND YEAR(e.encounter_date) = YEAR(CURDATE())\n    ) as visits_this_year\nFROM patients p\nWHERE p.active = 1\nORDER BY visits_this_year DESC;`,
-            description: 'Use subquery to count related records'
-        }
+        'select_all': `SELECT * FROM patients LIMIT 10;`,
+        'count': `SELECT COUNT(*) as total_patients FROM patients;`,
+        'join': `SELECT p.first_name, p.last_name, p.dob, a.appointment_date, a.visit_type
+FROM patients p
+JOIN appointments a ON p.patient_id = a.patient_id
+LIMIT 10;`,
+        'insert': `INSERT INTO patients (first_name, last_name, dob, sex, city)
+VALUES ('John', 'Doe', '1980-05-15', 'M', 'Yellowknife');`,
+        'update': `UPDATE patients SET city = 'Hay River' WHERE patient_id = 1;`,
+        'aggregate': `SELECT city, COUNT(*) as patient_count FROM patients GROUP BY city;`,
+        'subquery': `SELECT first_name, last_name 
+FROM patients 
+WHERE patient_id IN (SELECT patient_id FROM appointments WHERE visit_type = 'Emergency');`
     };
     
-    // Get the template
     const template = templates[templateName];
     
     if (!template) {
-        console.error('Template not found:', templateName);
-        alert(`Template "${templateName}" not found. Available templates: ${Object.keys(templates).join(', ')}`);
+        alert(`Template "${templateName}" not found`);
         return;
     }
     
     // Set the SQL value
-    if (sqlInput.tagName === 'TEXTAREA' || sqlInput.tagName === 'INPUT') {
-        sqlInput.value = template.sql;
-        
-        // Trigger change event if needed
-        sqlInput.dispatchEvent(new Event('input', { bubbles: true }));
-        sqlInput.dispatchEvent(new Event('change', { bubbles: true }));
-    } else {
-        // For contenteditable or other elements
-        sqlInput.textContent = template.sql;
-    }
-    
-    // Focus the input
+    sqlInput.value = template;
     sqlInput.focus();
     
-    // Show success notification
-    showTemplateNotification(template);
+    // Optional: Show simple notification
+    const notification = document.createElement('div');
+    notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:10px;border-radius:5px;z-index:1000;';
+    notification.textContent = `✓ Template loaded: ${templateName}`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 2000);
     
-    console.log(`SQL template "${templateName}" loaded successfully`);
+    console.log(`SQL template "${templateName}" loaded`);
 }
 
 function showTemplateNotification(template) {
@@ -1831,6 +1607,91 @@ function addTemplateButtons() {
     });
 }
 
+async function loadDatabase() {
+    try {
+        const status = document.getElementById('db-status');
+        status.innerHTML = '⏳ Loading OpenEMR_Sim.db...';
+        
+        const SQL = await initSqlJs({
+            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+        });
+        
+        const response = await fetch('OpenEMR_Sim.db');
+        const arrayBuffer = await response.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        
+        db = new SQL.Database(uint8Array);
+        
+        const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+        
+        status.innerHTML = `✅ Database loaded! Tables: ${tables[0]?.values?.map(t => t[0]).join(', ') || 'None'}`;
+        status.style.background = '#e8f5e9';
+        
+    } catch (error) {
+        document.getElementById('db-status').innerHTML = `❌ Error: ${error.message}`;
+    }
+}
+
+function executeSql() {
+    if (!db) {
+        alert('Database not loaded yet.');
+        return;
+    }
+    
+    const query = document.getElementById('sqlQuery').value.trim();
+    const resultsDiv = document.getElementById('sql-results');
+    
+    if (!query) {
+        alert('Enter a SQL query');
+        return;
+    }
+    
+    try {
+        const result = db.exec(query);
+        
+        if (result.length === 0) {
+            resultsDiv.innerHTML = `<div style="background: #e8f5e9; padding: 15px;">✅ Query executed</div>`;
+            return;
+        }
+        
+        displayResults(result[0]);
+        
+    } catch (error) {
+        resultsDiv.innerHTML = `<div style="background: #ffebee; padding: 15px; color: #d32f2f;">❌ SQL Error: ${error.message}</div>`;
+    }
+}
+
+function displayResults(result) {
+    const resultsDiv = document.getElementById('sql-results');
+    const columns = result.columns;
+    const rows = result.values;
+    
+    let html = `<div style="background: #e8f5e9; padding: 10px; border-radius: 5px 5px 0 0;">
+        <strong>✅ Results (${rows.length} rows)</strong></div>
+        <div style="overflow: auto; max-height: 300px;">
+        <table style="width: 100%; border-collapse: collapse;">`;
+    
+    columns.forEach(col => {
+        html += `<th style="padding: 8px; border-bottom: 2px solid #ddd;">${col}</th>`;
+    });
+    
+    rows.forEach((row, i) => {
+        html += `<tr style="${i % 2 === 0 ? 'background: #f9f9f9;' : ''}">`;
+        row.forEach(cell => {
+            html += `<td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${cell === null ? 'NULL' : cell}</td>`;
+        });
+        html += `</tr>`;
+    });
+    
+    html += `</table></div>`;
+    resultsDiv.innerHTML = html;
+}
+
+// Load database on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDatabase();
+});
+
 // ================= INITIALIZE =================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1895,6 +1756,7 @@ window.loadTemplate = loadTemplate;
                         <div class="form-container">
                             <div class="form-header">
                                 <h2>Data Request Form</h2>
+                                <div id="global-error" class="global-error" style="display:none; color:#b00020; background:#ffebee; padding:10px; border-radius:4px; margin-bottom:15px;"></div>
                             </div>
                             
                             <div class="form-columns">
@@ -1920,18 +1782,21 @@ window.loadTemplate = loadTemplate;
                                             <input type="text" id="other-org-text" placeholder="Specify" class="small-input">
                                         </div>
                                         <input type="hidden" id="organization" value="">
+                                        <div class="hint" id="hint-organization" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="org-error"></div>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="request-number">Data Request Number:</label>
                                         <input type="text" id="request-number" class="form-control" required>
+                                        <div class="hint" id="hint-request-number" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="reqnum-error"></div>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="requestor">Data Requestor's Name/Org:</label>
                                         <input type="text" id="requestor" class="form-control">
+                                        <div class="hint" id="hint-requestor" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <div class="form-group">
@@ -1953,6 +1818,7 @@ window.loadTemplate = loadTemplate;
                                                          vertical-align: middle;">?</span>
                                         </label>
                                         <input type="text" id="classification" class="form-control">
+                                        <div class="hint" id="hint-classification" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <div class="form-group">
@@ -1968,6 +1834,7 @@ window.loadTemplate = loadTemplate;
                                                 <input type="text" id="recurring-date" placeholder="yyyy-mm-dd" class="date-input">
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-history" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="history-error"></div>
                                     </div>
                                 </div>
@@ -1989,9 +1856,11 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-legislative" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="legislative-error"></div>
                                         <label for="legislative-desc">If Yes, describe authority:</label>
                                         <textarea id="legislative-desc" class="form-control textarea-small" rows="4"></textarea>
+                                        <div class="hint" id="hint-legdesc" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="legdesc-error"></div>
                                     </div>
 
@@ -2007,6 +1876,7 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-conditions" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <label for="conditions-desc">If Yes, describe conditions:</label>
                                         <input type="text" id="conditions-desc" class="form-control">
                                     </div>
@@ -2023,6 +1893,7 @@ window.loadTemplate = loadTemplate;
                                             <option value="Tłįchǫ Region">Tłįchǫ Region</option>
                                             <option value="Yellowknife Region">Yellowknife Region</option>
                                         </select>
+                                        <div class="hint" id="hint-region" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         
                                         <label for="district">District:</label>
                                         <select id="district" class="form-control" disabled>
@@ -2055,6 +1926,7 @@ window.loadTemplate = loadTemplate;
                                                          vertical-align: middle;">?</span>
                                         </label>
                                         <textarea id="defined-purpose" class="form-control textarea-medium" rows="5" required></textarea>
+                                        <div class="hint" id="hint-purpose" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="purpose-error"></div>
                                     </div>
 
@@ -2070,6 +1942,7 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-statutory" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="statutory-error"></div>
                                         
                                         <label>If Yes, identify statutory appointment:</label>
@@ -2098,6 +1971,7 @@ window.loadTemplate = loadTemplate;
                                         
                                         <label for="statutory-other">If Other, describe:</label>
                                         <input type="text" id="statutory-other" class="form-control">
+                                        <div class="hint" id="hint-statutory-other" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
                                 </div>
 
@@ -2117,6 +1991,7 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-agreement" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="agreement-error"></div>
                                         
                                         <label class="checkbox-label">
@@ -2126,6 +2001,7 @@ window.loadTemplate = loadTemplate;
                                         
                                         <label for="agreement-desc">Agreement Details:</label>
                                         <input type="text" id="agreement-desc" class="form-control">
+                                        <div class="hint" id="hint-agreement-desc" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <div class="form-group">
@@ -2140,10 +2016,12 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-matching" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="matching-error"></div>
                                         
                                         <label for="matching-desc">Describe Data Matching:</label>
                                         <input type="text" id="matching-desc" class="form-control">
+                                        <div class="hint" id="hint-matching-desc" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <div class="form-group">
@@ -2158,10 +2036,12 @@ window.loadTemplate = loadTemplate;
                                                 No
                                             </label>
                                         </div>
+                                        <div class="hint" id="hint-meeting" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                         <div class="validation-message" id="meeting-error"></div>
                                         
                                         <label for="meeting-desc">Meeting Details:</label>
                                         <input type="text" id="meeting-desc" class="form-control">
+                                        <div class="hint" id="hint-meeting-desc" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <!-- NEW: Data Type Specification Textarea with help -->
@@ -2185,6 +2065,7 @@ window.loadTemplate = loadTemplate;
                                         </label>
                                         <textarea id="data-type-spec" class="form-control textarea-small" rows="4" 
                                                   placeholder="Specify data elements, formats, and technical requirements..."></textarea>
+                                        <div class="hint" id="hint-data-type" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <!-- NEW: Data Request Frequency Textarea with help -->
@@ -2208,11 +2089,13 @@ window.loadTemplate = loadTemplate;
                                         </label>
                                         <textarea id="data-request-frequency" class="form-control textarea-small" rows="4"
                                                   placeholder="Specify frequency: One-time, Daily, Weekly, Monthly, Quarterly, Annually..."></textarea>
+                                        <div class="hint" id="hint-frequency" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="comments">Additional Comments:</label>
                                         <textarea id="comments" class="form-control textarea-small" rows="4"></textarea>
+                                        <div class="hint" id="hint-comments" style="font-size:12px; color:#666; min-height:20px; margin-top:5px;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -2225,6 +2108,228 @@ window.loadTemplate = loadTemplate;
                         </div>
                     </div>
                 </div>
+
+<script>
+// Validation hints for each field
+const validationHints = {
+    // Organization selection
+    'organization': 'Select at least one: DHSS, HSSA, or Other (specify if Other)',
+    'request-number': 'Format: ORG-YYYY-XXXX (e.g., DHSS-2024-001)',
+    'requestor': 'Enter requestor\'s full name and organization',
+    'classification': 'Specify: Public Health, Research, Operational, Compliance',
+    'history': 'Select request history - first original or recurring with date',
+    'legislative': 'Select Yes if legislative authority exists',
+    'legdesc': 'Describe specific legislation, section, and authority',
+    'conditions': 'Select Yes if conditions or client instructions apply',
+    'region': 'Select the region where data applies',
+    'purpose': 'Describe specific purpose, objectives, and intended use',
+    'statutory': 'Select Yes if statutory owner involved',
+    'statutory-other': 'Describe other statutory appointment',
+    'agreement': 'Select Yes if data sharing agreement required',
+    'agreement-desc': 'Describe agreement type, parties, and terms',
+    'matching': 'Select Yes if data matching or linkage required',
+    'matching-desc': 'Describe matching methodology and fields',
+    'meeting': 'Select Yes if meetings or consultations required',
+    'meeting-desc': 'Describe meeting purpose, frequency, attendees',
+    'data-type': 'Specify: data elements, formats, variables, technical specs',
+    'frequency': 'Specify: One-time, Daily, Weekly, Monthly, Quarterly, Annually',
+    'comments': 'Add any additional context or special requirements'
+};
+
+// Setup field focus hints
+function setupFieldHints() {
+    // Map fields to their hint IDs
+    const fieldMap = {
+        'dhss': 'organization', 'hssa': 'organization', 'other-org': 'organization',
+        'request-number': 'request-number',
+        'requestor': 'requestor',
+        'classification': 'classification',
+        'region': 'region',
+        'defined-purpose': 'purpose',
+        'data-type-spec': 'data-type',
+        'data-request-frequency': 'frequency',
+        'comments': 'comments'
+    };
+    
+    // Add focus listeners to all inputs
+    document.querySelectorAll('input, textarea, select').forEach(field => {
+        const fieldId = field.id;
+        const hintKey = fieldMap[fieldId] || 
+                       (field.name && field.name.replace('-', '').toLowerCase()) ||
+                       fieldId.replace('-', '').toLowerCase();
+        
+        if (hintKey && validationHints[hintKey]) {
+            field.addEventListener('focus', function() {
+                const hintId = 'hint-' + hintKey;
+                const hintElement = document.getElementById(hintId);
+                if (hintElement) {
+                    hintElement.textContent = validationHints[hintKey];
+                }
+            });
+            
+            field.addEventListener('blur', function() {
+                const hintId = 'hint-' + hintKey;
+                const hintElement = document.getElementById(hintId);
+                if (hintElement) {
+                    hintElement.textContent = '';
+                }
+            });
+        }
+    });
+    
+    // Special handling for radio/checkbox groups
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener('focus', function() {
+            const name = this.name;
+            const hintKey = name || this.id.replace('-', '').toLowerCase();
+            if (validationHints[hintKey]) {
+                const hintId = 'hint-' + hintKey;
+                const hintElement = document.getElementById(hintId);
+                if (hintElement) {
+                    hintElement.textContent = validationHints[hintKey];
+                }
+            }
+        });
+    });
+}
+
+// Validate form before save
+function validateForm() {
+    let isValid = true;
+    const globalError = document.getElementById('global-error');
+    globalError.style.display = 'none';
+    globalError.textContent = '';
+    
+    // Clear previous errors
+    document.querySelectorAll('.validation-message').forEach(el => {
+        el.textContent = '';
+    });
+    
+    // 1. Organization selection (at least one checkbox)
+    const orgChecked = document.getElementById('dhss').checked || 
+                      document.getElementById('hssa').checked || 
+                      document.getElementById('other-org').checked;
+    if (!orgChecked) {
+        document.getElementById('org-error').textContent = 'Select at least one organization';
+        isValid = false;
+    }
+    
+    // 2. Request number (required)
+    const requestNumber = document.getElementById('request-number').value.trim();
+    if (!requestNumber) {
+        document.getElementById('reqnum-error').textContent = 'Request number is required';
+        isValid = false;
+    }
+    
+    // 3. Legislative authority (radio required)
+    const legislativeSelected = document.querySelector('input[name="legislative"]:checked');
+    if (!legislativeSelected) {
+        document.getElementById('legislative-error').textContent = 'Select legislative authority status';
+        isValid = false;
+    } else if (legislativeSelected.value === 'yes') {
+        const legDesc = document.getElementById('legislative-desc').value.trim();
+        if (!legDesc) {
+            document.getElementById('legdesc-error').textContent = 'Describe legislative authority when Yes is selected';
+            isValid = false;
+        }
+    }
+    
+    // 4. Defined purpose (required)
+    const purpose = document.getElementById('defined-purpose').value.trim();
+    if (!purpose) {
+        document.getElementById('purpose-error').textContent = 'Defined purpose is required';
+        isValid = false;
+    }
+    
+    // 5. Statutory owner (radio required)
+    const statutorySelected = document.querySelector('input[name="statutory"]:checked');
+    if (!statutorySelected) {
+        document.getElementById('statutory-error').textContent = 'Select statutory owner status';
+        isValid = false;
+    }
+    
+    // 6. Agreement requirement (radio required)
+    const agreementSelected = document.querySelector('input[name="agreement"]:checked');
+    if (!agreementSelected) {
+        document.getElementById('agreement-error').textContent = 'Select agreement requirement';
+        isValid = false;
+    }
+    
+    // 7. Data matching (radio required)
+    const matchingSelected = document.querySelector('input[name="matching"]:checked');
+    if (!matchingSelected) {
+        document.getElementById('matching-error').textContent = 'Select data matching status';
+        isValid = false;
+    }
+    
+    // 8. Meeting requirement (radio required)
+    const meetingSelected = document.querySelector('input[name="meeting"]:checked');
+    if (!meetingSelected) {
+        document.getElementById('meeting-error').textContent = 'Select meeting requirement';
+        isValid = false;
+    }
+    
+    // 9. Region selection
+    const region = document.getElementById('region').value;
+    if (!region) {
+        document.getElementById('location-error').textContent = 'Select a region';
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        globalError.textContent = 'Form cannot be saved. Please complete all required fields marked above.';
+        globalError.style.display = 'block';
+        return false;
+    }
+    
+    return true;
+}
+
+// Enhanced save function
+document.getElementById('save-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+        // Scroll to first error
+        const firstError = document.querySelector('.validation-message:not(:empty)');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+    
+    // If validation passes, proceed with save
+    alert('Form validated successfully! Ready to save to database.');
+    // Your existing save logic here
+});
+
+// Clear form function
+document.getElementById('clear-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (confirm('Clear all form data?')) {
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                field.checked = false;
+            } else {
+                field.value = '';
+            }
+        });
+        // Reset radio defaults
+        document.querySelector('input[name="request-history"][value="first"]').checked = true;
+        
+        // Clear all hints and errors
+        document.querySelectorAll('.hint').forEach(el => el.textContent = '');
+        document.querySelectorAll('.validation-message').forEach(el => el.textContent = '');
+        document.getElementById('global-error').style.display = 'none';
+    }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupFieldHints();
+    console.log('Form validation system initialized');
+});
+</script>
 
                 <!-- ================= ACCORDION 2: REQUEST INTELLIGENCE ================= -->
                 <div class="accordion">
@@ -2928,45 +3033,239 @@ window.loadTemplate = loadTemplate;
                 </div>
                 
                 <!-- ================= ACCORDION 3: SQL PRACTICE ================= -->
-                <!-- Example SQL Editor Area -->
-<div class="form-group">
-    <label for="sqlQuery">SQL Query:</label>
-    <textarea id="sqlQuery" 
-              class="form-control" 
-              rows="6" 
-              placeholder="Enter your SQL query here..."
-              style="font-family: 'Courier New', monospace; font-size: 14px;">
-    </textarea>
-</div>
+                 <!-- ================= ACCORDION: SQL QUERY EDITOR ================= -->
+                <div class="accordion">
+                    <div class="accordion-header active" data-accordion="sql-editor">
+                        <span>📊 SQL Query Editor (Live Database)</span>
+                        <span class="accordion-icon">-</span>
+                    </div>
+                    <div class="accordion-content active" id="accordion-sql-editor" style="display: block;">
+                        
+                        <!-- Database Status -->
+                        <div id="db-status" style="padding: 10px; background: #e8f4fd; border-radius: 5px; margin-bottom: 15px;">
+                            ⏳ Loading database...
+                        </div>
+                        
+                        <!-- SQL Editor -->
+                        <div class="form-group">
+                            <label for="sqlQuery">SQL Query:</label>
+                            <textarea id="sqlQuery" class="form-control" rows="6" 
+                                      placeholder="SELECT * FROM patients LIMIT 10;"
+                                      style="font-family: 'Courier New', monospace; font-size: 14px;">
+                            </textarea>
+                        </div>
 
-<!-- Quick Templates Section -->
-<div class="form-group">
-    <label>Quick Templates:</label>
-    <div style="display: flex; flex-direction: column; gap: 5px;">
-        <button onclick="loadTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            SELECT * FROM [table]
-        </button>
-        <button onclick="loadTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            SELECT COUNT(*) FROM [table]
-        </button>
-        <button onclick="loadTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            Simple JOIN template
-        </button>
-        <!-- Add more buttons -->
-        <button onclick="loadTemplate('insert')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            INSERT template
-        </button>
-        <button onclick="loadTemplate('update')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            UPDATE template
-        </button>
-        <button onclick="loadTemplate('aggregate')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            Aggregate query
-        </button>
-        <button onclick="loadTemplate('subquery')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
-            Subquery example
-        </button>
-    </div>
-</div>
+                        <!-- Templates -->
+                        <div class="form-group">
+                            <label>Quick Templates:</label>
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <button onclick="loadSqlTemplate('select_all')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                    SELECT * FROM patients
+                                </button>
+                                <button onclick="loadSqlTemplate('count')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                    SELECT COUNT(*) FROM patients
+                                </button>
+                                <button onclick="loadSqlTemplate('join')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                    JOIN patients + appointments
+                                </button>
+                                <button onclick="loadSqlTemplate('schema')" class="btn btn-secondary" style="font-size: 12px; text-align: left;">
+                                    SHOW all tables
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Execute Button -->
+                        <div class="form-group">
+                            <button onclick="executeRealSql()" class="btn btn-primary">
+                                🚀 Execute on Real Database
+                            </button>
+                        </div>
+                        
+                        <!-- Results Area -->
+                        <div id="sql-results" style="margin-top: 20px;"></div>
+                        
+                    </div>
+                </div>
+
+                <!-- JAVASCRIPT - ADD THIS -->
+                <script>
+                // 1. ACCORDION TOGGLE (FIXED)
+                function initAccordions() {
+                    document.querySelectorAll('.accordion-header').forEach(header => {
+                        header.addEventListener('click', function() {
+                            const target = this.getAttribute('data-accordion');
+                            const content = document.getElementById('accordion-' + target);
+                            const icon = this.querySelector('.accordion-icon');
+                            
+                            // Toggle classes
+                            this.classList.toggle('active');
+                            content.classList.toggle('active');
+                            
+                            // Toggle display
+                            if (content.style.display === 'block' || content.classList.contains('active')) {
+                                content.style.display = 'none';
+                                icon.textContent = '+';
+                                this.classList.remove('active');
+                            } else {
+                                content.style.display = 'block';
+                                icon.textContent = '-';
+                                this.classList.add('active');
+                            }
+                        });
+                    });
+                }
+
+                // 2. DATABASE LOADING
+                let sqlDb = null;
+
+                async function loadSqlDatabase() {
+                    try {
+                        const status = document.getElementById('db-status');
+                        status.innerHTML = '⏳ Loading OpenEMR_Sim.db...';
+                        
+                        // Load SQL.js
+                        const SQL = await initSqlJs({
+                            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                        });
+                        
+                        // Load your database file
+                        const response = await fetch('OpenEMR_Sim.db');
+                        const arrayBuffer = await response.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        
+                        // Open database
+                        sqlDb = new SQL.Database(uint8Array);
+                        
+                        // Show tables
+                        const tables = sqlDb.exec("SELECT name FROM sqlite_master WHERE type='table'");
+                        const tableNames = tables[0]?.values?.map(t => t[0]).join(', ') || 'None found';
+                        
+                        status.innerHTML = `✅ Database loaded! Tables: ${tableNames}`;
+                        status.style.background = '#e8f5e9';
+                        
+                        console.log('Database loaded successfully');
+                        
+                    } catch (error) {
+                        document.getElementById('db-status').innerHTML = 
+                            `❌ Error: ${error.message}<br><small>Run from local server: python -m http.server</small>`;
+                        console.error('Database error:', error);
+                    }
+                }
+
+                // 3. SQL TEMPLATES
+                function loadSqlTemplate(templateName) {
+                    const sqlInput = document.getElementById('sqlQuery');
+                    if (!sqlInput) return;
+                    
+                    const templates = {
+                        'select_all': "SELECT * FROM patients LIMIT 10;",
+                        'count': "SELECT COUNT(*) as total_patients FROM patients;",
+                        'join': `SELECT p.first_name, p.last_name, a.appointment_date, a.visit_type 
+                                 FROM patients p 
+                                 JOIN appointments a ON p.patient_id = a.patient_id 
+                                 LIMIT 10;`,
+                        'schema': "SELECT name as table_name FROM sqlite_master WHERE type='table';"
+                    };
+                    
+                    if (templates[templateName]) {
+                        sqlInput.value = templates[templateName];
+                        sqlInput.focus();
+                        console.log('Template loaded:', templateName);
+                    }
+                }
+
+                // 4. EXECUTE SQL
+                function executeRealSql() {
+                    if (!sqlDb) {
+                        alert('Database not loaded yet. Wait for "✅ Database loaded!" message.');
+                        return;
+                    }
+                    
+                    const query = document.getElementById('sqlQuery').value.trim();
+                    const resultsDiv = document.getElementById('sql-results');
+                    
+                    if (!query) {
+                        alert('Enter a SQL query first');
+                        return;
+                    }
+                    
+                    resultsDiv.innerHTML = `<div style="padding: 15px; background: #f5f5f5;">⏳ Executing query...</div>`;
+                    
+                    try {
+                        const result = sqlDb.exec(query);
+                        
+                        if (result.length === 0) {
+                            resultsDiv.innerHTML = `<div style="background: #e8f5e9; padding: 15px;">✅ Query executed (no rows returned)</div>`;
+                            return;
+                        }
+                        
+                        displaySqlResults(result[0]);
+                        
+                    } catch (error) {
+                        resultsDiv.innerHTML = `
+                            <div style="background: #ffebee; padding: 15px; color: #d32f2f;">
+                                ❌ SQL Error: ${error.message}
+                            </div>
+                        `;
+                    }
+                }
+
+                // 5. DISPLAY RESULTS
+                function displaySqlResults(result) {
+                    const resultsDiv = document.getElementById('sql-results');
+                    const columns = result.columns;
+                    const rows = result.values;
+                    
+                    let html = `
+                        <div style="background: #e8f5e9; padding: 10px 15px; border-radius: 5px 5px 0 0;">
+                            <strong>✅ Results (${rows.length} rows)</strong>
+                        </div>
+                        <div style="overflow: auto; max-height: 400px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead><tr style="background: #f0f0f0;">`;
+                    
+                    // Header
+                    columns.forEach(col => {
+                        html += `<th style="padding: 8px 12px; text-align: left; border-bottom: 2px solid #ddd;">${col}</th>`;
+                    });
+                    
+                    html += `</tr></thead><tbody>`;
+                    
+                    // Rows
+                    rows.forEach((row, i) => {
+                        html += `<tr style="${i % 2 === 0 ? 'background: #f9f9f9;' : ''}">`;
+                        row.forEach(cell => {
+                            const value = cell === null ? '<em style="color:#999">NULL</em>' : cell;
+                            html += `<td style="padding: 6px 12px; border-bottom: 1px solid #eee;">${value}</td>`;
+                        });
+                        html += `</tr>`;
+                    });
+                    
+                    html += `</tbody></table></div>`;
+                    
+                    resultsDiv.innerHTML = html;
+                }
+
+                // 6. INITIALIZE EVERYTHING
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log('Initializing SQL Editor...');
+                    
+                    // Initialize accordions
+                    initAccordions();
+                    
+                    // Load database
+                    loadSqlDatabase();
+                    
+                    // Open SQL accordion by default
+                    setTimeout(() => {
+                        const sqlHeader = document.querySelector('.accordion-header[data-accordion="sql-editor"]');
+                        if (sqlHeader && !sqlHeader.classList.contains('active')) {
+                            sqlHeader.click();
+                        }
+                    }, 500);
+                });
+                </script>
+
                 
                 <!-- ================= ACCORDION 4: QUERY RESULTS ================= -->
                 <div class="accordion">
@@ -2995,7 +3294,114 @@ window.loadTemplate = loadTemplate;
 
     <script>
         // Configuration
+        
         let db = null;
+
+    async function loadDatabase() {
+        try {
+            const status = document.getElementById('db-status');
+            status.innerHTML = '⏳ Loading OpenEMR_Sim.db...';
+            
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+            });
+            
+            const response = await fetch('OpenEMR_Sim.db');
+            const arrayBuffer = await response.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            
+            db = new SQL.Database(uint8Array);
+            
+            const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
+            
+            status.innerHTML = `✅ Database loaded! Tables: ${tables[0]?.values?.map(t => t[0]).join(', ') || 'None'}`;
+            status.style.background = '#e8f5e9';
+            
+        } catch (error) {
+            document.getElementById('db-status').innerHTML = `❌ Error: ${error.message}`;
+        }
+    }
+
+    function executeSql() {
+        if (!db) {
+            alert('Database not loaded yet.');
+            return;
+        }
+        
+        const query = document.getElementById('sqlQuery').value.trim();
+        const resultsDiv = document.getElementById('sql-results');
+        
+        if (!query) {
+            alert('Enter a SQL query');
+            return;
+        }
+        
+        try {
+            const result = db.exec(query);
+            
+            if (result.length === 0) {
+                resultsDiv.innerHTML = `<div style="background: #e8f5e9; padding: 15px;">✅ Query executed</div>`;
+                return;
+            }
+            
+            displayResults(result[0]);
+            
+        } catch (error) {
+            resultsDiv.innerHTML = `<div style="background: #ffebee; padding: 15px; color: #d32f2f;">❌ SQL Error: ${error.message}</div>`;
+        }
+    }
+
+    function displayResults(result) {
+        const resultsDiv = document.getElementById('sql-results');
+        const columns = result.columns;
+        const rows = result.values;
+        
+        let html = `<div style="background: #e8f5e9; padding: 10px; border-radius: 5px 5px 0 0;">
+            <strong>✅ Results (${rows.length} rows)</strong></div>
+            <div style="overflow: auto; max-height: 300px;">
+            <table style="width: 100%; border-collapse: collapse;">`;
+        
+        columns.forEach(col => {
+            html += `<th style="padding: 8px; border-bottom: 2px solid #ddd;">${col}</th>`;
+        });
+        
+        rows.forEach((row, i) => {
+            html += `<tr style="${i % 2 === 0 ? 'background: #f9f9f9;' : ''}">`;
+            row.forEach(cell => {
+                html += `<td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${cell === null ? 'NULL' : cell}</td>`;
+            });
+            html += `</tr>`;
+        });
+        
+        html += `</table></div>`;
+        resultsDiv.innerHTML = html;
+    }
+
+    function loadTemplate(templateName) {
+        const sqlInput = document.getElementById('sqlQuery');
+        if (!sqlInput) return;
+    
+    const templates = {
+        'select_all': "SELECT * FROM patients LIMIT 10;",
+        'count': "SELECT COUNT(*) as total_patients FROM patients;",
+        'join': `SELECT p.first_name, p.last_name, a.appointment_date FROM patients p JOIN appointments a ON p.patient_id = a.patient_id LIMIT 10;`,
+        'insert': "INSERT INTO patients (first_name, last_name) VALUES ('John', 'Doe');",
+        'update': "UPDATE patients SET city = 'Yellowknife' WHERE patient_id = 1;",
+        'aggregate': "SELECT city, COUNT(*) as patient_count FROM patients GROUP BY city;",
+        'subquery': "SELECT * FROM patients WHERE patient_id IN (SELECT patient_id FROM appointments);"
+    };
+    
+    if (templates[templateName]) {
+        sqlInput.value = templates[templateName];
+        sqlInput.focus();
+    }
+}
+
+// Load database on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDatabase();
+});
+        
         let databaseLoaded = false;
         let currentQueryResults = null;
         
@@ -3221,78 +3627,84 @@ window.loadTemplate = loadTemplate;
         }
 
         // ================= ACCORDION FUNCTIONALITY =================
-            // Use event delegation for ALL accordions (even future ones)
-            document.addEventListener('click', function(event) {
-                // Check if the clicked element is an accordion header or inside one
-                const header = event.target.closest('.accordion-header');
+           // ================= SINGLE UNIFIED ACCORDION SYSTEM =================
+            function initAllAccordions() {
+                console.log('Setting up accordions...');
                 
-                if (header) {
-                    const accordionId = header.dataset.accordion;
-                    const content = document.getElementById(`accordion-${accordionId}`);
+                // Remove any existing event listeners
+                document.querySelectorAll('.accordion-header').forEach(header => {
+                    const newHeader = header.cloneNode(true);
+                    header.parentNode.replaceChild(newHeader, header);
+                });
+                
+                // Add fresh event listeners
+                document.querySelectorAll('.accordion-header').forEach(header => {
+                    header.addEventListener('click', function() {
+                        const targetId = this.getAttribute('data-accordion');
+                        const content = document.getElementById('accordion-' + targetId);
+                        const icon = this.querySelector('.accordion-icon');
+                        
+                        if (!content) {
+                            console.warn('Accordion content not found:', 'accordion-' + targetId);
+                            return;
+                        }
+                        
+                        // Toggle
+                        const isOpen = content.style.display === 'block';
+                        
+                        if (isOpen) {
+                            content.style.display = 'none';
+                            content.classList.remove('active');
+                            this.classList.remove('active');
+                            if (icon) icon.textContent = '+';
+                        } else {
+                            content.style.display = 'block';
+                            content.classList.add('active');
+                            this.classList.add('active');
+                            if (icon) icon.textContent = '-';
+                        }
+                        
+                        console.log('Accordion toggled:', targetId);
+                    });
+                });
+                
+                // Open any that have 'active' class initially
+                document.querySelectorAll('.accordion-header.active').forEach(header => {
+                    const targetId = header.getAttribute('data-accordion');
+                    const content = document.getElementById('accordion-' + targetId);
                     const icon = header.querySelector('.accordion-icon');
                     
                     if (content) {
-                        // Toggle active state
-                        const isActive = header.classList.contains('active');
-                        header.classList.toggle('active');
-                        content.classList.toggle('active');
-                        
-                        // Update icon
-                        if (header.classList.contains('active')) {
-                            icon.textContent = '−';
-                        } else {
-                            icon.textContent = '+';
-                        }
-                        
-                        // Auto-open results when query runs
-                        if (accordionId === 'results' && !isActive) {
-                            setTimeout(() => {
-                                content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                            }, 100);
-                        }
+                        content.style.display = 'block';
+                        content.classList.add('active');
+                        if (icon) icon.textContent = '-';
                     }
-                }
-            });
-            
-            // Auto-open results accordion when results are displayed
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                        const resultsDiv = document.getElementById('query-results');
-                        if (resultsDiv && resultsDiv.textContent && 
-                            resultsDiv.textContent.trim() !== 'Results will appear here...' &&
-                            resultsDiv.textContent.trim() !== '') {
-                            
-                            // Open results accordion
-                            const resultsHeader = document.querySelector('[data-accordion="results"]');
-                            const resultsContent = document.getElementById('accordion-results');
-                            
-                            if (resultsHeader && !resultsHeader.classList.contains('active')) {
-                                resultsHeader.classList.add('active');
-                                resultsContent.classList.add('active');
-                                resultsHeader.querySelector('.accordion-icon').textContent = '−';
-                                
-                                // Scroll to results
-                                setTimeout(() => {
-                                    resultsContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                }, 300);
-                            }
-                        }
-                    }
-                });
-            });
-            
-            // Observe the results div for changes
-            const resultsDiv = document.getElementById('query-results');
-            if (resultsDiv) {
-                observer.observe(resultsDiv, { 
-                    childList: true, 
-                    characterData: true, 
-                    subtree: true 
                 });
             }
-            
-            console.log("Accordions initialized");
+
+            // ================= INITIALIZE ON PAGE LOAD =================
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('Page loaded - initializing all systems');
+                
+                // 1. Accordions FIRST
+                initAllAccordions();
+                
+                // 2. Database loading
+                if (typeof loadSqlDatabase === 'function') {
+                    loadSqlDatabase();
+                }
+                
+                // 3. Your other systems...
+                if (typeof setupFieldHints === 'function') {
+                    setupFieldHints();
+                }
+                
+                if (typeof InfowayAPI !== 'undefined' && InfowayAPI.init) {
+                    InfowayAPI.init();
+                }
+                
+                console.log('All systems initialized');
+            });
 
         // Form Intelligence System - Works with YOUR real data
 
@@ -3512,6 +3924,8 @@ window.loadTemplate = loadTemplate;
                 }
             }, 100);
         }
+
+
 
 
 // =============================  DASHBOARD   =======================================================
